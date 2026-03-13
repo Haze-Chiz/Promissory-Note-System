@@ -848,7 +848,7 @@ def view_promissory(promissory_id):
     )
 
 
-@finance_bp.route("/logout", methods=["POST"])
+@finance_bp.route("/logout", methods=["GET", "POST"])
 @require_role("Finance")
 def logout():
     finance_user, response = get_finance_user()

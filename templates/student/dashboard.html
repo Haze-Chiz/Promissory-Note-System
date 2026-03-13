@@ -6,7 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard | Student Promissory Notes System</title>
   <link rel="icon" type="image/x-icon" href="/images/FCPC.jpg" />
+
   <script src="https://cdn.tailwindcss.com"></script>
+
   <script>
     tailwind.config = {
       theme: {
@@ -31,9 +33,34 @@
       }
     };
   </script>
+
+  <style>
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f4f7fc;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(#3a4bb3, #1e2a78);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #16205d;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #1e2a78 #f4f7fc;
+    }
+  </style>
 </head>
 
 <body class="min-h-screen bg-bg font-sans leading-6 text-textmain antialiased">
+
   <button
     class="fixed left-4 top-4 z-[1100] hidden rounded-[10px] bg-primary px-3 py-2 text-lg text-white shadow-soft focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[980px]:inline-flex max-[980px]:items-center max-[980px]:justify-center motion-reduce:transition-none"
     type="button"
@@ -50,49 +77,59 @@
     hidden></div>
 
   <div class="flex min-h-screen">
+
     <aside
       class="fixed left-0 top-0 z-[1000] flex min-h-screen w-[240px] flex-col bg-gradient-to-br from-primary to-primary-light px-0 pb-4 pt-5 text-white shadow-sidebar transition-transform duration-300 ease-in-out max-[980px]:w-[260px] max-[980px]:-translate-x-full motion-reduce:transition-none"
       id="sidebar"
       aria-label="Student navigation">
+
       <div class="mb-3 border-b border-white/15 px-[18px] pb-5">
         <h1 class="break-words text-[17px] font-semibold leading-[1.4]">Student</h1>
         <span class="mt-1 block text-[13px] font-normal opacity-90">Promissory Notes System</span>
       </div>
 
       <nav class="flex flex-1 flex-col gap-1.5 px-[10px]">
+
         <a
           href="{{ url_for('student.dashboard') }}"
           class="flex items-center gap-2.5 rounded-[10px] bg-white/20 px-[14px] py-3 font-bold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
           Dashboard
         </a>
+
         <a
           href="{{ url_for('student.request_promissory') }}"
           class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 font-semibold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
           Request Promissory
         </a>
+
         <a
           href="{{ url_for('student.history') }}"
           class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 font-semibold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
           History
         </a>
+
         <a
           href="{{ url_for('student.setup') }}"
           class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 font-semibold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
           Account
         </a>
+
       </nav>
 
       <div class="mt-3 border-t border-white/15 px-[10px] pt-3">
-        <button
-          class="w-full cursor-pointer rounded-[10px] border-0 bg-white/10 px-[14px] py-3 font-bold text-white transition duration-200 ease-in-out hover:-translate-y-px hover:bg-white/15 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none"
-          type="button"
-          onclick="window.location.href='{{ url_for('student.logout') }}'">
-          Logout
-        </button>
+        <form action="{{ url_for('student.logout') }}" method="post" class="w-full">
+          <button
+            class="w-full cursor-pointer rounded-[10px] border-0 bg-white/10 px-[14px] py-3 font-bold text-white transition duration-200 ease-in-out hover:-translate-y-px hover:bg-white/15 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none"
+            type="submit">
+            Logout
+          </button>
+        </form>
       </div>
+
     </aside>
 
     <main class="min-h-screen flex-1 p-6 ml-[240px] transition-all duration-300 ease-in-out max-[980px]:ml-0 max-[980px]:px-4 max-[980px]:pb-5 max-[980px]:pt-[76px] motion-reduce:transition-none">
+
       <header class="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-surface px-5 py-[18px] shadow-soft">
         <h2 class="text-[28px] font-bold text-primary max-[980px]:text-2xl">Dashboard</h2>
         <div class="text-right text-sm leading-6 text-muted max-[980px]:text-left">
@@ -102,10 +139,13 @@
       </header>
 
       <div class="flex flex-col gap-5">
+
         <section class="rounded-2xl bg-surface p-[22px] shadow-soft">
+
           <h3 class="mb-[18px] text-[22px] font-bold text-primary">Dashboard</h3>
 
           <div class="mb-[22px] grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-5 max-md:grid-cols-1">
+
             <div class="rounded-2xl bg-white p-[22px] text-center shadow-soft transition duration-200 ease-in-out hover:-translate-y-1 hover:shadow-cardhover motion-reduce:transition-none">
               <h3 class="mb-2 text-[32px] font-bold text-primary">{{ data.total_promissory or 0 }}</h3>
               <p class="text-sm font-semibold text-muted">Total Promissory Notes</p>
@@ -115,80 +155,91 @@
               <h3 class="mb-2 text-[32px] font-bold text-primary">{{ data.active_promissory or 0 }}</h3>
               <p class="text-sm font-semibold text-muted">Active</p>
             </div>
+
           </div>
 
           <div class="grid grid-cols-2 gap-5 max-[900px]:grid-cols-1">
-            <section class="overflow-x-auto rounded-2xl border border-borderline bg-white p-[22px] shadow-soft max-md:p-[18px]">
+
+            <section class="overflow-x-auto rounded-2xl border border-borderline bg-white p-[22px] shadow-soft">
+
               <h4 class="mb-[14px] text-lg font-bold text-primary">Recent Activity</h4>
 
               {% if recent_requests %}
+
               <table class="min-w-[560px] w-full border-collapse">
+
                 <thead>
                   <tr>
-                    <th class="whitespace-nowrap border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Date</th>
-                    <th class="whitespace-nowrap border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Time</th>
-                    <th class="whitespace-nowrap border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Request</th>
-                    <th class="whitespace-nowrap border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Status</th>
+                    <th class="border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Date</th>
+                    <th class="border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Time</th>
+                    <th class="border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Request</th>
+                    <th class="border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Status</th>
                   </tr>
                 </thead>
+
                 <tbody>
+
                   {% for req in recent_requests %}
+
                   <tr class="even:bg-[#fafbff] hover:bg-[#edf2ff]">
-                    <td class="border-b border-slate-100 px-3 py-[14px] align-middle text-sm">{{ req.requested_at.strftime('%m/%d/%Y') }}</td>
-                    <td class="border-b border-slate-100 px-3 py-[14px] align-middle text-sm">{{ req.requested_at.strftime('%I:%M %p') }}</td>
-                    <td class="border-b border-slate-100 px-3 py-[14px] align-middle text-sm">{{ req.program or req.course }}</td>
-                    <td class="border-b border-slate-100 px-3 py-[14px] align-middle text-sm">
-                      <span class="inline-flex min-w-[84px] items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 text-center text-xs font-bold
-                        {% if req.status == 'Approved' %}
-                          border border-green-300 bg-green-100 text-green-800
-                        {% elif req.status == 'Rejected' %}
-                          border border-red-300 bg-red-100 text-red-800
-                        {% else %}
-                          border border-amber-300 bg-amber-100 text-amber-800
-                        {% endif %}">
-                        {{ req.status.upper() }}
-                      </span>
+
+                    <td class="border-b border-slate-100 px-3 py-[14px] text-sm">
+                      {{ req.requested_at.strftime('%m/%d/%Y') }}
                     </td>
+
+                    <td class="border-b border-slate-100 px-3 py-[14px] text-sm">
+                      {{ req.requested_at.strftime('%I:%M %p') }}
+                    </td>
+
+                    <td class="border-b border-slate-100 px-3 py-[14px] text-sm">
+                      {{ req.program or req.course }}
+                    </td>
+
+                    <td class="border-b border-slate-100 px-3 py-[14px] text-sm">
+
+                      <span
+                        class="inline-flex min-w-[84px] items-center justify-center rounded-full px-3 py-1.5 text-xs font-bold
+                        {% if req.status == 'Approved' %}
+                        border border-green-300 bg-green-100 text-green-800
+                        {% elif req.status == 'Rejected' %}
+                        border border-red-300 bg-red-100 text-red-800
+                        {% else %}
+                        border border-amber-300 bg-amber-100 text-amber-800
+                        {% endif %}">
+
+                        {{ req.status.upper() }}
+
+                      </span>
+
+                    </td>
+
                   </tr>
+
                   {% endfor %}
+
                 </tbody>
+
               </table>
+
               {% else %}
-              <div class="mb-3 rounded-xl border border-[#edf0f7] bg-[#fafbff] px-4 py-[14px] last:mb-0">
-                <strong class="mb-1 block text-textmain">No recent activity yet</strong>
+
+              <div class="rounded-xl border border-[#edf0f7] bg-[#fafbff] px-4 py-[14px]">
+                <strong class="block text-textmain">No recent activity yet</strong>
                 <p class="text-[13px] leading-5 text-muted">Your updates will appear here.</p>
               </div>
+
               {% endif %}
+
             </section>
 
-            <section class="overflow-x-auto rounded-2xl border border-borderline bg-white p-[22px] shadow-soft max-md:p-[18px]">
-              <h4 class="mb-[14px] text-lg font-bold text-primary">Alerts & Notifications</h4>
-
-              {% if rejected_requests or incomplete_requests %}
-                {% if rejected_requests %}
-                <div class="mb-3 rounded-xl border border-[#edf0f7] bg-[#fafbff] px-4 py-[14px] last:mb-0">
-                  <strong class="mb-1 block text-textmain">{{ rejected_requests|length }} Rejected Request(s)</strong>
-                  <p class="text-[13px] leading-5 text-muted">Review comments and take action if needed.</p>
-                </div>
-                {% endif %}
-
-                {% if incomplete_requests %}
-                <div class="mb-3 rounded-xl border border-[#edf0f7] bg-[#fafbff] px-4 py-[14px] last:mb-0">
-                  <strong class="mb-1 block text-textmain">{{ incomplete_requests|length }} Incomplete Request(s)</strong>
-                  <p class="text-[13px] leading-5 text-muted">Some requests are missing documents. Please upload them.</p>
-                </div>
-                {% endif %}
-              {% else %}
-              <div class="mb-3 rounded-xl border border-[#edf0f7] bg-[#fafbff] px-4 py-[14px] last:mb-0">
-                <strong class="mb-1 block text-textmain">No alerts</strong>
-                <p class="text-[13px] leading-5 text-muted">You are all caught up.</p>
-              </div>
-              {% endif %}
-            </section>
           </div>
+
         </section>
+
       </div>
+
     </main>
+
   </div>
 
   <script>
@@ -224,24 +275,7 @@
 
     sidebarToggle.addEventListener("click", toggleSidebar);
     sidebarOverlay.addEventListener("click", closeSidebar);
-
-    document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape") {
-        closeSidebar();
-      }
-    });
-
-    window.addEventListener("resize", function () {
-      if (window.innerWidth > 980) {
-        sidebar.classList.remove("translate-x-0", "max-[980px]:-translate-x-full");
-        sidebarOverlay.classList.add("hidden");
-        sidebarOverlay.hidden = true;
-        sidebarToggle.setAttribute("aria-expanded", "false");
-      } else if (!sidebar.classList.contains("translate-x-0")) {
-        sidebar.classList.add("max-[980px]:-translate-x-full");
-      }
-    });
   </script>
-</body>
 
+</body>
 </html>

@@ -838,11 +838,11 @@ def show_generated_password():
 # =====================================================
 # LOGOUT
 # =====================================================
-@admin_bp.route("/logout", methods=["POST"])
+@admin_bp.route("/logout", methods=["GET", "POST"])
 @require_role("Admin")
 def logout():
     user_name = session.get("user_name", "Admin User")
+    log_action(user_name, "Logged out")
     session.clear()
     flash("You have been logged out.", "danger")
-    log_action(user_name, "Logged out")
     return redirect(url_for("login"))
