@@ -638,7 +638,6 @@
     const filterForm = document.querySelector('.filters');
     const filterSelects = filterForm.querySelectorAll('select');
 
-    // Only auto-submit on select change
     filterSelects.forEach(el => {
       el.addEventListener('change', () => filterForm.submit());
     });
