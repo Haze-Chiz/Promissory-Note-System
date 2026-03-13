@@ -1,573 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth motion-reduce:scroll-auto">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Promissory Notes Statistics</title>
-  <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
+  <link rel="icon" type="image/x-icon" href="./static/images/logo.png" />
 
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
-  <style>
-    :root {
-      --primary: #1e2a78;
-      --primary-light: #3a4bb3;
-      --primary-dark: #16205d;
-      --bg: #f4f7fc;
-      --surface: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --hover: #eef2ff;
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-      --radius: 14px;
-      --sidebar-width: 240px;
-      --success: #16a34a;
-      --danger: #dc3545;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.5;
-      color: var(--text);
-      background-color: var(--bg);
-    }
-
-    img {
-      display: block;
-      max-width: 100%;
-    }
-
-    button,
-    select,
-    input {
-      font: inherit;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    .sidebar-toggle {
-      display: none;
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      z-index: 1100;
-      border: none;
-      background: var(--primary);
-      color: #fff;
-      border-radius: 10px;
-      padding: 10px 12px;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      font-size: 18px;
-    }
-
-    .sidebar-toggle:focus-visible,
-    .sidebar a:focus-visible,
-    .logout-link:focus-visible,
-    .card-filter select:focus-visible,
-    .card-filter input:focus-visible,
-    .btn:focus-visible,
-    .download-btn:focus-visible,
-    .export-btn:focus-visible {
-      outline: 3px solid #93c5fd;
-      outline-offset: 2px;
-    }
-
-    .sidebar {
-      width: var(--sidebar-width);
-      min-height: 100vh;
-      background: linear-gradient(160deg, var(--primary), var(--primary-light));
-      color: #fff;
-      position: fixed;
-      top: 0;
-      left: 0;
-      display: flex;
-      flex-direction: column;
-      padding: 20px 0 16px;
-      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
-      z-index: 1000;
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar-header {
-      padding: 0 18px 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-      margin-bottom: 12px;
-    }
-
-    .sidebar-header h1 {
-      font-size: 17px;
-      font-weight: 600;
-      line-height: 1.4;
-      word-break: break-word;
-    }
-
-    .sidebar-header span {
-      display: block;
-      font-size: 13px;
-      font-weight: 400;
-      opacity: 0.9;
-      margin-top: 4px;
-    }
-
-    .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 0 10px;
-      flex: 1;
-    }
-
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      color: #fff;
-      border-radius: 10px;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-    }
-
-    .sidebar a:hover {
-      background-color: rgba(255, 255, 255, 0.12);
-      transform: translateX(2px);
-    }
-
-    .sidebar a.active {
-      background-color: rgba(255, 255, 255, 0.22);
-      font-weight: 700;
-    }
-
-    .sidebar img.icon {
-      width: 30px;
-      height: 30px;
-      background: #fff;
-      border-radius: 50%;
-      padding: 6px;
-      flex-shrink: 0;
-    }
-
-    .sidebar-footer {
-      padding: 12px 10px 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
-      margin-top: 12px;
-    }
-
-    .logout-link {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      color: #fff;
-      border-radius: 10px;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-    }
-
-    .logout-link:hover {
-      background: rgba(255, 255, 255, 0.12);
-      transform: translateX(2px);
-    }
-
-    .sidebar-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.45);
-      z-index: 999;
-    }
-
-    .sidebar-overlay.show {
-      display: block;
-    }
-
-    .main-content {
-      margin-left: var(--sidebar-width);
-      padding: 24px;
-      min-height: 100vh;
-      transition: margin-left 0.3s ease;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      background: var(--surface);
-      padding: 18px 20px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-    }
-
-    .header h2 {
-      font-weight: 700;
-      color: var(--primary);
-      font-size: 28px;
-    }
-
-    .header-meta {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .header-meta strong {
-      color: var(--text);
-    }
-
-    .card-filter {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .card-filter form {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-      align-items: end;
-    }
-
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      min-width: 170px;
-      flex: 1 1 170px;
-    }
-
-    .card-filter label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--muted);
-    }
-
-    .card-filter select,
-    .card-filter input {
-      padding: 11px 14px;
-      font-size: 14px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background-color: #f9fafb;
-      color: var(--text);
-      min-width: 0;
-      transition: all 0.2s ease;
-    }
-
-    .card-filter select:focus,
-    .card-filter input:focus {
-      outline: none;
-      border-color: #a5b4fc;
-      background-color: #fff;
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
-    }
-
-    .filter-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn,
-    .download-btn,
-    .export-btn,
-    .clear-btn {
-      border: none;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .clear-btn {
-      background-color: var(--danger);
-      color: #fff;
-      padding: 10px 18px;
-      border-radius: 999px;
-      box-shadow: 0 2px 8px rgba(220, 53, 69, 0.18);
-    }
-
-    .clear-btn:hover {
-      background-color: #b02a37;
-      transform: translateY(-1px);
-    }
-
-    .export-bar {
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .export-btn {
-      background-color: var(--primary);
-      color: #fff;
-      padding: 10px 16px;
-      border-radius: 10px;
-      font-size: 14px;
-      box-shadow: 0 2px 8px rgba(30, 42, 120, 0.2);
-    }
-
-    .export-btn:hover {
-      background-color: var(--primary-light);
-      transform: translateY(-1px);
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 20px;
-      margin-bottom: 24px;
-    }
-
-    .card {
-      background: var(--surface);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 24px 20px;
-      min-height: 160px;
-    }
-
-    .card .course-code {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--primary);
-      line-height: 1.3;
-      margin-bottom: 12px;
-    }
-
-    .card p {
-      font-size: 30px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .chart-card {
-      background: var(--surface);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      padding: 24px;
-      margin-bottom: 24px;
-    }
-
-    .chart-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-
-    .chart-card h3 {
-      color: var(--primary);
-      font-weight: 700;
-      font-size: 20px;
-      margin: 0;
-    }
-
-    .download-btn {
-      background: var(--primary);
-      color: #fff;
-      padding: 9px 14px;
-      border-radius: 10px;
-      font-size: 14px;
-      box-shadow: 0 2px 8px rgba(30, 42, 120, 0.2);
-    }
-
-    .download-btn:hover {
-      background: var(--primary-light);
-      transform: translateY(-1px);
-    }
-
-    .chart-container {
-      width: 100%;
-      height: 420px;
-      position: relative;
-    }
-
-    @media (max-width: 980px) {
-      .sidebar-toggle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#1e2a78",
+            "primary-light": "#3a4bb3",
+            "primary-dark": "#16205d",
+            bg: "#f4f7fc",
+            surface: "#ffffff",
+            textmain: "#1f2937",
+            muted: "#6b7280",
+            borderline: "#e5e7eb",
+            hoverbg: "#eef2ff",
+            success: "#16a34a",
+            danger: "#dc3545"
+          },
+          boxShadow: {
+            soft: "0 10px 25px rgba(0, 0, 0, 0.08)",
+            sidebar: "2px 0 12px rgba(0, 0, 0, 0.12)",
+            pill: "0 2px 8px rgba(30, 42, 120, 0.2)",
+            dangerpill: "0 2px 8px rgba(220, 53, 69, 0.18)"
+          }
+        }
       }
-
-      .sidebar {
-        transform: translateX(-100%);
-        width: 260px;
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .main-content {
-        margin-left: 0;
-        padding: 76px 16px 20px;
-      }
-
-      .header h2 {
-        font-size: 24px;
-      }
-    }
-
-    @media (max-width: 760px) {
-      .cards {
-        grid-template-columns: 1fr;
-      }
-
-      .filter-group {
-        flex: 1 1 100%;
-      }
-
-      .filter-actions {
-        width: 100%;
-      }
-
-      .clear-btn {
-        width: 100%;
-      }
-
-      .export-bar {
-        justify-content: stretch;
-      }
-
-      .export-btn {
-        width: 100%;
-      }
-
-      .chart-card {
-        padding: 18px;
-      }
-
-      .chart-container {
-        height: 340px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html {
-        scroll-behavior: auto;
-      }
-
-      *,
-      *::before,
-      *::after {
-        transition: none !important;
-        animation: none !important;
-      }
-    }
-  </style>
+    };
+  </script>
 </head>
 
-<body>
-  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false"
+<body class="bg-bg font-sans leading-6 text-textmain antialiased">
+  <button
+    class="fixed left-4 top-4 z-[1100] hidden rounded-[10px] bg-primary px-3 py-2 text-lg text-white shadow-soft focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[980px]:inline-flex max-[980px]:items-center max-[980px]:justify-center motion-reduce:transition-none"
+    type="button"
+    id="sidebarToggle"
+    aria-controls="sidebar"
+    aria-expanded="false"
     aria-label="Toggle navigation menu">
     ☰
   </button>
 
-  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
+  <div id="sidebarOverlay" class="fixed inset-0 z-[999] hidden bg-slate-900/45" hidden></div>
 
-  <nav class="sidebar" id="sidebar" aria-label="Finance navigation">
-    <div class="sidebar-header">
-      <h1>{{ finance_user }}</h1>
-      <span>Promissory Notes</span>
+  <nav
+    id="sidebar"
+    aria-label="Finance navigation"
+    class="fixed left-0 top-0 z-[1000] flex min-h-screen w-[240px] flex-col bg-[linear-gradient(160deg,#1e2a78,#3a4bb3)] px-0 pb-4 pt-5 text-white shadow-sidebar transition-transform duration-300 ease-in-out max-[980px]:w-[260px] max-[980px]:-translate-x-full motion-reduce:transition-none">
+    <div class="mb-3 border-b border-white/15 px-[18px] pb-5">
+      <h1 class="break-words text-[17px] font-semibold leading-[1.4]">{{ finance_user }}</h1>
+      <span class="mt-1 block text-[13px] font-normal opacity-90">Promissory Notes</span>
     </div>
 
-    <div class="sidebar-nav">
-      <a href="{{ url_for('finance.dashboard') }}"
-         class="{% if request.endpoint == 'finance.dashboard' %}active{% endif %}"
-         aria-current="{% if request.endpoint == 'finance.dashboard' %}page{% endif %}">
-        <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon" alt="">
+    <div class="flex flex-1 flex-col gap-1.5 px-[10px]">
+      <a
+        href="{{ url_for('finance.dashboard') }}"
+        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if request.endpoint == 'finance.dashboard' %}bg-white/10 font-bold{% else %}font-medium{% endif %}"
+        aria-current="{% if request.endpoint == 'finance.dashboard' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="h-[30px] w-[30px] shrink-0 rounded-full bg-white p-1.5" alt="">
         <span>Dashboard</span>
       </a>
 
-      <a href="{{ url_for('finance.promissory_notes') }}"
-         class="{% if request.endpoint == 'finance.promissory_notes' %}active{% endif %}"
-         aria-current="{% if request.endpoint == 'finance.promissory_notes' %}page{% endif %}">
-        <img src="{{ url_for('static', filename='images/notes.png') }}" class="icon" alt="">
+      <a
+        href="{{ url_for('finance.promissory_notes') }}"
+        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if request.endpoint == 'finance.promissory_notes' %}bg-white/10 font-bold{% else %}font-medium{% endif %}"
+        aria-current="{% if request.endpoint == 'finance.promissory_notes' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/notes.png') }}" class="h-[30px] w-[30px] shrink-0 rounded-full bg-white p-1.5" alt="">
         <span>Promissory Notes</span>
       </a>
 
-      <a href="{{ url_for('finance.all_promissory') }}"
-         class="{% if request.endpoint == 'finance.all_promissory' %}active{% endif %}"
-         aria-current="{% if request.endpoint == 'finance.all_promissory' %}page{% endif %}">
-        <img src="{{ url_for('static', filename='images/notes.png') }}" class="icon" alt="">
+      <a
+        href="{{ url_for('finance.all_promissory') }}"
+        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if request.endpoint == 'finance.all_promissory' %}bg-white/10 font-bold{% else %}font-medium{% endif %}"
+        aria-current="{% if request.endpoint == 'finance.all_promissory' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/notes.png') }}" class="h-[30px] w-[30px] shrink-0 rounded-full bg-white p-1.5" alt="">
         <span>Statistics</span>
       </a>
 
-      <a href="{{ url_for('finance.students_promissory') }}"
-         class="{% if request.endpoint == 'finance.students_promissory' %}active{% endif %}"
-         aria-current="{% if request.endpoint == 'finance.students_promissory' %}page{% endif %}">
-        <img src="{{ url_for('static', filename='images/students.png') }}" class="icon" alt="">
+      <a
+        href="{{ url_for('finance.students_promissory') }}"
+        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if request.endpoint == 'finance.students_promissory' %}bg-white/10 font-bold{% else %}font-medium{% endif %}"
+        aria-current="{% if request.endpoint == 'finance.students_promissory' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/students.png') }}" class="h-[30px] w-[30px] shrink-0 rounded-full bg-white p-1.5" alt="">
         <span>Students</span>
       </a>
     </div>
 
-    <div class="sidebar-footer">
-      <a href="{{ url_for('finance.logout') }}" class="logout-link">
-        <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon" alt="">
+    <div class="mt-3 border-t border-white/15 px-[10px] pt-3">
+      <a
+        href="{{ url_for('finance.logout') }}"
+        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+        <img src="{{ url_for('static', filename='images/logout.png') }}" class="h-[30px] w-[30px] shrink-0 rounded-full bg-white p-1.5" alt="">
         <span>Logout</span>
       </a>
     </div>
   </nav>
 
-  <main class="main-content">
-    <header class="header">
-      <h2>Promissory Notes Statistics</h2>
-      <div class="header-meta">
-        Active Semester: <strong>{{ active_semester }}</strong> |
-        S.Y.: <strong>{{ active_school_year }}</strong>
+  <main class="ml-[240px] min-h-screen p-6 transition-all duration-300 ease-in-out max-[980px]:ml-0 max-[980px]:px-4 max-[980px]:pb-5 max-[980px]:pt-[76px] motion-reduce:transition-none">
+    <header class="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-surface px-5 py-[18px] shadow-soft">
+      <h2 class="text-[28px] font-bold text-primary max-[980px]:text-2xl">Promissory Notes Statistics</h2>
+      <div class="text-sm text-muted">
+        Active Semester: <strong class="text-textmain">{{ active_semester }}</strong> |
+        S.Y.: <strong class="text-textmain">{{ active_school_year }}</strong>
       </div>
     </header>
 
-    <section class="card-filter" aria-labelledby="filters-title">
-      <h3 id="filters-title" class="sr-only">Filter statistics</h3>
+    <section class="mb-5 rounded-[14px] bg-surface p-5 shadow-soft" aria-labelledby="filters-title">
+      <h3 id="filters-title" class="sr-only absolute -m-px h-px w-px overflow-hidden whitespace-nowrap border-0 p-0 [clip:rect(0,0,0,0)]">
+        Filter statistics
+      </h3>
 
-      <form id="filterForm" method="GET">
-        <div class="filter-group">
-          <label for="courseFilter">Course</label>
-          <select name="course" id="courseFilter">
+      <form id="filterForm" method="GET" class="flex flex-wrap items-end gap-[14px]">
+        <div class="min-w-[170px] flex-1 basis-[170px] flex-col gap-1.5 max-[760px]:basis-full">
+          <label for="courseFilter" class="mb-1.5 block text-[13px] font-semibold text-muted">Course</label>
+          <select
+            name="course"
+            id="courseFilter"
+            class="min-w-0 w-full rounded-xl border border-borderline bg-slate-50 px-[14px] py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 motion-reduce:transition-none">
             <option value="">All</option>
             {% for course in courses %}
             <option value="{{ course }}" {% if course == selected_course %}selected{% endif %}>{{ course }}</option>
@@ -575,9 +134,12 @@
           </select>
         </div>
 
-        <div class="filter-group">
-          <label for="semesterFilter">Semester</label>
-          <select name="semester" id="semesterFilter">
+        <div class="min-w-[170px] flex-1 basis-[170px] flex-col gap-1.5 max-[760px]:basis-full">
+          <label for="semesterFilter" class="mb-1.5 block text-[13px] font-semibold text-muted">Semester</label>
+          <select
+            name="semester"
+            id="semesterFilter"
+            class="min-w-0 w-full rounded-xl border border-borderline bg-slate-50 px-[14px] py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 motion-reduce:transition-none">
             <option value="all" {% if selected_semester == 'all' %}selected{% endif %}>All</option>
             {% for sem in semesters %}
             <option value="{{ sem }}" {% if sem == selected_semester %}selected{% endif %}>{{ sem }}</option>
@@ -585,9 +147,12 @@
           </select>
         </div>
 
-        <div class="filter-group">
-          <label for="statusFilter">Status</label>
-          <select name="status" id="statusFilter">
+        <div class="min-w-[170px] flex-1 basis-[170px] flex-col gap-1.5 max-[760px]:basis-full">
+          <label for="statusFilter" class="mb-1.5 block text-[13px] font-semibold text-muted">Status</label>
+          <select
+            name="status"
+            id="statusFilter"
+            class="min-w-0 w-full rounded-xl border border-borderline bg-slate-50 px-[14px] py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 motion-reduce:transition-none">
             <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
             <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Approved</option>
             <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>Rejected</option>
@@ -595,9 +160,12 @@
           </select>
         </div>
 
-        <div class="filter-group">
-          <label for="semesterTypeFilter">Examination Type</label>
-          <select name="semester_type" id="semesterTypeFilter">
+        <div class="min-w-[170px] flex-1 basis-[170px] flex-col gap-1.5 max-[760px]:basis-full">
+          <label for="semesterTypeFilter" class="mb-1.5 block text-[13px] font-semibold text-muted">Examination Type</label>
+          <select
+            name="semester_type"
+            id="semesterTypeFilter"
+            class="min-w-0 w-full rounded-xl border border-borderline bg-slate-50 px-[14px] py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 motion-reduce:transition-none">
             <option value="">All</option>
             {% for semt in semester_types %}
             <option value="{{ semt }}" {% if semt == selected_semester_type %}selected{% endif %}>{{ semt }}</option>
@@ -605,9 +173,12 @@
           </select>
         </div>
 
-        <div class="filter-group">
-          <label for="schoolYearFilter">School Year</label>
-          <select name="school_year" id="schoolYearFilter">
+        <div class="min-w-[170px] flex-1 basis-[170px] flex-col gap-1.5 max-[760px]:basis-full">
+          <label for="schoolYearFilter" class="mb-1.5 block text-[13px] font-semibold text-muted">School Year</label>
+          <select
+            name="school_year"
+            id="schoolYearFilter"
+            class="min-w-0 w-full rounded-xl border border-borderline bg-slate-50 px-[14px] py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 motion-reduce:transition-none">
             <option value="all" {% if selected_school_year == 'all' %}selected{% endif %}>All</option>
             {% for sy in school_years %}
             <option value="{{ sy }}" {% if sy == selected_school_year %}selected{% endif %}>{{ sy }}</option>
@@ -615,94 +186,109 @@
           </select>
         </div>
 
-        <div class="filter-actions">
-          <button type="button" class="clear-btn" id="clearFiltersBtn">Clear</button>
+        <div class="flex items-center gap-2.5 flex-wrap max-[760px]:w-full">
+          <button
+            type="button"
+            id="clearFiltersBtn"
+            class="inline-flex items-center justify-center rounded-full bg-danger px-[18px] py-2.5 font-semibold text-white shadow-dangerpill transition duration-200 ease-in-out hover:-translate-y-px hover:bg-[#b02a37] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[760px]:w-full motion-reduce:transition-none">
+            Clear
+          </button>
         </div>
       </form>
     </section>
 
-    <div class="export-bar">
-      <a href="{{ url_for('finance.all_promissory', export='excel', course=selected_course if selected_course else None, semester=selected_semester if selected_semester else None, semester_type=selected_semester_type if selected_semester_type else None, school_year=selected_school_year if selected_school_year else None, status=selected_status) }}"
-         class="export-btn">
+    <div class="mb-5 flex flex-wrap justify-end gap-2.5">
+      <a
+        href="{{ url_for('finance.all_promissory', export='excel', course=selected_course if selected_course else None, semester=selected_semester if selected_semester else None, semester_type=selected_semester_type if selected_semester_type else None, school_year=selected_school_year if selected_school_year else None, status=selected_status) }}"
+        class="inline-flex items-center justify-center rounded-[10px] bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-pill transition duration-200 ease-in-out hover:-translate-y-px hover:bg-primary-light focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[760px]:w-full motion-reduce:transition-none">
         Export Excel
       </a>
 
-      <a href="{{ url_for('finance.all_promissory', export='csv', course=selected_course if selected_course else None, semester=selected_semester if selected_semester else None, semester_type=selected_semester_type if selected_semester_type else None, school_year=selected_school_year if selected_school_year else None, status=selected_status) }}"
-         class="export-btn">
+      <a
+        href="{{ url_for('finance.all_promissory', export='csv', course=selected_course if selected_course else None, semester=selected_semester if selected_semester else None, semester_type=selected_semester_type if selected_semester_type else None, school_year=selected_school_year if selected_school_year else None, status=selected_status) }}"
+        class="inline-flex items-center justify-center rounded-[10px] bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-pill transition duration-200 ease-in-out hover:-translate-y-px hover:bg-primary-light focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[760px]:w-full motion-reduce:transition-none">
         Export CSV
       </a>
     </div>
 
-    <section class="cards" aria-label="Statistics summary cards">
-      <article class="card">
-        <div class="course-code">Total Students</div>
-        <p>{{ total_students }}</p>
+    <section class="mb-6 grid grid-cols-2 gap-5 max-[760px]:grid-cols-1" aria-label="Statistics summary cards">
+      <article class="flex min-h-[160px] flex-col items-center justify-center rounded-2xl bg-surface px-5 py-6 text-center shadow-soft">
+        <div class="mb-3 text-[15px] font-semibold leading-[1.3] text-primary">Total Students</div>
+        <p class="text-[30px] font-bold text-textmain">{{ total_students }}</p>
       </article>
 
-      <article class="card">
-        <div class="course-code">Total Students Requested Promissory</div>
-        <p>{{ total_requested }}</p>
+      <article class="flex min-h-[160px] flex-col items-center justify-center rounded-2xl bg-surface px-5 py-6 text-center shadow-soft">
+        <div class="mb-3 text-[15px] font-semibold leading-[1.3] text-primary">Total Students Requested Promissory</div>
+        <p class="text-[30px] font-bold text-textmain">{{ total_requested }}</p>
       </article>
     </section>
 
-    <section class="chart-card" aria-labelledby="total-chart-title">
-      <div class="chart-card-header">
-        <h3 id="total-chart-title">Total vs Total Students Requested Promissory</h3>
-        <button class="download-btn" type="button"
+    <section class="mb-6 rounded-2xl bg-surface p-6 shadow-soft max-[760px]:p-[18px]" aria-labelledby="total-chart-title">
+      <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <h3 id="total-chart-title" class="text-xl font-bold text-primary">Total vs Total Students Requested Promissory</h3>
+        <button
+          class="inline-flex items-center justify-center rounded-[10px] bg-primary px-[14px] py-[9px] text-sm font-semibold text-white shadow-pill transition duration-200 ease-in-out hover:-translate-y-px hover:bg-primary-light focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none"
+          type="button"
           onclick="downloadChartHighRes('promissoryChart', 'total_vs_requested.png')">
           Download
         </button>
       </div>
 
-      <div class="chart-container">
+      <div class="relative h-[420px] w-full max-[760px]:h-[340px]">
         <canvas id="promissoryChart" aria-label="Bar chart comparing total students and total requested promissory" role="img"></canvas>
       </div>
     </section>
 
-    <section class="chart-card" aria-labelledby="course-chart-title">
-      <div class="chart-card-header">
-        <h3 id="course-chart-title">Course Requests (Lowest → Highest)</h3>
-        <button class="download-btn" type="button"
+    <section class="rounded-2xl bg-surface p-6 shadow-soft max-[760px]:p-[18px]" aria-labelledby="course-chart-title">
+      <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <h3 id="course-chart-title" class="text-xl font-bold text-primary">Course Requests (Lowest → Highest)</h3>
+        <button
+          class="inline-flex items-center justify-center rounded-[10px] bg-primary px-[14px] py-[9px] text-sm font-semibold text-white shadow-pill transition duration-200 ease-in-out hover:-translate-y-px hover:bg-primary-light focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none"
+          type="button"
           onclick="downloadChartHighRes('courseBarChart', 'course_requests.png')">
           Download
         </button>
       </div>
 
-      <div class="chart-container">
+      <div class="relative h-[420px] w-full max-[760px]:h-[340px]">
         <canvas id="courseBarChart" aria-label="Bar chart showing requests by course" role="img"></canvas>
       </div>
     </section>
   </main>
 
   <script>
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
 
-    const filterForm = document.getElementById('filterForm');
-    const courseFilter = document.getElementById('courseFilter');
-    const semesterFilter = document.getElementById('semesterFilter');
-    const statusFilter = document.getElementById('statusFilter');
-    const semesterTypeFilter = document.getElementById('semesterTypeFilter');
-    const schoolYearFilter = document.getElementById('schoolYearFilter');
-    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    const filterForm = document.getElementById("filterForm");
+    const courseFilter = document.getElementById("courseFilter");
+    const semesterFilter = document.getElementById("semesterFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const semesterTypeFilter = document.getElementById("semesterTypeFilter");
+    const schoolYearFilter = document.getElementById("schoolYearFilter");
+    const clearFiltersBtn = document.getElementById("clearFiltersBtn");
 
     function openSidebar() {
-      sidebar.classList.add('open');
+      sidebar.classList.remove("max-[980px]:-translate-x-full");
+      sidebar.classList.add("translate-x-0");
       sidebarOverlay.hidden = false;
-      sidebarOverlay.classList.add('show');
-      sidebarToggle.setAttribute('aria-expanded', 'true');
+      sidebarOverlay.classList.remove("hidden");
+      sidebarToggle.setAttribute("aria-expanded", "true");
     }
 
     function closeSidebar() {
-      sidebar.classList.remove('open');
-      sidebarOverlay.classList.remove('show');
+      if (window.innerWidth <= 980) {
+        sidebar.classList.remove("translate-x-0");
+        sidebar.classList.add("max-[980px]:-translate-x-full");
+      }
+      sidebarOverlay.classList.add("hidden");
       sidebarOverlay.hidden = true;
-      sidebarToggle.setAttribute('aria-expanded', 'false');
+      sidebarToggle.setAttribute("aria-expanded", "false");
     }
 
     function toggleSidebar() {
-      if (sidebar.classList.contains('open')) {
+      if (sidebar.classList.contains("translate-x-0") && window.innerWidth <= 980) {
         closeSidebar();
       } else {
         openSidebar();
@@ -718,34 +304,34 @@
       const schoolYear = schoolYearFilter.value;
       const status = statusFilter.value;
 
-      course ? params.set('course', course) : params.delete('course');
-      semester ? params.set('semester', semester) : params.delete('semester');
-      semesterType ? params.set('semester_type', semesterType) : params.delete('semester_type');
-      schoolYear ? params.set('school_year', schoolYear) : params.delete('school_year');
-      status ? params.set('status', status) : params.delete('status');
+      course ? params.set("course", course) : params.delete("course");
+      semester ? params.set("semester", semester) : params.delete("semester");
+      semesterType ? params.set("semester_type", semesterType) : params.delete("semester_type");
+      schoolYear ? params.set("school_year", schoolYear) : params.delete("school_year");
+      status ? params.set("status", status) : params.delete("status");
 
-      params.delete('export');
+      params.delete("export");
 
       window.location.href = `${window.location.pathname}?${params.toString()}`;
     }
 
     function clearFilters() {
-      courseFilter.value = '';
-      semesterFilter.value = 'all';
-      statusFilter.value = 'all';
-      semesterTypeFilter.value = '';
-      schoolYearFilter.value = 'all';
+      courseFilter.value = "";
+      semesterFilter.value = "all";
+      statusFilter.value = "all";
+      semesterTypeFilter.value = "";
+      schoolYearFilter.value = "all";
       applyFilters();
     }
 
     function downloadChartHighRes(chartId, filename) {
       const originalCanvas = document.getElementById(chartId);
-      const tempCanvas = document.createElement('canvas');
+      const tempCanvas = document.createElement("canvas");
       tempCanvas.width = 1920;
       tempCanvas.height = 1080;
 
-      const ctx = tempCanvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
+      const ctx = tempCanvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
 
       const sourceWidth = originalCanvas.width;
@@ -759,48 +345,53 @@
 
       ctx.drawImage(originalCanvas, offsetX, offsetY, drawWidth, drawHeight);
 
-      const link = document.createElement('a');
-      link.href = tempCanvas.toDataURL('image/png', 1.0);
+      const link = document.createElement("a");
+      link.href = tempCanvas.toDataURL("image/png", 1.0);
       link.download = filename;
       link.click();
     }
 
-    sidebarToggle.addEventListener('click', toggleSidebar);
-    sidebarOverlay.addEventListener('click', closeSidebar);
+    sidebarToggle.addEventListener("click", toggleSidebar);
+    sidebarOverlay.addEventListener("click", closeSidebar);
 
-    document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') {
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
         closeSidebar();
       }
     });
 
-    window.addEventListener('resize', function () {
+    window.addEventListener("resize", function () {
       if (window.innerWidth > 980) {
-        closeSidebar();
+        sidebar.classList.remove("translate-x-0", "max-[980px]:-translate-x-full");
+        sidebarOverlay.classList.add("hidden");
+        sidebarOverlay.hidden = true;
+        sidebarToggle.setAttribute("aria-expanded", "false");
+      } else if (!sidebar.classList.contains("translate-x-0")) {
+        sidebar.classList.add("max-[980px]:-translate-x-full");
       }
     });
 
     [courseFilter, semesterFilter, statusFilter, semesterTypeFilter, schoolYearFilter].forEach(function (element) {
-      element.addEventListener('change', applyFilters);
+      element.addEventListener("change", applyFilters);
     });
 
-    clearFiltersBtn.addEventListener('click', clearFilters);
+    clearFiltersBtn.addEventListener("click", clearFilters);
 
     Chart.register(ChartDataLabels);
 
     const totalStudents = Number({{ total_students|default(0) }});
     const totalRequested = Number({{ total_requested|default(0) }});
 
-    const promissoryCtx = document.getElementById('promissoryChart').getContext('2d');
+    const promissoryCtx = document.getElementById("promissoryChart").getContext("2d");
     new Chart(promissoryCtx, {
-      type: 'bar',
+      type: "bar",
       data: {
-        labels: ['Total Students', 'Total Students Requested Promissory'],
+        labels: ["Total Students", "Total Students Requested Promissory"],
         datasets: [{
-          label: 'Students',
+          label: "Students",
           data: [totalStudents, totalRequested],
-          backgroundColor: ['#1e2a78', '#16a34a'],
-          borderColor: ['#1e2a78', '#16a34a'],
+          backgroundColor: ["#1e2a78", "#16a34a"],
+          borderColor: ["#1e2a78", "#16a34a"],
           borderWidth: 2,
           borderRadius: 8
         }]
@@ -813,11 +404,11 @@
             display: false
           },
           datalabels: {
-            color: '#ffffff',
-            anchor: 'center',
-            align: 'center',
+            color: "#ffffff",
+            anchor: "center",
+            align: "center",
             font: {
-              weight: 'bold',
+              weight: "bold",
               size: 14
             },
             formatter: function (value, context) {
@@ -850,16 +441,16 @@
       }
     });
 
-    const courseBarCtx = document.getElementById('courseBarChart').getContext('2d');
+    const courseBarCtx = document.getElementById("courseBarChart").getContext("2d");
     new Chart(courseBarCtx, {
-      type: 'bar',
+      type: "bar",
       data: {
         labels: {{ courses_sorted|safe }},
         datasets: [{
-          label: 'Student Requests',
+          label: "Student Requests",
           data: {{ counts_sorted|safe }},
-          backgroundColor: '#1e2a78',
-          borderColor: '#1e2a78',
+          backgroundColor: "#1e2a78",
+          borderColor: "#1e2a78",
           borderWidth: 2,
           borderRadius: 8
         }]

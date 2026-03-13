@@ -1,622 +1,141 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth motion-reduce:scroll-auto">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>History | Student Promissory Notes System</title>
-  <link rel="icon" type="image/x-icon" href="/images/FCPC.jpg">
-
-  <style>
-    :root {
-      --primary: #1e2a78;
-      --primary-light: #3a4bb3;
-      --primary-dark: #16205d;
-      --bg: #f4f7fc;
-      --surface: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --hover: #eef2ff;
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-      --radius: 14px;
-      --sidebar-width: 240px;
-      --success: #16a34a;
-      --danger: #dc2626;
-      --warning: #d97706;
-      --info: #0891b2;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
-      line-height: 1.5;
-      color: var(--text);
-      background-color: var(--bg);
-    }
-
-    img {
-      display: block;
-      max-width: 100%;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    button,
-    input,
-    select {
-      font: inherit;
-    }
-
-    .sidebar-toggle {
-      display: none;
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      z-index: 1100;
-      border: none;
-      background: var(--primary);
-      color: #fff;
-      border-radius: 10px;
-      padding: 10px 12px;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      font-size: 18px;
-    }
-
-    .sidebar-toggle:focus-visible,
-    .sidebar a:focus-visible,
-    .logout-link:focus-visible,
-    .form-input:focus-visible,
-    .btn:focus-visible {
-      outline: 3px solid #93c5fd;
-      outline-offset: 2px;
-    }
-
-    .app {
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      width: var(--sidebar-width);
-      min-height: 100vh;
-      background: linear-gradient(160deg, var(--primary), var(--primary-light));
-      color: #fff;
-      position: fixed;
-      top: 0;
-      left: 0;
-      display: flex;
-      flex-direction: column;
-      padding: 20px 0 16px;
-      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
-      z-index: 1000;
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar-header {
-      padding: 0 18px 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-      margin-bottom: 12px;
-    }
-
-    .sidebar-header h1 {
-      font-size: 17px;
-      font-weight: 600;
-      line-height: 1.4;
-      word-break: break-word;
-    }
-
-    .sidebar-header span {
-      display: block;
-      font-size: 13px;
-      font-weight: 400;
-      opacity: 0.9;
-      margin-top: 4px;
-    }
-
-    .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 0 10px;
-      flex: 1;
-    }
-
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      color: #fff;
-      border-radius: 10px;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-      font-weight: 600;
-    }
-
-    .sidebar a.active {
-      background-color: rgba(255, 255, 255, 0.22);
-      font-weight: 700;
-    }
-
-    .sidebar a:hover {
-      background-color: rgba(255, 255, 255, 0.12);
-      transform: translateX(2px);
-    }
-
-    .sidebar-footer {
-      padding: 12px 10px 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
-      margin-top: 12px;
-    }
-
-    .logout-link {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 14px;
-      color: #fff;
-      border-radius: 10px;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-      background: rgba(255, 255, 255, 0.08);
-      border: none;
-      cursor: pointer;
-      font-weight: 700;
-      width: 100%;
-    }
-
-    .logout-link:hover {
-      background: rgba(255, 255, 255, 0.16);
-      transform: translateY(-1px);
-    }
-
-    .sidebar-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.45);
-      z-index: 999;
-    }
-
-    .sidebar-overlay.show {
-      display: block;
-    }
-
-    .main {
-      margin-left: var(--sidebar-width);
-      min-height: 100vh;
-      padding: 24px;
-      transition: margin-left 0.3s ease;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      background: var(--surface);
-      padding: 18px 20px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-    }
-
-    .header h2 {
-      font-weight: 700;
-      color: var(--primary);
-      font-size: 28px;
-    }
-
-    .header-user {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.5;
-      text-align: right;
-    }
-
-    .header-user strong {
-      color: var(--text);
-    }
-
-    .flash-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .flash {
-      padding: 14px 16px;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-      border-left: 5px solid transparent;
-      background: #fff;
-    }
-
-    .flash.success {
-      background: #ecfdf5;
-      color: #166534;
-      border-left-color: #22c55e;
-    }
-
-    .flash.danger {
-      background: #fef2f2;
-      color: #991b1b;
-      border-left-color: #ef4444;
-    }
-
-    .flash.warning {
-      background: #fffbeb;
-      color: #92400e;
-      border-left-color: #f59e0b;
-    }
-
-    .flash.info {
-      background: #ecfeff;
-      color: #155e75;
-      border-left-color: #06b6d4;
-    }
-
-    .content {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .section-card {
-      background: var(--surface);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      padding: 22px;
-    }
-
-    .section-title {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 18px;
-    }
-
-    .filters {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: end;
-      margin-bottom: 20px;
-      padding: 16px;
-      background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-      border: 1px solid var(--border);
-    }
-
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      min-width: 180px;
-      flex: 1 1 180px;
-    }
-
-    .filter-group label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--muted);
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 11px 12px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: #f9fafb;
-      color: var(--text);
-      font-size: 14px;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-    }
-
-    .form-input:focus {
-      border-color: #a5b4fc;
-      outline: none;
-      background: #fff;
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
-    }
-
-    .filter-actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .btn {
-      padding: 11px 18px;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-      white-space: nowrap;
-    }
-
-    .btn:hover:not(:disabled) {
-      transform: translateY(-1px);
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-light);
-    }
-
-    .btn-ghost {
-      background: #f3f4f6;
-      color: var(--text);
-      border: 1px solid #d1d5db;
-    }
-
-    .btn-ghost:hover {
-      background: #e5e7eb;
-    }
-
-    .btn-danger {
-      background: var(--danger);
-      color: #fff;
-    }
-
-    .btn-danger:hover:not(:disabled) {
-      background: #b91c1c;
-    }
-
-    .btn-danger:disabled {
-      background: #d1d5db;
-      color: #6b7280;
-      cursor: not-allowed;
-      opacity: 0.9;
-    }
-
-    .table-container {
-      overflow-x: auto;
-      width: 100%;
-      background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-      border: 1px solid var(--border);
-    }
-
-    .history-table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 920px;
-    }
-
-    .history-table th,
-    .history-table td {
-      padding: 14px 12px;
-      text-align: left;
-      font-size: 14px;
-      border-bottom: 1px solid #edf0f5;
-      vertical-align: middle;
-    }
-
-    .history-table th {
-      color: var(--primary);
-      font-weight: 700;
-      background: #f8faff;
-      white-space: nowrap;
-    }
-
-    .history-table tbody tr:nth-child(even) {
-      background: #fafbff;
-    }
-
-    .history-table tbody tr:hover td {
-      background: #edf2ff;
-    }
-
-    .request-info {
-      font-size: 14px;
-      line-height: 1.5;
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .request-details {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 4px;
-      line-height: 1.4;
-    }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 12px;
-      min-width: 90px;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    .status-pending {
-      background: #fef3c7;
-      color: #92400e;
-      border: 1px solid #fcd34d;
-    }
-
-    .status-approved {
-      background: #dcfce7;
-      color: #166534;
-      border: 1px solid #86efac;
-    }
-
-    .status-rejected {
-      background: #fee2e2;
-      color: #991b1b;
-      border: 1px solid #fca5a5;
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--muted);
-      font-style: italic;
-    }
-
-    @media (max-width: 980px) {
-      .sidebar-toggle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+  <link rel="icon" type="image/x-icon" href="/images/FCPC.jpg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#1e2a78",
+            "primary-light": "#3a4bb3",
+            "primary-dark": "#16205d",
+            bg: "#f4f7fc",
+            surface: "#ffffff",
+            textmain: "#1f2937",
+            muted: "#6b7280",
+            borderline: "#e5e7eb"
+          },
+          boxShadow: {
+            soft: "0 10px 25px rgba(0, 0, 0, 0.08)",
+            sidebar: "2px 0 12px rgba(0, 0, 0, 0.12)",
+            card: "0 4px 15px rgba(0, 0, 0, 0.06)",
+            flash: "0 4px 12px rgba(0, 0, 0, 0.06)"
+          }
+        }
       }
-
-      .sidebar {
-        transform: translateX(-100%);
-        width: 260px;
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .main {
-        margin-left: 0;
-        padding: 76px 16px 20px;
-      }
-
-      .header h2 {
-        font-size: 24px;
-      }
-
-      .header-user {
-        text-align: left;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .filters {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .filter-group,
-      .filter-actions,
-      .btn {
-        width: 100%;
-      }
-
-      .filter-actions {
-        flex-direction: column;
-      }
-
-      .action-buttons {
-        flex-direction: column;
-      }
-
-      .action-buttons .btn {
-        width: 100%;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html {
-        scroll-behavior: auto;
-      }
-
-      *,
-      *::before,
-      *::after {
-        transition: none !important;
-        animation: none !important;
-      }
-    }
-  </style>
+    };
+  </script>
 </head>
 
-<body>
+<body class="min-h-screen bg-bg font-sans leading-6 text-textmain antialiased">
   {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-  <div class="flash-container">
+  <div class="fixed left-4 right-4 top-4 z-[1200] flex flex-col gap-2.5 md:left-auto md:right-6 md:w-full md:max-w-md">
     {% for category, message in messages %}
-    <div class="flash {{ category }}">{{ message }}</div>
+    <div class="rounded-xl border-l-[5px] bg-white px-4 py-[14px] text-sm font-semibold shadow-flash
+      {% if category == 'success' %}
+        border-l-green-500 bg-green-50 text-green-800
+      {% elif category == 'danger' %}
+        border-l-red-500 bg-red-50 text-red-800
+      {% elif category == 'warning' %}
+        border-l-amber-500 bg-amber-50 text-amber-800
+      {% elif category == 'info' %}
+        border-l-cyan-500 bg-cyan-50 text-cyan-800
+      {% else %}
+        border-l-slate-300 bg-white text-slate-700
+      {% endif %}">
+      {{ message }}
+    </div>
     {% endfor %}
   </div>
   {% endif %}
   {% endwith %}
 
-  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false"
+  <button
+    class="fixed left-4 top-4 z-[1100] hidden rounded-[10px] bg-primary px-3 py-2 text-lg text-white shadow-soft focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[980px]:inline-flex max-[980px]:items-center max-[980px]:justify-center motion-reduce:transition-none"
+    type="button"
+    id="sidebarToggle"
+    aria-controls="sidebar"
+    aria-expanded="false"
     aria-label="Toggle navigation menu">
     ☰
   </button>
 
-  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
+  <div id="sidebarOverlay" class="fixed inset-0 z-[999] hidden bg-slate-900/45" hidden></div>
 
-  <div class="app">
-    <aside class="sidebar" id="sidebar" aria-label="Student navigation">
-      <div class="sidebar-header">
-        <h1>Student</h1>
-        <span>Promissory Notes System</span>
+  <div class="flex min-h-screen">
+    <aside
+      id="sidebar"
+      aria-label="Student navigation"
+      class="fixed left-0 top-0 z-[1000] flex min-h-screen w-[240px] flex-col bg-[linear-gradient(160deg,#1e2a78,#3a4bb3)] px-0 pb-4 pt-5 text-white shadow-sidebar transition-transform duration-300 ease-in-out max-[980px]:w-[260px] max-[980px]:-translate-x-full motion-reduce:transition-none">
+      <div class="mb-3 border-b border-white/15 px-[18px] pb-5">
+        <h1 class="break-words text-[17px] font-semibold leading-[1.4]">Student</h1>
+        <span class="mt-1 block text-[13px] font-normal opacity-90">Promissory Notes System</span>
       </div>
 
-      <nav class="sidebar-nav">
-        <a href="{{ url_for('student.dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('student.request_promissory') }}">Request Promissory</a>
-        <a href="{{ url_for('student.history') }}" class="active">History</a>
-        <a href="{{ url_for('student.setup') }}">Account</a>
+      <nav class="sidebar-nav flex flex-1 flex-col gap-1.5 px-[10px]">
+        <a
+          href="{{ url_for('student.dashboard') }}"
+          class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 font-semibold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+          Dashboard
+        </a>
+        <a
+          href="{{ url_for('student.request_promissory') }}"
+          class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 font-semibold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+          Request Promissory
+        </a>
+        <a
+          href="{{ url_for('student.history') }}"
+          class="flex items-center gap-2.5 rounded-[10px] bg-white/20 px-[14px] py-3 font-bold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+          History
+        </a>
+        <a
+          href="{{ url_for('student.setup') }}"
+          class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 font-semibold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+          Account
+        </a>
       </nav>
 
-      <div class="sidebar-footer">
-        <button class="logout-link" type="button" onclick="window.location.href='{{ url_for('student.logout') }}'">
+      <div class="mt-3 border-t border-white/15 px-[10px] pt-3">
+        <button
+          class="logout-link w-full cursor-pointer rounded-[10px] border-0 bg-white/10 px-[14px] py-3 font-bold text-white transition duration-200 ease-in-out hover:-translate-y-px hover:bg-white/15 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none"
+          type="button"
+          onclick="window.location.href='{{ url_for('student.logout') }}'">
           Logout
         </button>
       </div>
     </aside>
 
-    <main class="main">
-      <header class="header">
-        <h2>My Request History</h2>
-        <div class="header-user">
-          <strong>{{ student.first_name }} {{ student.last_name }}</strong><br>
+    <main class="ml-[240px] min-h-screen flex-1 p-6 transition-all duration-300 ease-in-out max-[980px]:ml-0 max-[980px]:px-4 max-[980px]:pb-5 max-[980px]:pt-[76px] motion-reduce:transition-none">
+      <header class="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-surface px-5 py-[18px] shadow-soft">
+        <h2 class="text-[28px] font-bold text-primary max-[980px]:text-2xl">My Request History</h2>
+        <div class="text-right text-sm leading-6 text-muted max-[980px]:text-left">
+          <strong class="text-textmain">{{ student.first_name }} {{ student.last_name }}</strong><br />
           {{ student.role }}
         </div>
       </header>
 
-      <div class="content">
-        <section class="section-card">
-          <h3 class="section-title">My Request History</h3>
+      <div class="flex flex-col gap-5">
+        <section class="rounded-2xl bg-surface p-[22px] shadow-soft">
+          <h3 class="mb-[18px] text-[22px] font-bold text-primary">My Request History</h3>
 
-          <form id="filterForm" method="GET" action="{{ url_for('student.history') }}" class="filters">
-            <div class="filter-group">
-              <label for="status">Status</label>
-              <select id="status" name="status" class="form-input">
+          <form
+            id="filterForm"
+            method="GET"
+            action="{{ url_for('student.history') }}"
+            class="mb-5 flex flex-wrap items-end gap-[14px] rounded-[14px] border border-borderline bg-white p-4 shadow-card max-md:flex-col max-md:items-stretch">
+            <div class="min-w-[180px] flex-1 basis-[180px] flex-col gap-1.5 max-md:w-full">
+              <label for="status" class="mb-1.5 block text-[13px] font-semibold text-muted">Status</label>
+              <select
+                id="status"
+                name="status"
+                class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
                 <option value="">All Status</option>
                 <option value="Pending" {% if request.args.get('status') == 'Pending' %}selected{% endif %}>Pending</option>
                 <option value="Approved" {% if request.args.get('status') == 'Approved' %}selected{% endif %}>Approved</option>
@@ -624,9 +143,12 @@
               </select>
             </div>
 
-            <div class="filter-group">
-              <label for="semester">Semester</label>
-              <select id="semester" name="semester" class="form-input">
+            <div class="min-w-[180px] flex-1 basis-[180px] flex-col gap-1.5 max-md:w-full">
+              <label for="semester" class="mb-1.5 block text-[13px] font-semibold text-muted">Semester</label>
+              <select
+                id="semester"
+                name="semester"
+                class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
                 <option value="">All Semesters</option>
                 <option value="First Semester" {% if request.args.get('semester') == 'First Semester' %}selected{% endif %}>First Semester</option>
                 <option value="Second Semester" {% if request.args.get('semester') == 'Second Semester' %}selected{% endif %}>Second Semester</option>
@@ -634,9 +156,12 @@
               </select>
             </div>
 
-            <div class="filter-group">
-              <label for="semester_type">Exam Type</label>
-              <select id="semester_type" name="semester_type" class="form-input">
+            <div class="min-w-[180px] flex-1 basis-[180px] flex-col gap-1.5 max-md:w-full">
+              <label for="semester_type" class="mb-1.5 block text-[13px] font-semibold text-muted">Exam Type</label>
+              <select
+                id="semester_type"
+                name="semester_type"
+                class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
                 <option value="">All Exam Types</option>
                 <option value="Prelims" {% if request.args.get('semester_type') == 'Prelims' %}selected{% endif %}>Prelims</option>
                 <option value="Midterm" {% if request.args.get('semester_type') == 'Midterm' %}selected{% endif %}>Midterm</option>
@@ -644,9 +169,12 @@
               </select>
             </div>
 
-            <div class="filter-group">
-              <label for="school_year">School Year</label>
-              <select id="school_year" name="school_year" class="form-input">
+            <div class="min-w-[180px] flex-1 basis-[180px] flex-col gap-1.5 max-md:w-full">
+              <label for="school_year" class="mb-1.5 block text-[13px] font-semibold text-muted">School Year</label>
+              <select
+                id="school_year"
+                name="school_year"
+                class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
                 <option value="">All School Years</option>
                 {% for sy in school_years %}
                 <option value="{{ sy }}" {% if request.args.get('school_year') == sy %}selected{% endif %}>{{ sy }}</option>
@@ -654,51 +182,74 @@
               </select>
             </div>
 
-            <div class="filter-actions">
-              <button type="button" class="btn btn-ghost" onclick="clearFilter()">Clear Filter</button>
-              <button type="button" class="btn btn-primary"
+            <div class="flex flex-wrap items-center gap-3 max-md:w-full max-md:flex-col">
+              <button
+                type="button"
+                class="btn rounded-xl border border-slate-300 bg-slate-100 px-[18px] py-[11px] text-sm font-bold whitespace-nowrap text-textmain transition duration-200 ease-in-out hover:-translate-y-px hover:bg-slate-200 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-md:w-full motion-reduce:transition-none"
+                onclick="clearFilter()">
+                Clear Filter
+              </button>
+
+              <button
+                type="button"
+                class="btn rounded-xl bg-primary px-[18px] py-[11px] text-sm font-bold whitespace-nowrap text-white transition duration-200 ease-in-out hover:-translate-y-px hover:bg-primary-light focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-md:w-full motion-reduce:transition-none"
                 onclick="window.location.href='{{ url_for('student.request_promissory') }}'">
                 Create New Request
               </button>
             </div>
           </form>
 
-          <div class="table-container">
-            <table class="history-table">
+          <div class="w-full overflow-x-auto rounded-[14px] border border-borderline bg-white shadow-card">
+            <table class="min-w-[920px] w-full border-collapse">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Request</th>
-                  <th>School Year</th>
-                  <th>Status</th>
-                  <th>Action</th>
+                  <th class="whitespace-nowrap border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Date</th>
+                  <th class="whitespace-nowrap border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Time</th>
+                  <th class="whitespace-nowrap border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Request</th>
+                  <th class="whitespace-nowrap border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">School Year</th>
+                  <th class="whitespace-nowrap border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Status</th>
+                  <th class="whitespace-nowrap border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {% for req in requests %}
-                <tr>
-                  <td>{{ req.requested_at.strftime('%m/%d/%Y') }}</td>
-                  <td>{{ req.requested_at.strftime('%I:%M %p') }}</td>
-                  <td>
-                    <div class="request-info">{{ req.program or req.course }}</div>
-                    <div class="request-details">{{ req.semester or "N/A" }} {{ req.semester_type or "" }}</div>
+                <tr class="even:bg-[#fafbff]">
+                  <td class="border-b border-slate-100 px-3 py-[14px] align-middle text-sm hover:bg-[#edf2ff]">{{ req.requested_at.strftime('%m/%d/%Y') }}</td>
+                  <td class="border-b border-slate-100 px-3 py-[14px] align-middle text-sm hover:bg-[#edf2ff]">{{ req.requested_at.strftime('%I:%M %p') }}</td>
+                  <td class="border-b border-slate-100 px-3 py-[14px] align-middle text-sm hover:bg-[#edf2ff]">
+                    <div class="text-sm font-semibold leading-6 text-textmain">{{ req.program or req.course }}</div>
+                    <div class="mt-1 text-xs leading-[1.4] text-muted">{{ req.semester or "N/A" }} {{ req.semester_type or "" }}</div>
                   </td>
-                  <td>{{ req.school_year or "N/A" }}</td>
-                  <td>
-                    <span class="status-badge {% if req.status == 'Pending' %}status-pending{% elif req.status == 'Approved' %}status-approved{% else %}status-rejected{% endif %}">
+                  <td class="border-b border-slate-100 px-3 py-[14px] align-middle text-sm hover:bg-[#edf2ff]">{{ req.school_year or "N/A" }}</td>
+                  <td class="border-b border-slate-100 px-3 py-[14px] align-middle text-sm hover:bg-[#edf2ff]">
+                    <span class="inline-flex min-w-[90px] items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 text-center text-xs font-bold
+                      {% if req.status == 'Pending' %}
+                        border border-amber-300 bg-amber-100 text-amber-800
+                      {% elif req.status == 'Approved' %}
+                        border border-green-300 bg-green-100 text-green-800
+                      {% else %}
+                        border border-red-300 bg-red-100 text-red-800
+                      {% endif %}">
                       {{ req.status.upper() }}
                     </span>
                   </td>
-                  <td>
-                    <div class="action-buttons">
-                      <a href="{{ url_for('student.view_request', request_id=req.id) }}" class="btn btn-ghost">View</a>
+                  <td class="border-b border-slate-100 px-3 py-[14px] align-middle text-sm hover:bg-[#edf2ff]">
+                    <div class="flex flex-wrap gap-2 max-md:flex-col">
+                      <a
+                        href="{{ url_for('student.view_request', request_id=req.id) }}"
+                        class="btn rounded-xl border border-slate-300 bg-slate-100 px-[18px] py-[11px] text-sm font-bold text-textmain transition duration-200 ease-in-out hover:-translate-y-px hover:bg-slate-200 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-md:w-full motion-reduce:transition-none">
+                        View
+                      </a>
 
-                      <form method="POST" action="{{ url_for('student.delete_request', request_id=req.id) }}"
-                        style="display:inline;">
+                      <form method="POST" action="{{ url_for('student.delete_request', request_id=req.id) }}" class="inline">
                         <button
                           type="submit"
-                          class="btn btn-danger"
+                          class="btn rounded-xl px-[18px] py-[11px] text-sm font-bold text-white transition duration-200 ease-in-out focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-md:w-full motion-reduce:transition-none
+                          {% if req.status != 'Pending' %}
+                            cursor-not-allowed bg-slate-300 text-slate-500 opacity-90
+                          {% else %}
+                            bg-red-600 hover:-translate-y-px hover:bg-red-700
+                          {% endif %}"
                           {% if req.status != 'Pending' %}disabled{% else %}onclick="return confirm('Are you sure you want to delete this pending request?');"{% endif %}>
                           Delete
                         </button>
@@ -708,7 +259,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                  <td colspan="6" class="empty-state">No requests found.</td>
+                  <td colspan="6" class="px-5 py-10 text-center italic text-muted">No requests found.</td>
                 </tr>
                 {% endfor %}
               </tbody>
@@ -720,68 +271,77 @@
   </div>
 
   <script>
-    const filterForm = document.getElementById('filterForm');
-    const filterSelects = filterForm.querySelectorAll('select');
+    const filterForm = document.getElementById("filterForm");
+    const filterSelects = filterForm.querySelectorAll("select");
 
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
 
     filterSelects.forEach((select) => {
-      select.addEventListener('change', () => {
+      select.addEventListener("change", () => {
         filterForm.submit();
       });
     });
 
     function clearFilter() {
       filterSelects.forEach((select) => {
-        select.value = '';
+        select.value = "";
       });
       filterForm.submit();
     }
 
     function openSidebar() {
-      sidebar.classList.add('open');
+      sidebar.classList.remove("max-[980px]:-translate-x-full");
+      sidebar.classList.add("translate-x-0");
       sidebarOverlay.hidden = false;
-      sidebarOverlay.classList.add('show');
-      sidebarToggle.setAttribute('aria-expanded', 'true');
+      sidebarOverlay.classList.remove("hidden");
+      sidebarToggle.setAttribute("aria-expanded", "true");
     }
 
     function closeSidebar() {
-      sidebar.classList.remove('open');
-      sidebarOverlay.classList.remove('show');
+      if (window.innerWidth <= 980) {
+        sidebar.classList.remove("translate-x-0");
+        sidebar.classList.add("max-[980px]:-translate-x-full");
+      }
+      sidebarOverlay.classList.add("hidden");
       sidebarOverlay.hidden = true;
-      sidebarToggle.setAttribute('aria-expanded', 'false');
+      sidebarToggle.setAttribute("aria-expanded", "false");
     }
 
     function toggleSidebar() {
-      if (sidebar.classList.contains('open')) {
+      if (sidebar.classList.contains("translate-x-0") && window.innerWidth <= 980) {
         closeSidebar();
       } else {
         openSidebar();
       }
     }
 
-    sidebarToggle.addEventListener('click', toggleSidebar);
-    sidebarOverlay.addEventListener('click', closeSidebar);
+    sidebarToggle.addEventListener("click", toggleSidebar);
+    sidebarOverlay.addEventListener("click", closeSidebar);
 
-    document.querySelectorAll('.sidebar-nav a, .logout-link').forEach((link) => {
-      link.addEventListener('click', () => {
+    document.querySelectorAll(".sidebar-nav a, .logout-link").forEach((link) => {
+      link.addEventListener("click", () => {
         if (window.innerWidth <= 980) {
           closeSidebar();
         }
       });
     });
 
-    document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') {
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
         closeSidebar();
       }
     });
 
-    window.addEventListener('resize', function () {
+    window.addEventListener("resize", function () {
       if (window.innerWidth > 980) {
-        closeSidebar();
+        sidebar.classList.remove("translate-x-0", "max-[980px]:-translate-x-full");
+        sidebarOverlay.classList.add("hidden");
+        sidebarOverlay.hidden = true;
+        sidebarToggle.setAttribute("aria-expanded", "false");
+      } else if (!sidebar.classList.contains("translate-x-0")) {
+        sidebar.classList.add("max-[980px]:-translate-x-full");
       }
     });
   </script>

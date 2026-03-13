@@ -1,525 +1,151 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth motion-reduce:scroll-auto">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard | Student Promissory Notes System</title>
-  <link rel="icon" type="image/x-icon" href="/images/FCPC.jpg">
-
-  <style>
-    :root {
-      --primary: #1e2a78;
-      --primary-light: #3a4bb3;
-      --primary-dark: #16205d;
-      --bg: #f4f7fc;
-      --surface: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --hover: #eef2ff;
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-      --radius: 14px;
-      --sidebar-width: 240px;
-      --success: #16a34a;
-      --danger: #dc2626;
-      --warning: #d97706;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
-      line-height: 1.5;
-      color: var(--text);
-      background-color: var(--bg);
-    }
-
-    img {
-      display: block;
-      max-width: 100%;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    button {
-      font: inherit;
-    }
-
-    .sidebar-toggle {
-      display: none;
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      z-index: 1100;
-      border: none;
-      background: var(--primary);
-      color: #fff;
-      border-radius: 10px;
-      padding: 10px 12px;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      font-size: 18px;
-    }
-
-    .sidebar-toggle:focus-visible,
-    .sidebar a:focus-visible,
-    .logout-link:focus-visible {
-      outline: 3px solid #93c5fd;
-      outline-offset: 2px;
-    }
-
-    .sidebar {
-      width: var(--sidebar-width);
-      min-height: 100vh;
-      background: linear-gradient(160deg, var(--primary), var(--primary-light));
-      color: #fff;
-      position: fixed;
-      top: 0;
-      left: 0;
-      display: flex;
-      flex-direction: column;
-      padding: 20px 0 16px;
-      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
-      z-index: 1000;
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar-header {
-      padding: 0 18px 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-      margin-bottom: 12px;
-    }
-
-    .sidebar-header h1 {
-      font-size: 17px;
-      font-weight: 600;
-      line-height: 1.4;
-      word-break: break-word;
-    }
-
-    .sidebar-header span {
-      display: block;
-      font-size: 13px;
-      font-weight: 400;
-      opacity: 0.9;
-      margin-top: 4px;
-    }
-
-    .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 0 10px;
-      flex: 1;
-    }
-
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      color: #fff;
-      border-radius: 10px;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-      font-weight: 600;
-    }
-
-    .sidebar a.active {
-      background-color: rgba(255, 255, 255, 0.22);
-      font-weight: 700;
-    }
-
-    .sidebar a:hover {
-      background-color: rgba(255, 255, 255, 0.12);
-      transform: translateX(2px);
-    }
-
-    .sidebar-footer {
-      padding: 12px 10px 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
-      margin-top: 12px;
-    }
-
-    .logout-link {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 14px;
-      color: #fff;
-      border-radius: 10px;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-      background: rgba(255, 255, 255, 0.08);
-      border: none;
-      cursor: pointer;
-      font-weight: 700;
-      width: 100%;
-    }
-
-    .logout-link:hover {
-      background: rgba(255, 255, 255, 0.16);
-      transform: translateY(-1px);
-    }
-
-    .sidebar-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.45);
-      z-index: 999;
-    }
-
-    .sidebar-overlay.show {
-      display: block;
-    }
-
-    .main {
-      margin-left: var(--sidebar-width);
-      min-height: 100vh;
-      padding: 24px;
-      transition: margin-left 0.3s ease;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      background: var(--surface);
-      padding: 18px 20px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-    }
-
-    .header h2 {
-      font-weight: 700;
-      color: var(--primary);
-      font-size: 28px;
-    }
-
-    .header-user {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.5;
-      text-align: right;
-    }
-
-    .header-user strong {
-      color: var(--text);
-    }
-
-    .content {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .section-card {
-      background: var(--surface);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      padding: 22px;
-    }
-
-    .section-title {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 18px;
-    }
-
-    .dash-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-      margin-bottom: 22px;
-    }
-
-    .stat {
-      background: #fff;
-      padding: 22px;
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      text-align: center;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .stat:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .stat h3 {
-      font-size: 32px;
-      margin-bottom: 8px;
-      color: var(--primary);
-      font-weight: 700;
-    }
-
-    .stat p {
-      font-size: 14px;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 20px;
-    }
-
-    .panel {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      padding: 22px;
-      border: 1px solid var(--border);
-      overflow-x: auto;
-    }
-
-    .panel h4 {
-      font-size: 18px;
-      margin-bottom: 14px;
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 560px;
-    }
-
-    th,
-    td {
-      padding: 14px 12px;
-      font-size: 14px;
-      text-align: left;
-      border-bottom: 1px solid #edf0f5;
-      vertical-align: middle;
-    }
-
-    th {
-      color: var(--primary);
-      font-weight: 700;
-      background: #f8faff;
-      white-space: nowrap;
-    }
-
-    tbody tr:nth-child(even) {
-      background: #fafbff;
-    }
-
-    tbody tr:hover {
-      background: #edf2ff;
-    }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 12px;
-      min-width: 84px;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    .status-approved {
-      background: #dcfce7;
-      color: #166534;
-      border: 1px solid #86efac;
-    }
-
-    .status-rejected {
-      background: #fee2e2;
-      color: #991b1b;
-      border: 1px solid #fca5a5;
-    }
-
-    .status-pending {
-      background: #fef3c7;
-      color: #92400e;
-      border: 1px solid #fcd34d;
-    }
-
-    .notice-box {
-      padding: 14px 16px;
-      background: #fafbff;
-      border: 1px solid #edf0f7;
-      border-radius: 12px;
-      margin-bottom: 12px;
-    }
-
-    .notice-box:last-child {
-      margin-bottom: 0;
-    }
-
-    .notice-box strong {
-      display: block;
-      margin-bottom: 4px;
-      color: var(--text);
-    }
-
-    .small {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    @media (max-width: 980px) {
-      .sidebar-toggle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+  <link rel="icon" type="image/x-icon" href="/images/FCPC.jpg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#1e2a78",
+            "primary-light": "#3a4bb3",
+            "primary-dark": "#16205d",
+            bg: "#f4f7fc",
+            surface: "#ffffff",
+            textmain: "#1f2937",
+            muted: "#6b7280",
+            borderline: "#e5e7eb",
+            hoverbg: "#eef2ff"
+          },
+          boxShadow: {
+            soft: "0 10px 25px rgba(0, 0, 0, 0.08)",
+            sidebar: "2px 0 12px rgba(0, 0, 0, 0.12)",
+            cardhover: "0 14px 30px rgba(0, 0, 0, 0.1)"
+          }
+        }
       }
-
-      .sidebar {
-        transform: translateX(-100%);
-        width: 260px;
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .main {
-        margin-left: 0;
-        padding: 76px 16px 20px;
-      }
-
-      .header h2 {
-        font-size: 24px;
-      }
-
-      .header-user {
-        text-align: left;
-      }
-    }
-
-    @media (max-width: 900px) {
-      .row {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .dash-stats {
-        grid-template-columns: 1fr;
-      }
-
-      .panel {
-        padding: 18px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html {
-        scroll-behavior: auto;
-      }
-
-      *,
-      *::before,
-      *::after {
-        transition: none !important;
-        animation: none !important;
-      }
-    }
-  </style>
+    };
+  </script>
 </head>
 
-<body>
-  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false"
+<body class="min-h-screen bg-bg font-sans leading-6 text-textmain antialiased">
+  <button
+    class="fixed left-4 top-4 z-[1100] hidden rounded-[10px] bg-primary px-3 py-2 text-lg text-white shadow-soft focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[980px]:inline-flex max-[980px]:items-center max-[980px]:justify-center motion-reduce:transition-none"
+    type="button"
+    id="sidebarToggle"
+    aria-controls="sidebar"
+    aria-expanded="false"
     aria-label="Toggle navigation menu">
     ☰
   </button>
 
-  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
+  <div
+    class="fixed inset-0 z-[999] hidden bg-slate-900/45"
+    id="sidebarOverlay"
+    hidden></div>
 
-  <div class="app">
-    <aside class="sidebar" id="sidebar" aria-label="Student navigation">
-      <div class="sidebar-header">
-        <h1>Student</h1>
-        <span>Promissory Notes System</span>
+  <div class="flex min-h-screen">
+    <aside
+      class="fixed left-0 top-0 z-[1000] flex min-h-screen w-[240px] flex-col bg-gradient-to-br from-primary to-primary-light px-0 pb-4 pt-5 text-white shadow-sidebar transition-transform duration-300 ease-in-out max-[980px]:w-[260px] max-[980px]:-translate-x-full motion-reduce:transition-none"
+      id="sidebar"
+      aria-label="Student navigation">
+      <div class="mb-3 border-b border-white/15 px-[18px] pb-5">
+        <h1 class="break-words text-[17px] font-semibold leading-[1.4]">Student</h1>
+        <span class="mt-1 block text-[13px] font-normal opacity-90">Promissory Notes System</span>
       </div>
 
-      <nav class="sidebar-nav">
-        <a href="{{ url_for('student.dashboard') }}" class="active">Dashboard</a>
-        <a href="{{ url_for('student.request_promissory') }}">Request Promissory</a>
-        <a href="{{ url_for('student.history') }}">History</a>
-        <a href="{{ url_for('student.setup') }}">Account</a>
+      <nav class="flex flex-1 flex-col gap-1.5 px-[10px]">
+        <a
+          href="{{ url_for('student.dashboard') }}"
+          class="flex items-center gap-2.5 rounded-[10px] bg-white/20 px-[14px] py-3 font-bold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+          Dashboard
+        </a>
+        <a
+          href="{{ url_for('student.request_promissory') }}"
+          class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 font-semibold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+          Request Promissory
+        </a>
+        <a
+          href="{{ url_for('student.history') }}"
+          class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 font-semibold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+          History
+        </a>
+        <a
+          href="{{ url_for('student.setup') }}"
+          class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 font-semibold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+          Account
+        </a>
       </nav>
 
-      <div class="sidebar-footer">
-        <button class="logout-link" type="button" onclick="window.location.href='{{ url_for('student.logout') }}'">
+      <div class="mt-3 border-t border-white/15 px-[10px] pt-3">
+        <button
+          class="w-full cursor-pointer rounded-[10px] border-0 bg-white/10 px-[14px] py-3 font-bold text-white transition duration-200 ease-in-out hover:-translate-y-px hover:bg-white/15 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none"
+          type="button"
+          onclick="window.location.href='{{ url_for('student.logout') }}'">
           Logout
         </button>
       </div>
     </aside>
 
-    <main class="main">
-      <header class="header">
-        <h2>Dashboard</h2>
-        <div class="header-user">
-          <strong>{{ student.first_name }} {{ student.last_name }}</strong><br>
+    <main class="min-h-screen flex-1 p-6 ml-[240px] transition-all duration-300 ease-in-out max-[980px]:ml-0 max-[980px]:px-4 max-[980px]:pb-5 max-[980px]:pt-[76px] motion-reduce:transition-none">
+      <header class="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-surface px-5 py-[18px] shadow-soft">
+        <h2 class="text-[28px] font-bold text-primary max-[980px]:text-2xl">Dashboard</h2>
+        <div class="text-right text-sm leading-6 text-muted max-[980px]:text-left">
+          <strong class="text-textmain">{{ student.first_name }} {{ student.last_name }}</strong><br />
           {{ student.role }}
         </div>
       </header>
 
-      <div class="content">
-        <section class="section-card">
-          <h3 class="section-title">Dashboard</h3>
+      <div class="flex flex-col gap-5">
+        <section class="rounded-2xl bg-surface p-[22px] shadow-soft">
+          <h3 class="mb-[18px] text-[22px] font-bold text-primary">Dashboard</h3>
 
-          <div class="dash-stats">
-            <div class="stat">
-              <h3>{{ data.total_promissory or 0 }}</h3>
-              <p>Total Promissory Notes</p>
+          <div class="mb-[22px] grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-5 max-md:grid-cols-1">
+            <div class="rounded-2xl bg-white p-[22px] text-center shadow-soft transition duration-200 ease-in-out hover:-translate-y-1 hover:shadow-cardhover motion-reduce:transition-none">
+              <h3 class="mb-2 text-[32px] font-bold text-primary">{{ data.total_promissory or 0 }}</h3>
+              <p class="text-sm font-semibold text-muted">Total Promissory Notes</p>
             </div>
 
-            <div class="stat">
-              <h3>{{ data.active_promissory or 0 }}</h3>
-              <p>Active</p>
+            <div class="rounded-2xl bg-white p-[22px] text-center shadow-soft transition duration-200 ease-in-out hover:-translate-y-1 hover:shadow-cardhover motion-reduce:transition-none">
+              <h3 class="mb-2 text-[32px] font-bold text-primary">{{ data.active_promissory or 0 }}</h3>
+              <p class="text-sm font-semibold text-muted">Active</p>
             </div>
           </div>
 
-          <div class="row">
-            <section class="panel">
-              <h4>Recent Activity</h4>
+          <div class="grid grid-cols-2 gap-5 max-[900px]:grid-cols-1">
+            <section class="overflow-x-auto rounded-2xl border border-borderline bg-white p-[22px] shadow-soft max-md:p-[18px]">
+              <h4 class="mb-[14px] text-lg font-bold text-primary">Recent Activity</h4>
 
               {% if recent_requests %}
-              <table>
+              <table class="min-w-[560px] w-full border-collapse">
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Request</th>
-                    <th>Status</th>
+                    <th class="whitespace-nowrap border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Date</th>
+                    <th class="whitespace-nowrap border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Time</th>
+                    <th class="whitespace-nowrap border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Request</th>
+                    <th class="whitespace-nowrap border-b border-slate-100 bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for req in recent_requests %}
-                  <tr>
-                    <td>{{ req.requested_at.strftime('%m/%d/%Y') }}</td>
-                    <td>{{ req.requested_at.strftime('%I:%M %p') }}</td>
-                    <td>{{ req.program or req.course }}</td>
-                    <td>
-                      <span class="status-badge {% if req.status == 'Approved' %}status-approved{% elif req.status == 'Rejected' %}status-rejected{% else %}status-pending{% endif %}">
+                  <tr class="even:bg-[#fafbff] hover:bg-[#edf2ff]">
+                    <td class="border-b border-slate-100 px-3 py-[14px] align-middle text-sm">{{ req.requested_at.strftime('%m/%d/%Y') }}</td>
+                    <td class="border-b border-slate-100 px-3 py-[14px] align-middle text-sm">{{ req.requested_at.strftime('%I:%M %p') }}</td>
+                    <td class="border-b border-slate-100 px-3 py-[14px] align-middle text-sm">{{ req.program or req.course }}</td>
+                    <td class="border-b border-slate-100 px-3 py-[14px] align-middle text-sm">
+                      <span class="inline-flex min-w-[84px] items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 text-center text-xs font-bold
+                        {% if req.status == 'Approved' %}
+                          border border-green-300 bg-green-100 text-green-800
+                        {% elif req.status == 'Rejected' %}
+                          border border-red-300 bg-red-100 text-red-800
+                        {% else %}
+                          border border-amber-300 bg-amber-100 text-amber-800
+                        {% endif %}">
                         {{ req.status.upper() }}
                       </span>
                     </td>
@@ -528,34 +154,34 @@
                 </tbody>
               </table>
               {% else %}
-              <div class="notice-box">
-                <strong>No recent activity yet</strong>
-                <p class="small">Your updates will appear here.</p>
+              <div class="mb-3 rounded-xl border border-[#edf0f7] bg-[#fafbff] px-4 py-[14px] last:mb-0">
+                <strong class="mb-1 block text-textmain">No recent activity yet</strong>
+                <p class="text-[13px] leading-5 text-muted">Your updates will appear here.</p>
               </div>
               {% endif %}
             </section>
 
-            <section class="panel">
-              <h4>Alerts & Notifications</h4>
+            <section class="overflow-x-auto rounded-2xl border border-borderline bg-white p-[22px] shadow-soft max-md:p-[18px]">
+              <h4 class="mb-[14px] text-lg font-bold text-primary">Alerts & Notifications</h4>
 
               {% if rejected_requests or incomplete_requests %}
                 {% if rejected_requests %}
-                <div class="notice-box">
-                  <strong>{{ rejected_requests|length }} Rejected Request(s)</strong>
-                  <p class="small">Review comments and take action if needed.</p>
+                <div class="mb-3 rounded-xl border border-[#edf0f7] bg-[#fafbff] px-4 py-[14px] last:mb-0">
+                  <strong class="mb-1 block text-textmain">{{ rejected_requests|length }} Rejected Request(s)</strong>
+                  <p class="text-[13px] leading-5 text-muted">Review comments and take action if needed.</p>
                 </div>
                 {% endif %}
 
                 {% if incomplete_requests %}
-                <div class="notice-box">
-                  <strong>{{ incomplete_requests|length }} Incomplete Request(s)</strong>
-                  <p class="small">Some requests are missing documents. Please upload them.</p>
+                <div class="mb-3 rounded-xl border border-[#edf0f7] bg-[#fafbff] px-4 py-[14px] last:mb-0">
+                  <strong class="mb-1 block text-textmain">{{ incomplete_requests|length }} Incomplete Request(s)</strong>
+                  <p class="text-[13px] leading-5 text-muted">Some requests are missing documents. Please upload them.</p>
                 </div>
                 {% endif %}
               {% else %}
-              <div class="notice-box">
-                <strong>No alerts</strong>
-                <p class="small">You are all caught up.</p>
+              <div class="mb-3 rounded-xl border border-[#edf0f7] bg-[#fafbff] px-4 py-[14px] last:mb-0">
+                <strong class="mb-1 block text-textmain">No alerts</strong>
+                <p class="text-[13px] leading-5 text-muted">You are all caught up.</p>
               </div>
               {% endif %}
             </section>
@@ -566,44 +192,53 @@
   </div>
 
   <script>
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
 
     function openSidebar() {
-      sidebar.classList.add('open');
+      sidebar.classList.remove("max-[980px]:-translate-x-full");
+      sidebar.classList.add("translate-x-0");
       sidebarOverlay.hidden = false;
-      sidebarOverlay.classList.add('show');
-      sidebarToggle.setAttribute('aria-expanded', 'true');
+      sidebarOverlay.classList.remove("hidden");
+      sidebarToggle.setAttribute("aria-expanded", "true");
     }
 
     function closeSidebar() {
-      sidebar.classList.remove('open');
-      sidebarOverlay.classList.remove('show');
+      if (window.innerWidth <= 980) {
+        sidebar.classList.remove("translate-x-0");
+        sidebar.classList.add("max-[980px]:-translate-x-full");
+      }
+      sidebarOverlay.classList.add("hidden");
       sidebarOverlay.hidden = true;
-      sidebarToggle.setAttribute('aria-expanded', 'false');
+      sidebarToggle.setAttribute("aria-expanded", "false");
     }
 
     function toggleSidebar() {
-      if (sidebar.classList.contains('open')) {
+      if (sidebar.classList.contains("translate-x-0") && window.innerWidth <= 980) {
         closeSidebar();
       } else {
         openSidebar();
       }
     }
 
-    sidebarToggle.addEventListener('click', toggleSidebar);
-    sidebarOverlay.addEventListener('click', closeSidebar);
+    sidebarToggle.addEventListener("click", toggleSidebar);
+    sidebarOverlay.addEventListener("click", closeSidebar);
 
-    document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') {
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
         closeSidebar();
       }
     });
 
-    window.addEventListener('resize', function () {
+    window.addEventListener("resize", function () {
       if (window.innerWidth > 980) {
-        closeSidebar();
+        sidebar.classList.remove("translate-x-0", "max-[980px]:-translate-x-full");
+        sidebarOverlay.classList.add("hidden");
+        sidebarOverlay.hidden = true;
+        sidebarToggle.setAttribute("aria-expanded", "false");
+      } else if (!sidebar.classList.contains("translate-x-0")) {
+        sidebar.classList.add("max-[980px]:-translate-x-full");
       }
     });
   </script>

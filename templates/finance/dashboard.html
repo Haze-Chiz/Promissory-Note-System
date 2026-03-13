@@ -1,548 +1,185 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth motion-reduce:scroll-auto">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard - Promissory Notes</title>
-  <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
-  <style>
-    :root {
-      --primary: #1e2a78;
-      --primary-light: #3a4bb3;
-      --bg: #f4f6fb;
-      --surface: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --hover: #eef2ff;
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-      --radius: 14px;
-      --sidebar-width: 240px;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.5;
-      color: var(--text);
-      background: var(--bg);
-    }
-
-    a,
-    button {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    img {
-      max-width: 100%;
-      display: block;
-    }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    .sidebar-toggle {
-      display: none;
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      z-index: 1100;
-      border: none;
-      background: var(--primary);
-      color: #fff;
-      border-radius: 10px;
-      padding: 10px 12px;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      font-size: 18px;
-    }
-
-    .sidebar-toggle:focus-visible,
-    .sidebar a:focus-visible,
-    .logout-link:focus-visible {
-      outline: 3px solid #93c5fd;
-      outline-offset: 2px;
-    }
-
-    .sidebar {
-      width: var(--sidebar-width);
-      min-height: 100vh;
-      background: linear-gradient(160deg, var(--primary), var(--primary-light));
-      color: #fff;
-      position: fixed;
-      top: 0;
-      left: 0;
-      display: flex;
-      flex-direction: column;
-      padding: 20px 0 16px;
-      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
-      z-index: 1000;
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar-header {
-      padding: 0 18px 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-      margin-bottom: 12px;
-    }
-
-    .sidebar-header h1 {
-      font-size: 17px;
-      font-weight: 600;
-      line-height: 1.4;
-      word-break: break-word;
-    }
-
-    .sidebar-header span {
-      display: block;
-      font-size: 13px;
-      font-weight: 400;
-      opacity: 0.9;
-      margin-top: 4px;
-    }
-
-    .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 0 10px;
-      flex: 1;
-    }
-
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 10px;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-    }
-
-    .sidebar a:hover {
-      background: rgba(255, 255, 255, 0.12);
-      transform: translateX(2px);
-    }
-
-    .sidebar a.active {
-      background: rgba(255, 255, 255, 0.22);
-      font-weight: 700;
-    }
-
-    .sidebar img.icon {
-      width: 30px;
-      height: 30px;
-      background: #fff;
-      border-radius: 50%;
-      padding: 6px;
-      flex-shrink: 0;
-    }
-
-    .sidebar-footer {
-      padding: 12px 10px 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
-      margin-top: 12px;
-    }
-
-    .logout-link {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 10px;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-    }
-
-    .logout-link:hover {
-      background: rgba(255, 255, 255, 0.12);
-      transform: translateX(2px);
-    }
-
-    .main-content {
-      margin-left: var(--sidebar-width);
-      min-height: 100vh;
-      padding: 24px;
-      transition: margin-left 0.3s ease;
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-      background: var(--surface);
-      padding: 20px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 24px;
-    }
-
-    .header h2 {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    .header-meta {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .header-meta strong {
-      color: var(--text);
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 18px;
-      margin-bottom: 24px;
-    }
-
-    .card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 20px;
-      text-align: center;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .card h3 {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 10px;
-    }
-
-    .card p {
-      font-size: 30px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .table-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 20px;
-    }
-
-    .table-card h3 {
-      font-size: 18px;
-      color: var(--primary);
-      font-weight: 700;
-      margin-bottom: 14px;
-    }
-
-    .table-wrapper {
-      overflow-x: auto;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 760px;
-    }
-
-    caption {
-      text-align: left;
-      padding: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      background: #fafbff;
-      border-bottom: 1px solid var(--border);
-    }
-
-    th,
-    td {
-      text-align: left;
-      padding: 14px 12px;
-      font-size: 14px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
-
-    th {
-      background: #f8faff;
-      color: var(--primary);
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    tbody tr:nth-child(even) {
-      background: #fcfcfd;
-    }
-
-    tbody tr:hover {
-      background: var(--hover);
-    }
-
-    .status {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: capitalize;
-      white-space: nowrap;
-    }
-
-    .pending {
-      background: #fff3cd;
-      color: #856404;
-    }
-
-    .approved {
-      background: #d1fae5;
-      color: #065f46;
-    }
-
-    .rejected {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .no-data {
-      text-align: center;
-      color: var(--muted);
-      padding: 24px;
-      font-style: italic;
-    }
-
-    .sidebar-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.45);
-      z-index: 999;
-    }
-
-    .sidebar-overlay.show {
-      display: block;
-    }
-
-    @media (max-width: 900px) {
-      .sidebar-toggle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+  <link rel="icon" type="image/x-icon" href="./static/images/logo.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#1e2a78",
+            "primary-light": "#3a4bb3",
+            bg: "#f4f6fb",
+            surface: "#ffffff",
+            textmain: "#1f2937",
+            muted: "#6b7280",
+            borderline: "#e5e7eb",
+            hoverbg: "#eef2ff"
+          },
+          boxShadow: {
+            soft: "0 10px 25px rgba(0, 0, 0, 0.08)",
+            sidebar: "2px 0 12px rgba(0, 0, 0, 0.12)",
+            cardhover: "0 14px 30px rgba(0, 0, 0, 0.1)"
+          }
+        }
       }
-
-      .sidebar {
-        transform: translateX(-100%);
-        width: 260px;
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .main-content {
-        margin-left: 0;
-        padding: 76px 16px 20px;
-      }
-
-      .header {
-        padding: 18px;
-      }
-
-      .header h2 {
-        font-size: 24px;
-      }
-
-      .cards {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      }
-    }
-
-    @media (max-width: 600px) {
-      .card {
-        padding: 18px;
-      }
-
-      .card p {
-        font-size: 26px;
-      }
-
-      .table-card {
-        padding: 16px;
-      }
-
-      th,
-      td {
-        padding: 12px 10px;
-        font-size: 13px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        scroll-behavior: auto;
-      }
-
-      .sidebar,
-      .main-content,
-      .card,
-      .sidebar a,
-      .logout-link {
-        transition: none;
-      }
-    }
-  </style>
+    };
+  </script>
 </head>
 
-<body>
-  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar"
-    aria-expanded="false" aria-label="Toggle navigation menu">
+<body class="bg-bg font-sans leading-6 text-textmain antialiased">
+  <button
+    class="fixed left-4 top-4 z-[1100] hidden rounded-[10px] bg-primary px-3 py-2 text-lg text-white shadow-soft focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[900px]:inline-flex max-[900px]:items-center max-[900px]:justify-center motion-reduce:transition-none"
+    type="button"
+    id="sidebarToggle"
+    aria-controls="sidebar"
+    aria-expanded="false"
+    aria-label="Toggle navigation menu">
     ☰
   </button>
 
-  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
+  <div id="sidebarOverlay" class="fixed inset-0 z-[999] hidden bg-slate-900/45" hidden></div>
 
-  <nav class="sidebar" id="sidebar" aria-label="Sidebar navigation">
-    <div class="sidebar-header">
-      <h1>{{ finance_user }}</h1>
-      <span>Promissory Notes</span>
+  <nav
+    id="sidebar"
+    aria-label="Sidebar navigation"
+    class="fixed left-0 top-0 z-[1000] flex min-h-screen w-[240px] flex-col bg-[linear-gradient(160deg,#1e2a78,#3a4bb3)] px-0 pb-4 pt-5 text-white shadow-sidebar transition-transform duration-300 ease-in-out max-[900px]:w-[260px] max-[900px]:-translate-x-full motion-reduce:transition-none">
+    <div class="mb-3 border-b border-white/15 px-[18px] pb-5">
+      <h1 class="break-words text-[17px] font-semibold leading-[1.4]">{{ finance_user }}</h1>
+      <span class="mt-1 block text-[13px] font-normal opacity-90">Promissory Notes</span>
     </div>
 
-    <div class="sidebar-nav">
-      <a href="{{ url_for('finance.dashboard') }}"
-        class="{% if request.endpoint == 'finance.dashboard' %}active{% endif %}"
+    <div class="flex flex-1 flex-col gap-1.5 px-[10px]">
+      <a
+        href="{{ url_for('finance.dashboard') }}"
+        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if request.endpoint == 'finance.dashboard' %}bg-white/20 font-bold{% else %}font-medium{% endif %}"
         aria-current="{% if request.endpoint == 'finance.dashboard' %}page{% endif %}">
-        <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon" alt="">
+        <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="h-[30px] w-[30px] shrink-0 rounded-full bg-white p-1.5" alt="" />
         <span>Dashboard</span>
       </a>
 
-      <a href="{{ url_for('finance.promissory_notes') }}"
-        class="{% if request.endpoint == 'finance.promissory_notes' %}active{% endif %}"
+      <a
+        href="{{ url_for('finance.promissory_notes') }}"
+        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if request.endpoint == 'finance.promissory_notes' %}bg-white/20 font-bold{% else %}font-medium{% endif %}"
         aria-current="{% if request.endpoint == 'finance.promissory_notes' %}page{% endif %}">
-        <img src="{{ url_for('static', filename='images/notes.png') }}" class="icon" alt="">
+        <img src="{{ url_for('static', filename='images/notes.png') }}" class="h-[30px] w-[30px] shrink-0 rounded-full bg-white p-1.5" alt="" />
         <span>Promissory Notes</span>
       </a>
 
-      <a href="{{ url_for('finance.all_promissory') }}"
-        class="{% if request.endpoint == 'finance.all_promissory' %}active{% endif %}"
+      <a
+        href="{{ url_for('finance.all_promissory') }}"
+        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if request.endpoint == 'finance.all_promissory' %}bg-white/20 font-bold{% else %}font-medium{% endif %}"
         aria-current="{% if request.endpoint == 'finance.all_promissory' %}page{% endif %}">
-        <img src="{{ url_for('static', filename='images/notes.png') }}" class="icon" alt="">
+        <img src="{{ url_for('static', filename='images/notes.png') }}" class="h-[30px] w-[30px] shrink-0 rounded-full bg-white p-1.5" alt="" />
         <span>Statistics</span>
       </a>
 
-      <a href="{{ url_for('finance.students_promissory') }}"
-        class="{% if request.endpoint == 'finance.students_promissory' %}active{% endif %}"
+      <a
+        href="{{ url_for('finance.students_promissory') }}"
+        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if request.endpoint == 'finance.students_promissory' %}bg-white/20 font-bold{% else %}font-medium{% endif %}"
         aria-current="{% if request.endpoint == 'finance.students_promissory' %}page{% endif %}">
-        <img src="{{ url_for('static', filename='images/students.png') }}" class="icon" alt="">
+        <img src="{{ url_for('static', filename='images/students.png') }}" class="h-[30px] w-[30px] shrink-0 rounded-full bg-white p-1.5" alt="" />
         <span>Students</span>
       </a>
     </div>
 
-    <div class="sidebar-footer">
-      <a href="{{ url_for('finance.logout') }}" class="logout-link">
-        <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon" alt="">
+    <div class="mt-3 border-t border-white/15 px-[10px] pt-3">
+      <a
+        href="{{ url_for('finance.logout') }}"
+        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+        <img src="{{ url_for('static', filename='images/logout.png') }}" class="h-[30px] w-[30px] shrink-0 rounded-full bg-white p-1.5" alt="" />
         <span>Logout</span>
       </a>
     </div>
   </nav>
 
-  <main class="main-content" id="mainContent">
-    <header class="header">
+  <main
+    id="mainContent"
+    class="ml-[240px] min-h-screen p-6 transition-all duration-300 ease-in-out max-[900px]:ml-0 max-[900px]:px-4 max-[900px]:pb-5 max-[900px]:pt-[76px] motion-reduce:transition-none">
+    <header class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-surface p-5 shadow-soft max-[900px]:p-[18px]">
       <div>
-        <h2>Dashboard</h2>
+        <h2 class="text-[28px] font-bold text-primary max-[900px]:text-2xl">Dashboard</h2>
       </div>
-      <p class="header-meta">
-        Active Semester: <strong>{{ active_semester }}</strong>
+      <p class="text-sm text-muted">
+        Active Semester: <strong class="text-textmain">{{ active_semester }}</strong>
         |
-        S.Y.: <strong>{{ active_school_year }}</strong>
+        S.Y.: <strong class="text-textmain">{{ active_school_year }}</strong>
       </p>
     </header>
 
-    <section class="cards" aria-label="Promissory summary cards">
-      <article class="card">
-        <h3>Total Promissory</h3>
-        <p>{{ data.total_promissory }}</p>
+    <section class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[18px] max-[900px]:grid-cols-[repeat(auto-fit,minmax(150px,1fr))]" aria-label="Promissory summary cards">
+      <article class="rounded-[14px] bg-surface p-5 text-center shadow-soft transition duration-200 ease-in-out hover:-translate-y-1 hover:shadow-cardhover motion-reduce:transition-none">
+        <h3 class="mb-2.5 text-[15px] font-semibold text-primary">Total Promissory</h3>
+        <p class="text-[30px] font-bold text-textmain max-[600px]:text-[26px]">{{ data.total_promissory }}</p>
       </article>
 
-      <article class="card">
-        <h3>Pending</h3>
-        <p>{{ data.total_pending }}</p>
+      <article class="rounded-[14px] bg-surface p-5 text-center shadow-soft transition duration-200 ease-in-out hover:-translate-y-1 hover:shadow-cardhover motion-reduce:transition-none">
+        <h3 class="mb-2.5 text-[15px] font-semibold text-primary">Pending</h3>
+        <p class="text-[30px] font-bold text-textmain max-[600px]:text-[26px]">{{ data.total_pending }}</p>
       </article>
 
-      <article class="card">
-        <h3>Approved</h3>
-        <p>{{ data.total_approved }}</p>
+      <article class="rounded-[14px] bg-surface p-5 text-center shadow-soft transition duration-200 ease-in-out hover:-translate-y-1 hover:shadow-cardhover motion-reduce:transition-none">
+        <h3 class="mb-2.5 text-[15px] font-semibold text-primary">Approved</h3>
+        <p class="text-[30px] font-bold text-textmain max-[600px]:text-[26px]">{{ data.total_approved }}</p>
       </article>
 
-      <article class="card">
-        <h3>Rejected</h3>
-        <p>{{ data.total_rejected }}</p>
+      <article class="rounded-[14px] bg-surface p-5 text-center shadow-soft transition duration-200 ease-in-out hover:-translate-y-1 hover:shadow-cardhover motion-reduce:transition-none">
+        <h3 class="mb-2.5 text-[15px] font-semibold text-primary">Rejected</h3>
+        <p class="text-[30px] font-bold text-textmain max-[600px]:text-[26px]">{{ data.total_rejected }}</p>
       </article>
     </section>
 
-    <section class="table-card" aria-labelledby="recent-requests-title">
-      <h3 id="recent-requests-title">Recent Promissory Requests</h3>
+    <section class="rounded-[14px] bg-surface p-5 shadow-soft max-[600px]:p-4" aria-labelledby="recent-requests-title">
+      <h3 id="recent-requests-title" class="mb-[14px] text-lg font-bold text-primary">Recent Promissory Requests</h3>
 
-      <div class="table-wrapper">
-        <table>
-          <caption class="sr-only">List of recent promissory note requests</caption>
+      <div class="overflow-x-auto rounded-xl border border-borderline">
+        <table class="min-w-[760px] w-full border-collapse">
+          <caption class="sr-only absolute -m-px h-px w-px overflow-hidden whitespace-nowrap border-0 p-0 [clip:rect(0,0,0,0)]">
+            List of recent promissory note requests
+          </caption>
           <thead>
             <tr>
-              <th scope="col">Student Name</th>
-              <th scope="col">Course</th>
-              <th scope="col">Semester</th>
-              <th scope="col">Examination Type</th>
-              <th scope="col">Date Submitted</th>
-              <th scope="col">Status</th>
+              <th class="whitespace-nowrap border-b border-borderline bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary max-[600px]:px-2.5 max-[600px]:py-3 max-[600px]:text-[13px]" scope="col">Student Name</th>
+              <th class="whitespace-nowrap border-b border-borderline bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary max-[600px]:px-2.5 max-[600px]:py-3 max-[600px]:text-[13px]" scope="col">Course</th>
+              <th class="whitespace-nowrap border-b border-borderline bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary max-[600px]:px-2.5 max-[600px]:py-3 max-[600px]:text-[13px]" scope="col">Semester</th>
+              <th class="whitespace-nowrap border-b border-borderline bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary max-[600px]:px-2.5 max-[600px]:py-3 max-[600px]:text-[13px]" scope="col">Examination Type</th>
+              <th class="whitespace-nowrap border-b border-borderline bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary max-[600px]:px-2.5 max-[600px]:py-3 max-[600px]:text-[13px]" scope="col">Date Submitted</th>
+              <th class="whitespace-nowrap border-b border-borderline bg-[#f8faff] px-3 py-[14px] text-left text-sm font-bold text-primary max-[600px]:px-2.5 max-[600px]:py-3 max-[600px]:text-[13px]" scope="col">Status</th>
             </tr>
           </thead>
           <tbody>
             {% if recent_requests %}
               {% for req in recent_requests %}
-              <tr>
-                <td>{{ req.student_name }}</td>
-                <td>{{ req.course }}</td>
-                <td>{{ req.semester }}</td>
-                <td>{{ req.semester_type }}</td>
-                <td>{{ req.date_submitted.strftime('%b %d, %Y') }}</td>
-                <td>
-                  <span class="status {{ req.status|lower }}">{{ req.status }}</span>
+              <tr class="even:bg-[#fcfcfd] hover:bg-hoverbg">
+                <td class="border-b border-borderline px-3 py-[14px] text-left text-sm align-middle max-[600px]:px-2.5 max-[600px]:py-3 max-[600px]:text-[13px]">{{ req.student_name }}</td>
+                <td class="border-b border-borderline px-3 py-[14px] text-left text-sm align-middle max-[600px]:px-2.5 max-[600px]:py-3 max-[600px]:text-[13px]">{{ req.course }}</td>
+                <td class="border-b border-borderline px-3 py-[14px] text-left text-sm align-middle max-[600px]:px-2.5 max-[600px]:py-3 max-[600px]:text-[13px]">{{ req.semester }}</td>
+                <td class="border-b border-borderline px-3 py-[14px] text-left text-sm align-middle max-[600px]:px-2.5 max-[600px]:py-3 max-[600px]:text-[13px]">{{ req.semester_type }}</td>
+                <td class="border-b border-borderline px-3 py-[14px] text-left text-sm align-middle max-[600px]:px-2.5 max-[600px]:py-3 max-[600px]:text-[13px]">{{ req.date_submitted.strftime('%b %d, %Y') }}</td>
+                <td class="border-b border-borderline px-3 py-[14px] text-left text-sm align-middle max-[600px]:px-2.5 max-[600px]:py-3 max-[600px]:text-[13px]">
+                  <span class="inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-bold capitalize
+                    {% if req.status|lower == 'pending' %}
+                      bg-amber-100 text-amber-800
+                    {% elif req.status|lower == 'approved' %}
+                      bg-emerald-100 text-emerald-800
+                    {% elif req.status|lower == 'rejected' %}
+                      bg-red-100 text-red-800
+                    {% else %}
+                      bg-slate-100 text-slate-700
+                    {% endif %}">
+                    {{ req.status }}
+                  </span>
                 </td>
               </tr>
               {% endfor %}
             {% else %}
               <tr>
-                <td colspan="6" class="no-data">No recent requests found.</td>
+                <td colspan="6" class="p-6 text-center italic text-muted">No recent requests found.</td>
               </tr>
             {% endif %}
           </tbody>
@@ -552,26 +189,30 @@
   </main>
 
   <script>
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
 
     function openSidebar() {
-      sidebar.classList.add('open');
+      sidebar.classList.remove("max-[900px]:-translate-x-full");
+      sidebar.classList.add("translate-x-0");
       sidebarOverlay.hidden = false;
-      sidebarOverlay.classList.add('show');
-      sidebarToggle.setAttribute('aria-expanded', 'true');
+      sidebarOverlay.classList.remove("hidden");
+      sidebarToggle.setAttribute("aria-expanded", "true");
     }
 
     function closeSidebar() {
-      sidebar.classList.remove('open');
-      sidebarOverlay.classList.remove('show');
+      if (window.innerWidth <= 900) {
+        sidebar.classList.remove("translate-x-0");
+        sidebar.classList.add("max-[900px]:-translate-x-full");
+      }
+      sidebarOverlay.classList.add("hidden");
       sidebarOverlay.hidden = true;
-      sidebarToggle.setAttribute('aria-expanded', 'false');
+      sidebarToggle.setAttribute("aria-expanded", "false");
     }
 
     function toggleSidebar() {
-      const isOpen = sidebar.classList.contains('open');
+      const isOpen = sidebar.classList.contains("translate-x-0") && window.innerWidth <= 900;
       if (isOpen) {
         closeSidebar();
       } else {
@@ -579,17 +220,22 @@
       }
     }
 
-    sidebarToggle.addEventListener('click', toggleSidebar);
-    sidebarOverlay.addEventListener('click', closeSidebar);
+    sidebarToggle.addEventListener("click", toggleSidebar);
+    sidebarOverlay.addEventListener("click", closeSidebar);
 
-    window.addEventListener('resize', function () {
+    window.addEventListener("resize", function () {
       if (window.innerWidth > 900) {
-        closeSidebar();
+        sidebar.classList.remove("translate-x-0", "max-[900px]:-translate-x-full");
+        sidebarOverlay.classList.add("hidden");
+        sidebarOverlay.hidden = true;
+        sidebarToggle.setAttribute("aria-expanded", "false");
+      } else if (!sidebar.classList.contains("translate-x-0")) {
+        sidebar.classList.add("max-[900px]:-translate-x-full");
       }
     });
 
-    document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') {
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
         closeSidebar();
       }
     });

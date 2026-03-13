@@ -1,588 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth motion-reduce:scroll-auto">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Promissory Notes - Finance</title>
-  <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
-
-  <style>
-    :root {
-      --primary: #1e2a78;
-      --primary-light: #3a4bb3;
-      --primary-dark: #16205d;
-      --bg: #f4f7fc;
-      --surface: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --hover: #eef2ff;
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-      --radius: 14px;
-      --sidebar-width: 240px;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.5;
-      color: var(--text);
-      background-color: var(--bg);
-    }
-
-    img {
-      display: block;
-      max-width: 100%;
-    }
-
-    a {
-      color: inherit;
-    }
-
-    button,
-    input,
-    select {
-      font: inherit;
-    }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    .sidebar-toggle {
-      display: none;
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      z-index: 1100;
-      border: none;
-      background: var(--primary);
-      color: #fff;
-      border-radius: 10px;
-      padding: 10px 12px;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      font-size: 18px;
-    }
-
-    .sidebar-toggle:focus-visible,
-    .sidebar a:focus-visible,
-    .logout-link:focus-visible,
-    .filters input:focus-visible,
-    .filters select:focus-visible,
-    .btn:focus-visible,
-    .btn-clear:focus-visible,
-    .btn-primary:focus-visible,
-    .btn-view:focus-visible,
-    .pagination a:focus-visible {
-      outline: 3px solid #93c5fd;
-      outline-offset: 2px;
-    }
-
-    .sidebar {
-      width: var(--sidebar-width);
-      min-height: 100vh;
-      background: linear-gradient(160deg, var(--primary), var(--primary-light));
-      color: #fff;
-      position: fixed;
-      top: 0;
-      left: 0;
-      display: flex;
-      flex-direction: column;
-      padding: 20px 0 16px;
-      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
-      z-index: 1000;
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar-header {
-      padding: 0 18px 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-      margin-bottom: 12px;
-    }
-
-    .sidebar-header h1 {
-      font-size: 17px;
-      font-weight: 600;
-      line-height: 1.4;
-      word-break: break-word;
-    }
-
-    .sidebar-header span {
-      display: block;
-      font-size: 13px;
-      font-weight: 400;
-      opacity: 0.9;
-      margin-top: 4px;
-    }
-
-    .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 0 10px;
-      flex: 1;
-    }
-
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 10px;
-      margin: 0;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-    }
-
-    .sidebar a:hover {
-      background-color: rgba(255, 255, 255, 0.12);
-      transform: translateX(2px);
-    }
-
-    .sidebar a.active {
-      background-color: rgba(255, 255, 255, 0.22);
-      font-weight: 700;
-    }
-
-    .sidebar img.icon {
-      width: 30px;
-      height: 30px;
-      margin-right: 0;
-      background: #fff;
-      border-radius: 50%;
-      padding: 6px;
-      flex-shrink: 0;
-    }
-
-    .sidebar-footer {
-      padding: 12px 10px 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
-      margin-top: 12px;
-    }
-
-    .logout-link {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 10px;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-    }
-
-    .logout-link:hover {
-      background: rgba(255, 255, 255, 0.12);
-      transform: translateX(2px);
-    }
-
-    .sidebar-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.45);
-      z-index: 999;
-    }
-
-    .sidebar-overlay.show {
-      display: block;
-    }
-
-    .main-content {
-      margin-left: var(--sidebar-width);
-      padding: 24px;
-      min-height: 100vh;
-      transition: margin-left 0.3s ease;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      background: var(--surface);
-      padding: 18px 20px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-    }
-
-    .header h2 {
-      font-weight: 700;
-      color: var(--primary);
-      font-size: 28px;
-    }
-
-    .header-meta {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .header-meta strong {
-      color: var(--text);
-    }
-
-    .filters {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: end;
-      margin-bottom: 20px;
-      padding: 16px;
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      min-width: 170px;
-      flex: 1 1 170px;
-    }
-
-    .filter-group label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--muted);
-    }
-
-    .filters input,
-    .filters select {
-      padding: 11px 14px;
-      font-size: 14px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background-color: #f9fafb;
-      color: var(--text);
-      min-width: 0;
-      transition: all 0.2s ease;
-    }
-
-    .filters input:focus,
-    .filters select:focus {
-      outline: none;
-      border-color: #a5b4fc;
-      background-color: #fff;
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
-    }
-
-    .filter-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      width: 100%;
-      margin-top: 4px;
-    }
-
-    .export-buttons {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .btn,
-    .btn-clear,
-    .btn-primary,
-    .btn-view,
-    .pagination a {
-      border: none;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-    }
-
-    .btn-primary {
-      background-color: var(--primary);
-      color: #fff;
-      padding: 10px 18px;
-      font-size: 14px;
-      border-radius: 999px;
-      box-shadow: 0 2px 8px rgba(30, 42, 120, 0.2);
-    }
-
-    .btn-primary:hover {
-      background-color: var(--primary-light);
-      transform: translateY(-1px);
-    }
-
-    .btn-clear {
-      background-color: #6b7280;
-      color: #fff;
-      padding: 10px 18px;
-      font-size: 14px;
-      border-radius: 999px;
-      box-shadow: 0 2px 8px rgba(107, 114, 128, 0.15);
-    }
-
-    .btn-clear:hover {
-      background-color: #4b5563;
-      transform: translateY(-1px);
-    }
-
-    .table-container {
-      overflow-x: auto;
-      width: 100%;
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-      border: 1px solid var(--border);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 1100px;
-    }
-
-    thead {
-      background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      color: #fff;
-    }
-
-    th,
-    td {
-      padding: 14px 15px;
-      border-bottom: 1px solid #edf0f5;
-      text-align: left;
-      vertical-align: middle;
-      font-size: 14px;
-    }
-
-    th {
-      white-space: nowrap;
-      font-weight: 700;
-    }
-
-    tbody tr:nth-child(even) {
-      background: #fafbff;
-    }
-
-    tbody tr:hover {
-      background: #edf2ff;
-      transition: background-color 0.2s ease;
-    }
-
-    .status {
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      display: inline-block;
-      min-width: 84px;
-      text-align: center;
-      text-transform: capitalize;
-      white-space: nowrap;
-    }
-
-    .status.pending {
-      background: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffe69c;
-    }
-
-    .status.approved {
-      background: #dcfce7;
-      color: #166534;
-      border: 1px solid #86efac;
-    }
-
-    .status.rejected {
-      background: #fee2e2;
-      color: #991b1b;
-      border: 1px solid #fca5a5;
-    }
-
-    .btn-view {
-      background: var(--primary);
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 10px;
-      white-space: nowrap;
-      font-size: 13px;
-    }
-
-    .btn-view:hover {
-      background: var(--primary-light);
-    }
-
-    .no-data {
-      text-align: center;
-      padding: 40px;
-      color: var(--muted);
-      font-style: italic;
-    }
-
-    .pagination-container {
-      margin-top: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .results-info {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .pagination {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .pagination a,
-    .pagination span {
-      background: #fff;
-      border: 1px solid #d1d5db;
-      padding: 8px 12px;
-      border-radius: 8px;
-      color: var(--text);
-      min-width: 40px;
-      text-align: center;
-      font-size: 14px;
-    }
-
-    .pagination a:hover {
-      background: #f3f4f6;
-    }
-
-    .pagination a.active {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary);
-    }
-
-    .pagination .disabled {
-      opacity: 0.5;
-      pointer-events: none;
-      background: #f9fafb;
-    }
-
-    .pagination .ellipsis {
-      cursor: default;
-      background: transparent;
-      border-color: transparent;
-      padding-left: 2px;
-      padding-right: 2px;
-    }
-
-    @media (max-width: 980px) {
-      .sidebar-toggle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+  <link rel="icon" type="image/x-icon" href="./static/images/logo.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#1e2a78",
+            "primary-light": "#3a4bb3",
+            "primary-dark": "#16205d",
+            bg: "#f4f7fc",
+            surface: "#ffffff",
+            textmain: "#1f2937",
+            muted: "#6b7280",
+            borderline: "#e5e7eb",
+            hoverbg: "#eef2ff"
+          },
+          boxShadow: {
+            soft: "0 10px 25px rgba(0, 0, 0, 0.08)",
+            sidebar: "2px 0 12px rgba(0, 0, 0, 0.12)",
+            pill: "0 2px 8px rgba(30, 42, 120, 0.2)",
+            mutedpill: "0 2px 8px rgba(107, 114, 128, 0.15)"
+          }
+        }
       }
-
-      .sidebar {
-        transform: translateX(-100%);
-        width: 260px;
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .main-content {
-        margin-left: 0;
-        padding: 76px 16px 20px;
-      }
-
-      .header h2 {
-        font-size: 24px;
-      }
-    }
-
-    @media (max-width: 700px) {
-      .filters {
-        padding: 14px;
-      }
-
-      .filter-group {
-        flex: 1 1 100%;
-      }
-
-      .filter-actions {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .export-buttons {
-        width: 100%;
-        flex-direction: column;
-      }
-
-      .export-buttons .btn-primary,
-      .btn-clear {
-        width: 100%;
-      }
-
-      .pagination-container {
-        align-items: flex-start;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html {
-        scroll-behavior: auto;
-      }
-
-      *,
-      *::before,
-      *::after {
-        transition: none !important;
-        animation: none !important;
-      }
-    }
-  </style>
+    };
+  </script>
 </head>
 
-<body>
-  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false"
+<body class="bg-bg font-sans leading-6 text-textmain antialiased">
+  <button
+    class="fixed left-4 top-4 z-[1100] hidden rounded-[10px] bg-primary px-3 py-2 text-lg text-white shadow-soft focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[980px]:inline-flex max-[980px]:items-center max-[980px]:justify-center motion-reduce:transition-none"
+    type="button"
+    id="sidebarToggle"
+    aria-controls="sidebar"
+    aria-expanded="false"
     aria-label="Toggle navigation menu">
     ☰
   </button>
 
-  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
+  <div id="sidebarOverlay" class="fixed inset-0 z-[999] hidden bg-slate-900/45" hidden></div>
 
-  <nav class="sidebar" id="sidebar" aria-label="Finance navigation">
-    <div class="sidebar-header">
-      <h1>{{ finance_user }}</h1>
-      <span>Promissory Notes</span>
+  <nav
+    id="sidebar"
+    aria-label="Finance navigation"
+    class="fixed left-0 top-0 z-[1000] flex min-h-screen w-[240px] flex-col bg-[linear-gradient(160deg,#1e2a78,#3a4bb3)] px-0 pb-4 pt-5 text-white shadow-sidebar transition-transform duration-300 ease-in-out max-[980px]:w-[260px] max-[980px]:-translate-x-full motion-reduce:transition-none">
+    <div class="mb-3 border-b border-white/15 px-[18px] pb-5">
+      <h1 class="break-words text-[17px] font-semibold leading-[1.4]">{{ finance_user }}</h1>
+      <span class="mt-1 block text-[13px] font-normal opacity-90">Promissory Notes</span>
     </div>
 
-    <div class="sidebar-nav">
+    <div class="flex flex-1 flex-col gap-1.5 px-[10px]">
       {% set links = [
       ('finance.dashboard', 'Dashboard', 'dashboard.png'),
       ('finance.promissory_notes', 'Promissory Notes', 'notes.png'),
@@ -591,47 +65,64 @@
       ] %}
 
       {% for endpoint, text, icon in links %}
-      <a href="{{ url_for(endpoint) }}"
-         class="{% if request.endpoint == endpoint %}active{% endif %}"
-         aria-current="{% if request.endpoint == endpoint %}page{% endif %}">
-        <img src="{{ url_for('static', filename='images/' + icon) }}" class="icon" alt="">
+      <a
+        href="{{ url_for(endpoint) }}"
+        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if request.endpoint == endpoint %}bg-white/20 font-bold{% else %}font-medium{% endif %}"
+        aria-current="{% if request.endpoint == endpoint %}page{% endif %}">
+        <img
+          src="{{ url_for('static', filename='images/' + icon) }}"
+          class="h-[30px] w-[30px] shrink-0 rounded-full bg-white p-1.5"
+          alt="" />
         <span>{{ text }}</span>
       </a>
       {% endfor %}
     </div>
 
-    <div class="sidebar-footer">
-      <a href="{{ url_for('finance.logout') }}" class="logout-link">
-        <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon" alt="">
+    <div class="mt-3 border-t border-white/15 px-[10px] pt-3">
+      <a
+        href="{{ url_for('finance.logout') }}"
+        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+        <img
+          src="{{ url_for('static', filename='images/logout.png') }}"
+          class="h-[30px] w-[30px] shrink-0 rounded-full bg-white p-1.5"
+          alt="" />
         <span>Logout</span>
       </a>
     </div>
   </nav>
 
-  <main class="main-content">
-    <header class="header">
-      <h2>Promissory Notes</h2>
-      <div class="header-meta">
-        Active Semester: <strong>{{ active_semester }}</strong> |
-        S.Y.: <strong>{{ active_school_year }}</strong>
+  <main class="ml-[240px] min-h-screen p-6 transition-all duration-300 ease-in-out max-[980px]:ml-0 max-[980px]:px-4 max-[980px]:pb-5 max-[980px]:pt-[76px] motion-reduce:transition-none">
+    <header class="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-surface px-5 py-[18px] shadow-soft">
+      <h2 class="text-[28px] font-bold text-primary max-[980px]:text-2xl">Promissory Notes</h2>
+      <div class="text-sm text-muted">
+        Active Semester: <strong class="text-textmain">{{ active_semester }}</strong> |
+        S.Y.: <strong class="text-textmain">{{ active_school_year }}</strong>
       </div>
     </header>
 
-    <form method="GET" class="filters" id="filterForm" aria-label="Filter promissory notes">
-      <div class="filter-group">
-        <label for="search">Search</label>
+    <form
+      method="GET"
+      id="filterForm"
+      aria-label="Filter promissory notes"
+      class="mb-5 flex flex-wrap items-end gap-[14px] rounded-[14px] bg-surface p-4 shadow-soft max-[700px]:p-[14px]">
+      <div class="min-w-[170px] flex-1 basis-[170px] flex-col gap-1.5 max-[700px]:basis-full">
+        <label for="search" class="mb-1.5 block text-[13px] font-semibold text-muted">Search</label>
         <input
           id="search"
           type="text"
           name="search"
           placeholder="Search by name or email"
           value="{{ search }}"
-          autocomplete="off">
+          autocomplete="off"
+          class="min-w-0 w-full rounded-xl border border-borderline bg-slate-50 px-[14px] py-[11px] text-sm text-textmain transition duration-200 ease-in-out placeholder:text-slate-400 focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none" />
       </div>
 
-      <div class="filter-group">
-        <label for="status">Status</label>
-        <select id="status" name="status">
+      <div class="min-w-[170px] flex-1 basis-[170px] flex-col gap-1.5 max-[700px]:basis-full">
+        <label for="status" class="mb-1.5 block text-[13px] font-semibold text-muted">Status</label>
+        <select
+          id="status"
+          name="status"
+          class="min-w-0 w-full rounded-xl border border-borderline bg-slate-50 px-[14px] py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
           {% for s in ['Pending', 'Approved', 'Rejected', 'All'] %}
           <option value="{{ s }}" {% if status_filter == s or (not status_filter and s == 'Pending') %}selected{% endif %}>
             {{ s if s != 'All' else 'All Status' }}
@@ -640,9 +131,12 @@
         </select>
       </div>
 
-      <div class="filter-group">
-        <label for="course">Course</label>
-        <select id="course" name="course">
+      <div class="min-w-[170px] flex-1 basis-[170px] flex-col gap-1.5 max-[700px]:basis-full">
+        <label for="course" class="mb-1.5 block text-[13px] font-semibold text-muted">Course</label>
+        <select
+          id="course"
+          name="course"
+          class="min-w-0 w-full rounded-xl border border-borderline bg-slate-50 px-[14px] py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
           <option value="">All Courses</option>
           {% for c in all_courses %}
           <option value="{{ c }}" {% if selected_course == c %}selected{% endif %}>{{ c }}</option>
@@ -650,18 +144,24 @@
         </select>
       </div>
 
-      <div class="filter-group">
-        <label for="school_year">School Year</label>
-        <select id="school_year" name="school_year">
+      <div class="min-w-[170px] flex-1 basis-[170px] flex-col gap-1.5 max-[700px]:basis-full">
+        <label for="school_year" class="mb-1.5 block text-[13px] font-semibold text-muted">School Year</label>
+        <select
+          id="school_year"
+          name="school_year"
+          class="min-w-0 w-full rounded-xl border border-borderline bg-slate-50 px-[14px] py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
           {% for sy in all_school_years %}
           <option value="{{ sy }}" {% if selected_school_year == sy %}selected{% endif %}>{{ sy }}</option>
           {% endfor %}
         </select>
       </div>
 
-      <div class="filter-group">
-        <label for="semester">Semester</label>
-        <select id="semester" name="semester">
+      <div class="min-w-[170px] flex-1 basis-[170px] flex-col gap-1.5 max-[700px]:basis-full">
+        <label for="semester" class="mb-1.5 block text-[13px] font-semibold text-muted">Semester</label>
+        <select
+          id="semester"
+          name="semester"
+          class="min-w-0 w-full rounded-xl border border-borderline bg-slate-50 px-[14px] py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
           <option value="" {% if not selected_semester %}selected{% endif %}>All Semesters</option>
           {% for sem in all_semesters %}
           <option value="{{ sem }}" {% if selected_semester == sem %}selected{% endif %}>{{ sem }}</option>
@@ -669,9 +169,12 @@
         </select>
       </div>
 
-      <div class="filter-group">
-        <label for="semester_type">Examination Type</label>
-        <select id="semester_type" name="semester_type">
+      <div class="min-w-[170px] flex-1 basis-[170px] flex-col gap-1.5 max-[700px]:basis-full">
+        <label for="semester_type" class="mb-1.5 block text-[13px] font-semibold text-muted">Examination Type</label>
+        <select
+          id="semester_type"
+          name="semester_type"
+          class="min-w-0 w-full rounded-xl border border-borderline bg-slate-50 px-[14px] py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
           <option value="" {% if not selected_semester_type %}selected{% endif %}>All Examination Types</option>
           {% for et in ['Prelims', 'Midterms', 'Finals'] %}
           <option value="{{ et }}" {% if selected_semester_type == et %}selected{% endif %}>{{ et }}</option>
@@ -679,53 +182,80 @@
         </select>
       </div>
 
-      <div class="filter-actions">
-        <div class="export-buttons">
-          <button type="button" class="btn-primary" id="exportCsvBtn">📄 Export CSV</button>
-          <button type="button" class="btn-primary" id="exportExcelBtn">🗒️ Export Excel</button>
+      <div class="mt-1 flex w-full flex-wrap items-center gap-2.5 max-[700px]:flex-col max-[700px]:items-stretch">
+        <div class="flex flex-wrap gap-2 max-[700px]:w-full max-[700px]:flex-col">
+          <button
+            type="button"
+            id="exportCsvBtn"
+            class="inline-flex items-center justify-center rounded-full bg-primary px-[18px] py-2.5 text-sm font-semibold text-white shadow-pill transition duration-200 ease-in-out hover:-translate-y-px hover:bg-primary-light focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[700px]:w-full motion-reduce:transition-none">
+            📄 Export CSV
+          </button>
+          <button
+            type="button"
+            id="exportExcelBtn"
+            class="inline-flex items-center justify-center rounded-full bg-primary px-[18px] py-2.5 text-sm font-semibold text-white shadow-pill transition duration-200 ease-in-out hover:-translate-y-px hover:bg-primary-light focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[700px]:w-full motion-reduce:transition-none">
+            🗒️ Export Excel
+          </button>
         </div>
 
-        <a href="{{ url_for('finance.promissory_notes') }}" class="btn-clear">Clear</a>
+        <a
+          href="{{ url_for('finance.promissory_notes') }}"
+          class="inline-flex items-center justify-center rounded-full bg-slate-500 px-[18px] py-2.5 text-sm font-semibold text-white shadow-mutedpill transition duration-200 ease-in-out hover:-translate-y-px hover:bg-slate-600 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[700px]:w-full motion-reduce:transition-none">
+          Clear
+        </a>
       </div>
     </form>
 
-    <div class="table-container">
-      <table aria-describedby="promissory-table-description">
-        <caption id="promissory-table-description" class="sr-only">
+    <div class="mb-5 w-full overflow-x-auto rounded-[14px] border border-borderline bg-surface shadow-soft">
+      <table class="min-w-[1100px] w-full border-collapse" aria-describedby="promissory-table-description">
+        <caption id="promissory-table-description" class="sr-only absolute -m-px h-px w-px overflow-hidden whitespace-nowrap border-0 p-0 [clip:rect(0,0,0,0)]">
           List of promissory note requests with student information, semester, school year, status, and action.
         </caption>
-        <thead>
+        <thead class="bg-[linear-gradient(135deg,#1e2a78,#3a4bb3)] text-white">
           <tr>
-            <th scope="col" style="width: 190px;">Student Name</th>
-            <th scope="col" style="width: 280px;">Course</th>
-            <th scope="col" style="width: 110px;">Semester</th>
-            <th scope="col" style="width: 150px;">Examination Type</th>
-            <th scope="col" style="width: 110px;">S.Y.</th>
-            <th scope="col" style="width: 150px;">Date Submitted</th>
-            <th scope="col" style="width: 110px;">Status</th>
-            <th scope="col" style="width: 120px;">Action</th>
+            <th scope="col" class="w-[190px] whitespace-nowrap px-[15px] py-[14px] text-left text-sm font-bold">Student Name</th>
+            <th scope="col" class="w-[280px] whitespace-nowrap px-[15px] py-[14px] text-left text-sm font-bold">Course</th>
+            <th scope="col" class="w-[110px] whitespace-nowrap px-[15px] py-[14px] text-left text-sm font-bold">Semester</th>
+            <th scope="col" class="w-[150px] whitespace-nowrap px-[15px] py-[14px] text-left text-sm font-bold">Examination Type</th>
+            <th scope="col" class="w-[110px] whitespace-nowrap px-[15px] py-[14px] text-left text-sm font-bold">S.Y.</th>
+            <th scope="col" class="w-[150px] whitespace-nowrap px-[15px] py-[14px] text-left text-sm font-bold">Date Submitted</th>
+            <th scope="col" class="w-[110px] whitespace-nowrap px-[15px] py-[14px] text-left text-sm font-bold">Status</th>
+            <th scope="col" class="w-[120px] whitespace-nowrap px-[15px] py-[14px] text-left text-sm font-bold">Action</th>
           </tr>
         </thead>
         <tbody>
           {% if promissory_requests %}
             {% for req in promissory_requests %}
-            <tr>
-              <td>
+            <tr class="even:bg-[#fafbff] hover:bg-[#edf2ff]">
+              <td class="border-b border-slate-100 px-[15px] py-[14px] text-left align-middle text-sm">
                 {{ req.student.first_name }}
                 {{ req.student.middle_name or '' }}
                 {{ req.student.last_name }}
                 {{ req.student.suffix or '' }}
               </td>
-              <td>{{ req.course }}</td>
-              <td>{{ req.semester or 'N/A' }}</td>
-              <td>{{ req.semester_type or 'N/A' }}</td>
-              <td>{{ req.school_year or 'N/A' }}</td>
-              <td>{{ req.requested_at.strftime('%b %d, %Y') }}</td>
-              <td>
-                <span class="status {{ req.status|lower }}">{{ req.status }}</span>
+              <td class="border-b border-slate-100 px-[15px] py-[14px] text-left align-middle text-sm">{{ req.course }}</td>
+              <td class="border-b border-slate-100 px-[15px] py-[14px] text-left align-middle text-sm">{{ req.semester or 'N/A' }}</td>
+              <td class="border-b border-slate-100 px-[15px] py-[14px] text-left align-middle text-sm">{{ req.semester_type or 'N/A' }}</td>
+              <td class="border-b border-slate-100 px-[15px] py-[14px] text-left align-middle text-sm">{{ req.school_year or 'N/A' }}</td>
+              <td class="border-b border-slate-100 px-[15px] py-[14px] text-left align-middle text-sm">{{ req.requested_at.strftime('%b %d, %Y') }}</td>
+              <td class="border-b border-slate-100 px-[15px] py-[14px] text-left align-middle text-sm">
+                <span class="inline-block min-w-[84px] whitespace-nowrap rounded-full px-3 py-1.5 text-center text-xs font-bold capitalize
+                  {% if req.status|lower == 'pending' %}
+                    border border-amber-200 bg-amber-100 text-amber-800
+                  {% elif req.status|lower == 'approved' %}
+                    border border-green-300 bg-green-100 text-green-800
+                  {% elif req.status|lower == 'rejected' %}
+                    border border-red-300 bg-red-100 text-red-800
+                  {% else %}
+                    border border-slate-200 bg-slate-100 text-slate-700
+                  {% endif %}">
+                  {{ req.status }}
+                </span>
               </td>
-              <td>
-                <a href="{{ url_for('finance.view_promissory', promissory_id=req.id) }}" class="btn-view">
+              <td class="border-b border-slate-100 px-[15px] py-[14px] text-left align-middle text-sm">
+                <a
+                  href="{{ url_for('finance.view_promissory', promissory_id=req.id) }}"
+                  class="inline-flex items-center justify-center whitespace-nowrap rounded-[10px] bg-primary px-3 py-2 text-[13px] font-semibold text-white transition duration-200 ease-in-out hover:bg-primary-light focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
                   View Details
                 </a>
               </td>
@@ -733,30 +263,34 @@
             {% endfor %}
           {% else %}
             <tr>
-              <td colspan="8" class="no-data">No promissory requests submitted yet</td>
+              <td colspan="8" class="p-10 text-center italic text-muted">No promissory requests submitted yet</td>
             </tr>
           {% endif %}
         </tbody>
       </table>
     </div>
 
-    <div class="pagination-container">
-      <div class="results-info">Page {{ pagination.page }} of {{ total_pages }}</div>
+    <div class="mt-5 flex flex-wrap items-center justify-between gap-3 max-[700px]:items-start">
+      <div class="text-sm text-muted">Page {{ pagination.page }} of {{ total_pages }}</div>
 
-      <nav class="pagination" aria-label="Pagination">
+      <nav class="flex flex-wrap items-center gap-2" aria-label="Pagination">
         {% if pagination.has_prev %}
-          <a href="{{ url_for(
-            'finance.promissory_notes',
-            page=pagination.prev_num,
-            search=search,
-            status=status_filter,
-            semester=selected_semester,
-            semester_type=selected_semester_type,
-            school_year=selected_school_year,
-            course=selected_course
-          ) }}">Previous</a>
+          <a
+            href="{{ url_for(
+              'finance.promissory_notes',
+              page=pagination.prev_num,
+              search=search,
+              status=status_filter,
+              semester=selected_semester,
+              semester_type=selected_semester_type,
+              school_year=selected_school_year,
+              course=selected_course
+            ) }}"
+            class="inline-flex min-w-10 items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-textmain transition duration-200 ease-in-out hover:bg-slate-100 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+            Previous
+          </a>
         {% else %}
-          <span class="disabled">Previous</span>
+          <span class="pointer-events-none inline-flex min-w-10 items-center justify-center rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-textmain opacity-50">Previous</span>
         {% endif %}
 
         {% if total_pages <= 7 %}
@@ -772,7 +306,7 @@
                 school_year=selected_school_year,
                 course=selected_course
               ) }}"
-              class="{% if p == pagination.page %}active{% endif %}">
+              class="inline-flex min-w-10 items-center justify-center rounded-lg border px-3 py-2 text-sm transition duration-200 ease-in-out focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if p == pagination.page %}border-primary bg-primary text-white{% else %}border-slate-300 bg-white text-textmain hover:bg-slate-100{% endif %}">
               {{ p }}
             </a>
           {% endfor %}
@@ -789,13 +323,13 @@
                 school_year=selected_school_year,
                 course=selected_course
               ) }}"
-              class="{% if p == pagination.page %}active{% endif %}">
+              class="inline-flex min-w-10 items-center justify-center rounded-lg border px-3 py-2 text-sm transition duration-200 ease-in-out focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if p == pagination.page %}border-primary bg-primary text-white{% else %}border-slate-300 bg-white text-textmain hover:bg-slate-100{% endif %}">
               {{ p }}
             </a>
           {% endfor %}
 
           {% if pagination.page > 4 and pagination.page < total_pages - 3 %}
-            <span class="ellipsis">...</span>
+            <span class="cursor-default border-transparent bg-transparent px-0.5 py-2 text-sm text-textmain">...</span>
 
             {% for p in range(pagination.page - 1, pagination.page + 2) %}
               <a
@@ -809,12 +343,12 @@
                   school_year=selected_school_year,
                   course=selected_course
                 ) }}"
-                class="{% if p == pagination.page %}active{% endif %}">
+                class="inline-flex min-w-10 items-center justify-center rounded-lg border px-3 py-2 text-sm transition duration-200 ease-in-out focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if p == pagination.page %}border-primary bg-primary text-white{% else %}border-slate-300 bg-white text-textmain hover:bg-slate-100{% endif %}">
                 {{ p }}
               </a>
             {% endfor %}
 
-            <span class="ellipsis">...</span>
+            <span class="cursor-default border-transparent bg-transparent px-0.5 py-2 text-sm text-textmain">...</span>
           {% elif pagination.page <= 4 %}
             {% for p in range(4, 6) %}
               <a
@@ -828,13 +362,13 @@
                   school_year=selected_school_year,
                   course=selected_course
                 ) }}"
-                class="{% if p == pagination.page %}active{% endif %}">
+                class="inline-flex min-w-10 items-center justify-center rounded-lg border px-3 py-2 text-sm transition duration-200 ease-in-out focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if p == pagination.page %}border-primary bg-primary text-white{% else %}border-slate-300 bg-white text-textmain hover:bg-slate-100{% endif %}">
                 {{ p }}
               </a>
             {% endfor %}
-            <span class="ellipsis">...</span>
+            <span class="cursor-default border-transparent bg-transparent px-0.5 py-2 text-sm text-textmain">...</span>
           {% else %}
-            <span class="ellipsis">...</span>
+            <span class="cursor-default border-transparent bg-transparent px-0.5 py-2 text-sm text-textmain">...</span>
             {% for p in range(total_pages - 5, total_pages - 2) %}
               <a
                 href="{{ url_for(
@@ -847,7 +381,7 @@
                   school_year=selected_school_year,
                   course=selected_course
                 ) }}"
-                class="{% if p == pagination.page %}active{% endif %}">
+                class="inline-flex min-w-10 items-center justify-center rounded-lg border px-3 py-2 text-sm transition duration-200 ease-in-out focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if p == pagination.page %}border-primary bg-primary text-white{% else %}border-slate-300 bg-white text-textmain hover:bg-slate-100{% endif %}">
                 {{ p }}
               </a>
             {% endfor %}
@@ -865,55 +399,63 @@
                 school_year=selected_school_year,
                 course=selected_course
               ) }}"
-              class="{% if p == pagination.page %}active{% endif %}">
+              class="inline-flex min-w-10 items-center justify-center rounded-lg border px-3 py-2 text-sm transition duration-200 ease-in-out focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if p == pagination.page %}border-primary bg-primary text-white{% else %}border-slate-300 bg-white text-textmain hover:bg-slate-100{% endif %}">
               {{ p }}
             </a>
           {% endfor %}
         {% endif %}
 
         {% if pagination.has_next %}
-          <a href="{{ url_for(
-            'finance.promissory_notes',
-            page=pagination.next_num,
-            search=search,
-            status=status_filter,
-            semester=selected_semester,
-            semester_type=selected_semester_type,
-            school_year=selected_school_year,
-            course=selected_course
-          ) }}">Next</a>
+          <a
+            href="{{ url_for(
+              'finance.promissory_notes',
+              page=pagination.next_num,
+              search=search,
+              status=status_filter,
+              semester=selected_semester,
+              semester_type=selected_semester_type,
+              school_year=selected_school_year,
+              course=selected_course
+            ) }}"
+            class="inline-flex min-w-10 items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-textmain transition duration-200 ease-in-out hover:bg-slate-100 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+            Next
+          </a>
         {% else %}
-          <span class="disabled">Next</span>
+          <span class="pointer-events-none inline-flex min-w-10 items-center justify-center rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-textmain opacity-50">Next</span>
         {% endif %}
       </nav>
     </div>
   </main>
 
   <script>
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    const filterForm = document.getElementById('filterForm');
-    const filterSelects = filterForm.querySelectorAll('select');
-    const exportCsvBtn = document.getElementById('exportCsvBtn');
-    const exportExcelBtn = document.getElementById('exportExcelBtn');
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
+    const filterForm = document.getElementById("filterForm");
+    const filterSelects = filterForm.querySelectorAll("select");
+    const exportCsvBtn = document.getElementById("exportCsvBtn");
+    const exportExcelBtn = document.getElementById("exportExcelBtn");
 
     function openSidebar() {
-      sidebar.classList.add('open');
+      sidebar.classList.remove("max-[980px]:-translate-x-full");
+      sidebar.classList.add("translate-x-0");
       sidebarOverlay.hidden = false;
-      sidebarOverlay.classList.add('show');
-      sidebarToggle.setAttribute('aria-expanded', 'true');
+      sidebarOverlay.classList.remove("hidden");
+      sidebarToggle.setAttribute("aria-expanded", "true");
     }
 
     function closeSidebar() {
-      sidebar.classList.remove('open');
-      sidebarOverlay.classList.remove('show');
+      if (window.innerWidth <= 980) {
+        sidebar.classList.remove("translate-x-0");
+        sidebar.classList.add("max-[980px]:-translate-x-full");
+      }
+      sidebarOverlay.classList.add("hidden");
       sidebarOverlay.hidden = true;
-      sidebarToggle.setAttribute('aria-expanded', 'false');
+      sidebarToggle.setAttribute("aria-expanded", "false");
     }
 
     function toggleSidebar() {
-      if (sidebar.classList.contains('open')) {
+      if (sidebar.classList.contains("translate-x-0") && window.innerWidth <= 980) {
         closeSidebar();
       } else {
         openSidebar();
@@ -928,37 +470,42 @@
         params.set(key, value);
       }
 
-      params.set('export', format);
+      params.set("export", format);
       return `${window.location.pathname}?${params.toString()}`;
     }
 
-    sidebarToggle.addEventListener('click', toggleSidebar);
-    sidebarOverlay.addEventListener('click', closeSidebar);
+    sidebarToggle.addEventListener("click", toggleSidebar);
+    sidebarOverlay.addEventListener("click", closeSidebar);
 
-    document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') {
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
         closeSidebar();
       }
     });
 
-    window.addEventListener('resize', function () {
+    window.addEventListener("resize", function () {
       if (window.innerWidth > 980) {
-        closeSidebar();
+        sidebar.classList.remove("translate-x-0", "max-[980px]:-translate-x-full");
+        sidebarOverlay.classList.add("hidden");
+        sidebarOverlay.hidden = true;
+        sidebarToggle.setAttribute("aria-expanded", "false");
+      } else if (!sidebar.classList.contains("translate-x-0")) {
+        sidebar.classList.add("max-[980px]:-translate-x-full");
       }
     });
 
     filterSelects.forEach(function (select) {
-      select.addEventListener('change', function () {
+      select.addEventListener("change", function () {
         filterForm.submit();
       });
     });
 
-    exportCsvBtn.addEventListener('click', function () {
-      window.location.href = buildExportUrl('csv');
+    exportCsvBtn.addEventListener("click", function () {
+      window.location.href = buildExportUrl("csv");
     });
 
-    exportExcelBtn.addEventListener('click', function () {
-      window.location.href = buildExportUrl('excel');
+    exportExcelBtn.addEventListener("click", function () {
+      window.location.href = buildExportUrl("excel");
     });
   </script>
 </body>

@@ -1,566 +1,201 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth motion-reduce:scroll-auto">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>View Request | Student Promissory Notes System</title>
-  <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
-
-  <style>
-    :root {
-      --primary: #1e2a78;
-      --primary-light: #3a4bb3;
-      --primary-dark: #16205d;
-      --bg: #f4f7fc;
-      --surface: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --hover: #eef2ff;
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-      --radius: 14px;
-      --sidebar-width: 240px;
-      --success: #16a34a;
-      --danger: #dc2626;
-      --warning: #d97706;
-      --info: #0891b2;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
-      line-height: 1.5;
-      color: var(--text);
-      background-color: var(--bg);
-    }
-
-    img {
-      display: block;
-      max-width: 100%;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    button {
-      font: inherit;
-    }
-
-    .sidebar-toggle {
-      display: none;
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      z-index: 1100;
-      border: none;
-      background: var(--primary);
-      color: #fff;
-      border-radius: 10px;
-      padding: 10px 12px;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      font-size: 18px;
-    }
-
-    .sidebar-toggle:focus-visible,
-    .sidebar a:focus-visible,
-    .logout-link:focus-visible,
-    .btn-back:focus-visible,
-    .file-link:focus-visible {
-      outline: 3px solid #93c5fd;
-      outline-offset: 2px;
-    }
-
-    .app {
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      width: var(--sidebar-width);
-      min-height: 100vh;
-      background: linear-gradient(160deg, var(--primary), var(--primary-light));
-      color: #fff;
-      position: fixed;
-      top: 0;
-      left: 0;
-      display: flex;
-      flex-direction: column;
-      padding: 20px 0 16px;
-      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
-      z-index: 1000;
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar-header {
-      padding: 0 18px 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-      margin-bottom: 12px;
-    }
-
-    .sidebar-header h1 {
-      font-size: 17px;
-      font-weight: 600;
-      line-height: 1.4;
-      word-break: break-word;
-    }
-
-    .sidebar-header span {
-      display: block;
-      font-size: 13px;
-      font-weight: 400;
-      opacity: 0.9;
-      margin-top: 4px;
-    }
-
-    .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 0 10px;
-      flex: 1;
-    }
-
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      color: #fff;
-      border-radius: 10px;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-      font-weight: 600;
-    }
-
-    .sidebar a.active {
-      background-color: rgba(255, 255, 255, 0.22);
-      font-weight: 700;
-    }
-
-    .sidebar a:hover {
-      background-color: rgba(255, 255, 255, 0.12);
-      transform: translateX(2px);
-    }
-
-    .sidebar-footer {
-      padding: 12px 10px 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
-      margin-top: 12px;
-    }
-
-    .logout-link {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 14px;
-      color: #fff;
-      border-radius: 10px;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-      background: rgba(255, 255, 255, 0.08);
-      border: none;
-      cursor: pointer;
-      font-weight: 700;
-      width: 100%;
-    }
-
-    .logout-link:hover {
-      background: rgba(255, 255, 255, 0.16);
-      transform: translateY(-1px);
-    }
-
-    .sidebar-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.45);
-      z-index: 999;
-    }
-
-    .sidebar-overlay.show {
-      display: block;
-    }
-
-    .main {
-      margin-left: var(--sidebar-width);
-      min-height: 100vh;
-      padding: 24px;
-      transition: margin-left 0.3s ease;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      background: var(--surface);
-      padding: 18px 20px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-    }
-
-    .header h2 {
-      font-weight: 700;
-      color: var(--primary);
-      font-size: 28px;
-    }
-
-    .header-user {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.5;
-      text-align: right;
-    }
-
-    .header-user strong {
-      color: var(--text);
-    }
-
-    .content {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .top-actions {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .btn-back {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: none;
-      background: #eef2ff;
-      color: var(--primary);
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-    }
-
-    .btn-back:hover {
-      background: #dbe4ff;
-      transform: translateY(-1px);
-    }
-
-    .btn-back img {
-      width: 18px;
-      height: 18px;
-    }
-
-    .section-card {
-      background: var(--surface);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      padding: 22px;
-    }
-
-    .section-title {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 18px;
-    }
-
-    .details-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px 20px;
-    }
-
-    .info-card {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-    }
-
-    .info-card.full-width {
-      grid-column: 1 / -1;
-    }
-
-    .info-card label {
-      display: block;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--muted);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-    }
-
-    .info-card p,
-    .info-card a {
-      font-size: 14px;
-      color: var(--text);
-      line-height: 1.6;
-      word-break: break-word;
-    }
-
-    .file-link {
-      color: var(--primary);
-      font-weight: 700;
-    }
-
-    .file-link:hover {
-      color: var(--primary-light);
-      text-decoration: underline;
-    }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 12px;
-      min-width: 90px;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    .status-pending {
-      background: #fef3c7;
-      color: #92400e;
-      border: 1px solid #fcd34d;
-    }
-
-    .status-approved {
-      background: #dcfce7;
-      color: #166534;
-      border: 1px solid #86efac;
-    }
-
-    .status-declined {
-      background: #fee2e2;
-      color: #991b1b;
-      border: 1px solid #fca5a5;
-    }
-
-    .comments-box {
-      padding: 18px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: #fafbff;
-    }
-
-    .comments-box strong {
-      display: block;
-      margin-bottom: 8px;
-      color: var(--primary);
-      font-size: 15px;
-    }
-
-    .comments-box p {
-      color: var(--text);
-      font-size: 14px;
-      line-height: 1.6;
-      white-space: pre-line;
-    }
-
-    @media (max-width: 980px) {
-      .sidebar-toggle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+  <link rel="icon" type="image/x-icon" href="./static/images/logo.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#1e2a78",
+            "primary-light": "#3a4bb3",
+            "primary-dark": "#16205d",
+            bg: "#f4f7fc",
+            surface: "#ffffff",
+            textmain: "#1f2937",
+            muted: "#6b7280",
+            borderline: "#e5e7eb"
+          },
+          boxShadow: {
+            soft: "0 10px 25px rgba(0, 0, 0, 0.08)",
+            sidebar: "2px 0 12px rgba(0, 0, 0, 0.12)",
+            card: "0 4px 12px rgba(0, 0, 0, 0.04)"
+          }
+        }
       }
-
-      .sidebar {
-        transform: translateX(-100%);
-        width: 260px;
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .main {
-        margin-left: 0;
-        padding: 76px 16px 20px;
-      }
-
-      .header h2 {
-        font-size: 24px;
-      }
-
-      .header-user {
-        text-align: left;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .details-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .info-card.full-width {
-        grid-column: auto;
-      }
-
-      .btn-back {
-        width: 100%;
-        justify-content: center;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html {
-        scroll-behavior: auto;
-      }
-
-      *,
-      *::before,
-      *::after {
-        transition: none !important;
-        animation: none !important;
-      }
-    }
-  </style>
+    };
+  </script>
 </head>
 
-<body>
-  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false"
+<body class="min-h-screen bg-bg font-sans leading-6 text-textmain antialiased">
+  <button
+    class="fixed left-4 top-4 z-[1100] hidden rounded-[10px] bg-primary px-3 py-2 text-lg text-white shadow-soft focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[980px]:inline-flex max-[980px]:items-center max-[980px]:justify-center motion-reduce:transition-none"
+    type="button"
+    id="sidebarToggle"
+    aria-controls="sidebar"
+    aria-expanded="false"
     aria-label="Toggle navigation menu">
     ☰
   </button>
 
-  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
+  <div id="sidebarOverlay" class="fixed inset-0 z-[999] hidden bg-slate-900/45" hidden></div>
 
-  <div class="app">
-    <aside class="sidebar" id="sidebar" aria-label="Student navigation">
-      <div class="sidebar-header">
-        <h1>Student</h1>
-        <span>Promissory Notes System</span>
+  <div class="flex min-h-screen">
+    <aside
+      id="sidebar"
+      aria-label="Student navigation"
+      class="fixed left-0 top-0 z-[1000] flex min-h-screen w-[240px] flex-col bg-[linear-gradient(160deg,#1e2a78,#3a4bb3)] px-0 pb-4 pt-5 text-white shadow-sidebar transition-transform duration-300 ease-in-out max-[980px]:w-[260px] max-[980px]:-translate-x-full motion-reduce:transition-none">
+      <div class="mb-3 border-b border-white/15 px-[18px] pb-5">
+        <h1 class="break-words text-[17px] font-semibold leading-[1.4]">Student</h1>
+        <span class="mt-1 block text-[13px] font-normal opacity-90">Promissory Notes System</span>
       </div>
 
-      <nav class="sidebar-nav">
-        <a href="{{ url_for('student.dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('student.request_promissory') }}">Request Promissory</a>
-        <a href="{{ url_for('student.history') }}" class="active">History</a>
-        <a href="{{ url_for('student.setup') }}">Account</a>
+      <nav class="flex flex-1 flex-col gap-1.5 px-[10px]">
+        <a
+          href="{{ url_for('student.dashboard') }}"
+          class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 font-semibold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+          Dashboard
+        </a>
+        <a
+          href="{{ url_for('student.request_promissory') }}"
+          class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 font-semibold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+          Request Promissory
+        </a>
+        <a
+          href="{{ url_for('student.history') }}"
+          class="flex items-center gap-2.5 rounded-[10px] bg-white/20 px-[14px] py-3 font-bold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+          History
+        </a>
+        <a
+          href="{{ url_for('student.setup') }}"
+          class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 font-semibold text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+          Account
+        </a>
       </nav>
 
-      <div class="sidebar-footer">
-        <button class="logout-link" type="button" onclick="window.location.href='{{ url_for('student.logout') }}'">
+      <div class="mt-3 border-t border-white/15 px-[10px] pt-3">
+        <button
+          class="w-full cursor-pointer rounded-[10px] border-0 bg-white/10 px-[14px] py-3 font-bold text-white transition duration-200 ease-in-out hover:-translate-y-px hover:bg-white/15 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none"
+          type="button"
+          onclick="window.location.href='{{ url_for('student.logout') }}'">
           Logout
         </button>
       </div>
     </aside>
 
-    <main class="main">
-      <header class="header">
-        <h2>View Promissory Request</h2>
-        <div class="header-user">
-          <strong>{{ student.first_name }} {{ student.last_name }}</strong><br>
+    <main class="ml-[240px] min-h-screen flex-1 p-6 transition-all duration-300 ease-in-out max-[980px]:ml-0 max-[980px]:px-4 max-[980px]:pb-5 max-[980px]:pt-[76px] motion-reduce:transition-none">
+      <header class="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-surface px-5 py-[18px] shadow-soft">
+        <h2 class="text-[28px] font-bold text-primary max-[980px]:text-2xl">View Promissory Request</h2>
+        <div class="text-right text-sm leading-6 text-muted max-[980px]:text-left">
+          <strong class="text-textmain">{{ student.first_name }} {{ student.last_name }}</strong><br />
           {{ student.role }}
         </div>
       </header>
 
-      <div class="content">
-        <div class="top-actions">
-          <a href="{{ url_for('student.history') }}" class="btn-back">
-            <img src="{{ url_for('static', filename='images/back.png') }}" alt="">
+      <div class="flex flex-col gap-5">
+        <div class="flex flex-wrap items-center gap-3">
+          <a
+            href="{{ url_for('student.history') }}"
+            class="inline-flex items-center gap-2 rounded-xl bg-indigo-50 px-[14px] py-2.5 font-bold text-primary transition duration-200 ease-in-out hover:-translate-y-px hover:bg-indigo-100 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-md:w-full max-md:justify-center motion-reduce:transition-none">
+            <img src="{{ url_for('static', filename='images/back.png') }}" alt="" class="h-[18px] w-[18px]" />
             <span>Back to History</span>
           </a>
         </div>
 
-        <section class="section-card">
-          <h3 class="section-title">Request Details</h3>
+        <section class="rounded-2xl bg-surface p-[22px] shadow-soft">
+          <h3 class="mb-[18px] text-[22px] font-bold text-primary">Request Details</h3>
 
-          <div class="details-grid">
-            <div class="info-card">
-              <label>Request Date</label>
-              <p>{{ request.requested_at.strftime('%B %d, %Y %I:%M %p') }}</p>
+          <div class="grid grid-cols-2 gap-x-5 gap-y-[18px] max-md:grid-cols-1">
+            <div class="rounded-[14px] border border-borderline bg-white p-4 shadow-card">
+              <label class="mb-1.5 block text-[13px] font-bold uppercase tracking-[0.02em] text-muted">Request Date</label>
+              <p class="break-words text-sm leading-6 text-textmain">{{ request.requested_at.strftime('%B %d, %Y %I:%M %p') }}</p>
             </div>
 
-            <div class="info-card">
-              <label>Status</label>
-              <span class="status-badge {% if request.status == 'Pending' %}status-pending{% elif request.status == 'Approved' %}status-approved{% else %}status-declined{% endif %}">
+            <div class="rounded-[14px] border border-borderline bg-white p-4 shadow-card">
+              <label class="mb-1.5 block text-[13px] font-bold uppercase tracking-[0.02em] text-muted">Status</label>
+              <span class="inline-flex min-w-[90px] items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 text-center text-xs font-bold
+                {% if request.status == 'Pending' %}
+                  border border-amber-300 bg-amber-100 text-amber-800
+                {% elif request.status == 'Approved' %}
+                  border border-green-300 bg-green-100 text-green-800
+                {% else %}
+                  border border-red-300 bg-red-100 text-red-800
+                {% endif %}">
                 {{ request.status.upper() }}
               </span>
             </div>
 
-            <div class="info-card">
-              <label>Year Level</label>
-              <p>{{ request.year_level }}</p>
+            <div class="rounded-[14px] border border-borderline bg-white p-4 shadow-card">
+              <label class="mb-1.5 block text-[13px] font-bold uppercase tracking-[0.02em] text-muted">Year Level</label>
+              <p class="break-words text-sm leading-6 text-textmain">{{ request.year_level }}</p>
             </div>
 
-            <div class="info-card">
-              <label>Course</label>
-              <p>{{ request.course }}</p>
+            <div class="rounded-[14px] border border-borderline bg-white p-4 shadow-card">
+              <label class="mb-1.5 block text-[13px] font-bold uppercase tracking-[0.02em] text-muted">Course</label>
+              <p class="break-words text-sm leading-6 text-textmain">{{ request.course }}</p>
             </div>
 
-            <div class="info-card">
-              <label>Semester</label>
-              <p>{{ request.semester or "Not specified" }}</p>
+            <div class="rounded-[14px] border border-borderline bg-white p-4 shadow-card">
+              <label class="mb-1.5 block text-[13px] font-bold uppercase tracking-[0.02em] text-muted">Semester</label>
+              <p class="break-words text-sm leading-6 text-textmain">{{ request.semester or "Not specified" }}</p>
             </div>
 
-            <div class="info-card">
-              <label>Semester Type</label>
-              <p>{{ request.semester_type or "Not specified" }}</p>
+            <div class="rounded-[14px] border border-borderline bg-white p-4 shadow-card">
+              <label class="mb-1.5 block text-[13px] font-bold uppercase tracking-[0.02em] text-muted">Semester Type</label>
+              <p class="break-words text-sm leading-6 text-textmain">{{ request.semester_type or "Not specified" }}</p>
             </div>
 
             {% if request.program %}
-            <div class="info-card">
-              <label>Program</label>
-              <p>{{ request.program }}</p>
+            <div class="rounded-[14px] border border-borderline bg-white p-4 shadow-card">
+              <label class="mb-1.5 block text-[13px] font-bold uppercase tracking-[0.02em] text-muted">Program</label>
+              <p class="break-words text-sm leading-6 text-textmain">{{ request.program }}</p>
             </div>
             {% endif %}
 
-            <div class="info-card">
-              <label>Email</label>
-              <p>{{ request.email }}</p>
+            <div class="rounded-[14px] border border-borderline bg-white p-4 shadow-card">
+              <label class="mb-1.5 block text-[13px] font-bold uppercase tracking-[0.02em] text-muted">Email</label>
+              <p class="break-words text-sm leading-6 text-textmain">{{ request.email }}</p>
             </div>
 
-            <div class="info-card full-width">
-              <label>Reason</label>
+            <div class="col-span-full rounded-[14px] border border-borderline bg-white p-4 shadow-card max-md:col-span-1">
+              <label class="mb-1.5 block text-[13px] font-bold uppercase tracking-[0.02em] text-muted">Reason</label>
               {% if request.reason_text %}
-              <p>{{ request.reason_text }}</p>
+              <p class="break-words text-sm leading-6 text-textmain">{{ request.reason_text }}</p>
               {% elif request.reason_doc %}
-              <a class="file-link" href="{{ url_for('static', filename='uploads/' + request.reason_doc) }}" target="_blank">
+              <a
+                class="break-words text-sm font-bold leading-6 text-primary transition duration-200 ease-in-out hover:text-primary-light hover:underline focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
+                href="{{ url_for('static', filename='uploads/' + request.reason_doc) }}"
+                target="_blank">
                 View Document
               </a>
               {% else %}
-              <p>Not provided</p>
+              <p class="break-words text-sm leading-6 text-textmain">Not provided</p>
               {% endif %}
             </div>
 
-            <div class="info-card full-width">
-              <label>Valid ID</label>
+            <div class="col-span-full rounded-[14px] border border-borderline bg-white p-4 shadow-card max-md:col-span-1">
+              <label class="mb-1.5 block text-[13px] font-bold uppercase tracking-[0.02em] text-muted">Valid ID</label>
               {% if request.valid_id %}
-              <a class="file-link" href="{{ url_for('static', filename='uploads/' + request.valid_id) }}" target="_blank">
+              <a
+                class="break-words text-sm font-bold leading-6 text-primary transition duration-200 ease-in-out hover:text-primary-light hover:underline focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
+                href="{{ url_for('static', filename='uploads/' + request.valid_id) }}"
+                target="_blank">
                 View Document
               </a>
               {% else %}
-              <p>Not uploaded</p>
+              <p class="break-words text-sm leading-6 text-textmain">Not uploaded</p>
               {% endif %}
             </div>
 
-            <div class="info-card full-width">
-              <div class="comments-box">
-                <strong>Comments from Finance</strong>
-                <p>{{ request.comments or "No comments yet." }}</p>
+            <div class="col-span-full rounded-[14px] border border-borderline bg-white p-4 shadow-card max-md:col-span-1">
+              <div class="rounded-[14px] border border-borderline bg-[#fafbff] p-[18px]">
+                <strong class="mb-2 block text-[15px] text-primary">Comments from Finance</strong>
+                <p class="whitespace-pre-line break-words text-sm leading-6 text-textmain">{{ request.comments or "No comments yet." }}</p>
               </div>
             </div>
           </div>
@@ -570,44 +205,53 @@
   </div>
 
   <script>
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
 
     function openSidebar() {
-      sidebar.classList.add('open');
+      sidebar.classList.remove("max-[980px]:-translate-x-full");
+      sidebar.classList.add("translate-x-0");
       sidebarOverlay.hidden = false;
-      sidebarOverlay.classList.add('show');
-      sidebarToggle.setAttribute('aria-expanded', 'true');
+      sidebarOverlay.classList.remove("hidden");
+      sidebarToggle.setAttribute("aria-expanded", "true");
     }
 
     function closeSidebar() {
-      sidebar.classList.remove('open');
-      sidebarOverlay.classList.remove('show');
+      if (window.innerWidth <= 980) {
+        sidebar.classList.remove("translate-x-0");
+        sidebar.classList.add("max-[980px]:-translate-x-full");
+      }
+      sidebarOverlay.classList.add("hidden");
       sidebarOverlay.hidden = true;
-      sidebarToggle.setAttribute('aria-expanded', 'false');
+      sidebarToggle.setAttribute("aria-expanded", "false");
     }
 
     function toggleSidebar() {
-      if (sidebar.classList.contains('open')) {
+      if (sidebar.classList.contains("translate-x-0") && window.innerWidth <= 980) {
         closeSidebar();
       } else {
         openSidebar();
       }
     }
 
-    sidebarToggle.addEventListener('click', toggleSidebar);
-    sidebarOverlay.addEventListener('click', closeSidebar);
+    sidebarToggle.addEventListener("click", toggleSidebar);
+    sidebarOverlay.addEventListener("click", closeSidebar);
 
-    document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') {
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
         closeSidebar();
       }
     });
 
-    window.addEventListener('resize', function () {
+    window.addEventListener("resize", function () {
       if (window.innerWidth > 980) {
-        closeSidebar();
+        sidebar.classList.remove("translate-x-0", "max-[980px]:-translate-x-full");
+        sidebarOverlay.classList.add("hidden");
+        sidebarOverlay.hidden = true;
+        sidebarToggle.setAttribute("aria-expanded", "false");
+      } else if (!sidebar.classList.contains("translate-x-0")) {
+        sidebar.classList.add("max-[980px]:-translate-x-full");
       }
     });
   </script>
