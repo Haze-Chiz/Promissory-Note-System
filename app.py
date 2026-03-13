@@ -11,14 +11,22 @@ from student_routes import student_bp
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "change-this-in-production")
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///promissory.db")
+
+    _database_url = os.environ.get("DATABASE_URL", "sqlite:///promissory.db")
+    if _database_url.startswith("postgres://"):
+        _database_url = _database_url.replace("postgres://", "postgresql://", 1)
+
+    SQLALCHEMY_DATABASE_URI = _database_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     PERMANENT_SESSION_LIFETIME = timedelta(days=30)
 
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
-    SESSION_COOKIE_SECURE = os.environ.get("FLASK_ENV") == "production"
+    SESSION_COOKIE_SECURE = os.environ.get("FLASK_ENV", "").lower() == "production"
+
+    PREFERRED_URL_SCHEME = "https"
+    TEMPLATES_AUTO_RELOAD = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
 
 
 def create_app():
@@ -27,9 +35,10 @@ def create_app():
 
     db.init_app(app)
 
-    app.register_blueprint(admin_bp, url_prefix="/admin")
-    app.register_blueprint(finance_bp, url_prefix="/finance")
-    app.register_blueprint(student_bp, url_prefix="/student")
+    # Blueprints already contain their own url_prefix in the route modules.
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(finance_bp)
+    app.register_blueprint(student_bp)
 
     def login_required(role=None):
         def decorator(func):
@@ -52,7 +61,7 @@ def create_app():
         """Safely record a system log entry."""
         try:
             log = SystemLog(
-                user_name=user_name,
+                user_name=user_name or "Unknown",
                 action=action,
                 timestamp=datetime.utcnow()
             )
@@ -61,7 +70,7 @@ def create_app():
         except Exception:
             db.session.rollback()
 
-    def get_dashboard_endpoint(role: str) -> str | None:
+    def get_dashboard_endpoint(role: str):
         role_map = {
             "Admin": "admin.dashboard",
             "Finance": "finance.dashboard",
@@ -71,20 +80,23 @@ def create_app():
 
     @app.before_request
     def protect_admin_routes():
-        admin_prefix = "/admin"
-        allowed_admin_endpoints = {"login", "static"}
+        """
+        Extra safety layer for /admin routes.
+        Allows only authenticated Admin users past this point.
+        """
+        if not request.path.startswith("/admin"):
+            return None
 
-        if request.path.startswith(admin_prefix):
-            if request.endpoint in allowed_admin_endpoints:
-                return None
+        if request.endpoint in {None, "static"}:
+            return None
 
-            if "user_id" not in session:
-                flash("Please log in first.", "warning")
-                return redirect(url_for("login"))
+        if "user_id" not in session:
+            flash("Please log in first.", "warning")
+            return redirect(url_for("login"))
 
-            if session.get("role") != "Admin":
-                flash("Admin access required.", "danger")
-                return redirect(url_for("login"))
+        if session.get("role") != "Admin":
+            flash("Admin access required.", "danger")
+            return redirect(url_for("login"))
 
         return None
 
@@ -118,12 +130,16 @@ def create_app():
                 flash("Invalid email or password.", "danger")
                 return render_template("login.html"), 401
 
+            if getattr(user, "status", None) == "Inactive":
+                flash("Your account is inactive. Please contact the administrator.", "warning")
+                return render_template("login.html"), 403
+
             session.clear()
             session.permanent = remember
             session["user_id"] = user.id
             session["role"] = user.role
             session["user_name"] = " ".join(
-                part for part in [user.first_name, user.last_name] if part
+                part for part in [user.first_name, user.last_name] if part and str(part).strip()
             ).strip() or user.email
 
             log_action(user.email, "Logged in")
@@ -138,9 +154,10 @@ def create_app():
 
         return render_template("login.html")
 
-    @app.route("/logout", methods=["POST"])
+    @app.route("/logout", methods=["GET", "POST"])
     def logout():
         user_name = session.get("user_name") or session.get("user_id") or "Unknown"
+
         if "user_id" in session:
             log_action(str(user_name), "Logged out")
 

@@ -1,6 +1,6 @@
 import os
+import re
 from datetime import datetime
-from functools import wraps
 from pathlib import Path
 from uuid import uuid4
 
@@ -16,7 +16,9 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 
-from models import db, Account, PromissoryRequest, ActiveSettings, SystemLog
+from models import db, Account, PromissoryRequest, ActiveSettings
+from utils.auth import require_role, require_active_user
+from utils.logging import log_action
 
 
 student_bp = Blueprint(
@@ -30,128 +32,26 @@ ALLOWED_UPLOAD_EXTENSIONS = {"pdf", "jpg", "jpeg", "png"}
 DEFAULT_UPLOAD_SUBDIR = os.path.join("static", "uploads")
 VALID_SEMESTER_TYPES = {"Midterm", "Final", "Prelim", "Pre-Final"}
 
-
-def require_role(role=None):
-    def wrapper(func):
-        @wraps(func)
-        def decorated(*args, **kwargs):
-            user_id = session.get("user_id")
-            if not user_id:
-                flash("Please log in first.", "warning")
-                return redirect(url_for("login"))
-
-            user = db.session.get(Account, user_id)
-            if not user:
-                session.clear()
-                flash("Account not found. Please log in again.", "danger")
-                return redirect(url_for("login"))
-
-            if user.status == "Inactive":
-                flash("Your account is inactive. Please contact the admin.", "danger")
-                return redirect(url_for("student.inactive_notice"))
-
-            if role and user.role != role:
-                flash("Access denied.", "danger")
-                return redirect(url_for("login"))
-
-            return func(*args, **kwargs)
-
-        return decorated
-
-    return wrapper
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+PHONE_PATTERN = re.compile(r"^[0-9+\-\s()]{7,20}$")
 
 
-def get_current_student():
-    user_id = session.get("user_id")
-    if not user_id:
-        return None
-    return db.session.get(Account, user_id)
+def get_full_name(account):
+    if not account:
+        return "Student User"
 
-
-def get_full_name(acc):
-    return " ".join(
+    full_name = " ".join(
         part.strip()
         for part in [
-            getattr(acc, "first_name", "") or "",
-            getattr(acc, "middle_name", "") or "",
-            getattr(acc, "last_name", "") or "",
-            getattr(acc, "suffix", "") or "",
+            getattr(account, "first_name", "") or "",
+            getattr(account, "middle_name", "") or "",
+            getattr(account, "last_name", "") or "",
+            getattr(account, "suffix", "") or "",
         ]
         if part and part.strip()
     ).strip()
 
-
-def log_action(user_name, action):
-    """Safely log student actions without breaking the main request flow."""
-    try:
-        log = SystemLog(
-            user_name=user_name,
-            action=action,
-            timestamp=datetime.utcnow(),
-        )
-        db.session.add(log)
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-
-
-def is_allowed_file(filename):
-    if not filename or "." not in filename:
-        return False
-    ext = filename.rsplit(".", 1)[-1].lower()
-    return ext in ALLOWED_UPLOAD_EXTENSIONS
-
-
-def get_upload_root():
-    configured_path = current_app.config.get("UPLOAD_FOLDER", DEFAULT_UPLOAD_SUBDIR)
-    return Path(configured_path)
-
-
-def ensure_student_upload_dir(student_id):
-    folder = get_upload_root() / f"student_{student_id}"
-    folder.mkdir(parents=True, exist_ok=True)
-    return folder
-
-
-def save_file(file_obj, student_id, category="reason"):
-    if not file_obj or not getattr(file_obj, "filename", None):
-        return None
-
-    original_name = secure_filename(file_obj.filename)
-    if not original_name:
-        raise ValueError("Invalid file name.")
-
-    if not is_allowed_file(original_name):
-        raise ValueError("Unsupported file type.")
-
-    ext = original_name.rsplit(".", 1)[-1].lower()
-    unique_name = f"{category}_{uuid4().hex}.{ext}"
-
-    student_folder = ensure_student_upload_dir(student_id)
-    absolute_path = student_folder / unique_name
-    file_obj.save(absolute_path)
-
-    relative_path = Path(student_folder.name) / unique_name
-    return str(Path("uploads") / relative_path).replace("\\", "/")
-
-
-def delete_uploaded_file(relative_path):
-    if not relative_path:
-        return
-
-    try:
-        static_path = Path("static")
-        normalized = Path(relative_path)
-
-        if normalized.parts and normalized.parts[0] == "uploads":
-            absolute_path = static_path / normalized
-        else:
-            absolute_path = normalized
-
-        if absolute_path.exists() and absolute_path.is_file():
-            absolute_path.unlink()
-    except Exception:
-        pass
+    return full_name or getattr(account, "email", "Student User")
 
 
 def get_active_term():
@@ -181,44 +81,174 @@ def is_unique_username(username, current_user_id):
     return existing is None
 
 
+def is_valid_email(email):
+    return bool(email and EMAIL_PATTERN.match(email))
+
+
+def is_valid_phone(phone):
+    return not phone or bool(PHONE_PATTERN.match(phone))
+
+
+def is_valid_password(password):
+    return not password or len(password) >= 8
+
+
+def is_allowed_file(filename):
+    if not filename or "." not in filename:
+        return False
+    ext = filename.rsplit(".", 1)[-1].lower()
+    return ext in ALLOWED_UPLOAD_EXTENSIONS
+
+
+def get_upload_root():
+    configured_path = current_app.config.get("UPLOAD_FOLDER", DEFAULT_UPLOAD_SUBDIR)
+    return Path(configured_path)
+
+
+def ensure_student_upload_dir(student_id):
+    folder = get_upload_root() / f"student_{student_id}"
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder
+
+
+def build_relative_upload_path(student_id, filename):
+    return str(Path("uploads") / f"student_{student_id}" / filename).replace("\\", "/")
+
+
+def save_file(file_obj, student_id, category="reason"):
+    if not file_obj or not getattr(file_obj, "filename", None):
+        return None
+
+    original_name = secure_filename(file_obj.filename)
+    if not original_name:
+        raise ValueError("Invalid file name.")
+
+    if not is_allowed_file(original_name):
+        raise ValueError("Unsupported file type.")
+
+    ext = original_name.rsplit(".", 1)[-1].lower()
+    unique_name = f"{category}_{uuid4().hex}.{ext}"
+
+    student_folder = ensure_student_upload_dir(student_id)
+    absolute_path = student_folder / unique_name
+    file_obj.save(absolute_path)
+
+    return build_relative_upload_path(student_id, unique_name)
+
+
+def delete_uploaded_file(relative_path):
+    if not relative_path:
+        return
+
+    try:
+        normalized = Path(relative_path)
+
+        if normalized.parts and normalized.parts[0] == "uploads":
+            upload_root = get_upload_root()
+            absolute_path = upload_root.parent / normalized
+        else:
+            absolute_path = normalized
+
+        if absolute_path.exists() and absolute_path.is_file():
+            absolute_path.unlink()
+    except Exception:
+        pass
+
+
+def get_student_request_query(student_id):
+    return PromissoryRequest.query.filter(PromissoryRequest.student_id == student_id)
+
+
+def get_existing_term_request(student_id, semester_type, semester, school_year):
+    return (
+        PromissoryRequest.query.filter_by(
+            student_id=student_id,
+            semester_type=semester_type,
+            semester=semester,
+            school_year=school_year,
+        )
+        .order_by(PromissoryRequest.requested_at.desc())
+        .first()
+    )
+
+
+def validate_promissory_submission(reason_text, reason_file, semester_type):
+    if semester_type not in VALID_SEMESTER_TYPES:
+        return "Invalid semester type selected."
+
+    if not reason_text and not (reason_file and reason_file.filename):
+        return "Please provide a reason or upload a document."
+
+    return None
+
+
+def validate_profile_update(student_id, username, email, phone, password):
+    if username and not is_unique_username(username, student_id):
+        return "Username is already taken."
+
+    if email:
+        if not is_valid_email(email):
+            return "Please enter a valid email address."
+        if not is_unique_email(email, student_id):
+            return "Email is already in use."
+
+    if phone and not is_valid_phone(phone):
+        return "Please enter a valid phone number."
+
+    if password and not is_valid_password(password):
+        return "Password must be at least 8 characters long."
+
+    return None
+
+
+def update_student_profile(student, username, first_name, middle_name, last_name, email, phone, password):
+    if username:
+        student.username = username
+    if first_name:
+        student.first_name = first_name
+    if middle_name:
+        student.middle_name = middle_name
+    if last_name:
+        student.last_name = last_name
+    if email:
+        student.email = email
+    if phone:
+        student.phone = phone
+    if password:
+        student.set_password(password)
+
+
 @student_bp.route("/inactive")
 def inactive_notice():
     return render_template("student/inactive_notice.html")
 
 
 @student_bp.route("/dashboard")
-@require_role("Student")
+@require_role("Student", allow_inactive_notice_endpoint="student.inactive_notice")
 def dashboard():
-    student = get_current_student()
-    if not student:
-        session.clear()
-        flash("Session expired. Please log in again.", "warning")
-        return redirect(url_for("login"))
+    student, response = require_active_user(
+        role="Student",
+        allow_inactive_notice_endpoint="student.inactive_notice",
+    )
+    if response:
+        return response
 
-    total_promissory = PromissoryRequest.query.filter_by(student_id=student.id).count()
-    active_promissory = PromissoryRequest.query.filter_by(
-        student_id=student.id,
-        status="Pending",
-    ).count()
+    base_query = get_student_request_query(student.id)
+
+    total_promissory = base_query.count()
+    active_promissory = base_query.filter(PromissoryRequest.status == "Pending").count()
 
     recent_requests = (
-        PromissoryRequest.query.filter(
-            PromissoryRequest.student_id == student.id,
-            PromissoryRequest.status.in_(["Approved", "Rejected"]),
-        )
+        base_query.filter(PromissoryRequest.status.in_(["Approved", "Rejected"]))
         .order_by(PromissoryRequest.requested_at.desc())
         .limit(5)
         .all()
     )
 
-    rejected_requests = PromissoryRequest.query.filter_by(
-        student_id=student.id,
-        status="Rejected",
-    ).all()
+    rejected_requests = base_query.filter(PromissoryRequest.status == "Rejected").all()
 
-    incomplete_requests = PromissoryRequest.query.filter(
-        PromissoryRequest.student_id == student.id,
-        (PromissoryRequest.reason_doc.is_(None)) | (PromissoryRequest.valid_id.is_(None)),
+    incomplete_requests = base_query.filter(
+        (PromissoryRequest.reason_doc.is_(None)) | (PromissoryRequest.valid_id.is_(None))
     ).all()
 
     data = {
@@ -242,13 +272,14 @@ def dashboard():
 
 
 @student_bp.route("/request", methods=["GET", "POST"])
-@require_role("Student")
+@require_role("Student", allow_inactive_notice_endpoint="student.inactive_notice")
 def request_promissory():
-    student = get_current_student()
-    if not student:
-        session.clear()
-        flash("Session expired. Please log in again.", "warning")
-        return redirect(url_for("login"))
+    student, response = require_active_user(
+        role="Student",
+        allow_inactive_notice_endpoint="student.inactive_notice",
+    )
+    if response:
+        return response
 
     semester, school_year = get_active_term()
 
@@ -258,19 +289,20 @@ def request_promissory():
         reason_file = request.files.get("reason_doc")
         valid_id_file = request.files.get("valid_id")
 
-        if semester_type not in VALID_SEMESTER_TYPES:
-            flash("Invalid semester type selected.", "danger")
+        validation_error = validate_promissory_submission(
+            reason_text=reason_text,
+            reason_file=reason_file,
+            semester_type=semester_type,
+        )
+        if validation_error:
+            flash(validation_error, "danger")
             return redirect(url_for("student.request_promissory"))
 
-        existing_request = (
-            PromissoryRequest.query.filter_by(
-                student_id=student.id,
-                semester_type=semester_type,
-                semester=semester,
-                school_year=school_year,
-            )
-            .order_by(PromissoryRequest.requested_at.desc())
-            .first()
+        existing_request = get_existing_term_request(
+            student_id=student.id,
+            semester_type=semester_type,
+            semester=semester,
+            school_year=school_year,
         )
 
         if existing_request:
@@ -287,10 +319,6 @@ def request_promissory():
                     "danger",
                 )
                 return redirect(url_for("student.request_promissory"))
-
-        if not reason_text and not (reason_file and reason_file.filename):
-            flash("Please provide a reason or upload a document.", "danger")
-            return redirect(url_for("student.request_promissory"))
 
         saved_reason_doc = None
         saved_valid_id = None
@@ -350,19 +378,19 @@ def request_promissory():
 
 
 @student_bp.route("/history")
-@require_role("Student")
+@require_role("Student", allow_inactive_notice_endpoint="student.inactive_notice")
 def history():
-    student = get_current_student()
-    if not student:
-        session.clear()
-        flash("Session expired. Please log in again.", "warning")
-        return redirect(url_for("login"))
+    student, response = require_active_user(
+        role="Student",
+        allow_inactive_notice_endpoint="student.inactive_notice",
+    )
+    if response:
+        return response
 
-    query = PromissoryRequest.query.filter_by(student_id=student.id)
+    query = get_student_request_query(student.id)
 
-    filterable_fields = ["status", "semester", "semester_type", "school_year"]
-    for key in filterable_fields:
-        value = normalize_form_value(key) if request.method == "POST" else (request.args.get(key, "").strip())
+    for key in ["status", "semester", "semester_type", "school_year"]:
+        value = (request.args.get(key) or "").strip()
         if value:
             column = getattr(PromissoryRequest, key, None)
             if column is not None:
@@ -373,10 +401,11 @@ def history():
     school_years = [
         sy[0]
         for sy in db.session.query(PromissoryRequest.school_year)
-        .filter_by(student_id=student.id)
+        .filter(PromissoryRequest.student_id == student.id)
         .distinct()
         .order_by(PromissoryRequest.school_year.desc())
         .all()
+        if sy[0]
     ]
 
     log_action(student.email, "Viewed promissory request history")
@@ -390,18 +419,22 @@ def history():
 
 
 @student_bp.route("/delete_request/<int:request_id>", methods=["POST"])
-@require_role("Student")
+@require_role("Student", allow_inactive_notice_endpoint="student.inactive_notice")
 def delete_request(request_id):
-    student = get_current_student()
-    if not student:
-        session.clear()
-        flash("Session expired. Please log in again.", "warning")
-        return redirect(url_for("login"))
+    student, response = require_active_user(
+        role="Student",
+        allow_inactive_notice_endpoint="student.inactive_notice",
+    )
+    if response:
+        return response
 
-    req = PromissoryRequest.query.filter_by(
-        id=request_id,
-        student_id=student.id,
-    ).first()
+    req = (
+        PromissoryRequest.query.filter_by(
+            id=request_id,
+            student_id=student.id,
+        )
+        .first()
+    )
 
     if not req:
         flash("Request not found.", "danger")
@@ -431,15 +464,14 @@ def delete_request(request_id):
 
 
 @student_bp.route("/setup", methods=["GET", "POST"])
-@require_role("Student")
+@require_role("Student", allow_inactive_notice_endpoint="student.inactive_notice")
 def setup():
-    student = get_current_student()
-    if not student:
-        session.clear()
-        flash("Session expired. Please log in again.", "warning")
-        return redirect(url_for("login"))
-
-    db.session.refresh(student)
+    student, response = require_active_user(
+        role="Student",
+        allow_inactive_notice_endpoint="student.inactive_notice",
+    )
+    if response:
+        return response
 
     if request.method == "POST":
         username = normalize_form_value("username")
@@ -448,35 +480,33 @@ def setup():
         last_name = normalize_form_value("last_name")
         email = normalize_form_value("email").lower()
         phone = normalize_form_value("phone")
-        password = request.form.get("password", "").strip()
+        password = (request.form.get("password") or "").strip()
 
-        if username and not is_unique_username(username, student.id):
-            flash("Username is already taken.", "danger")
-            return redirect(url_for("student.setup"))
-
-        if email and not is_unique_email(email, student.id):
-            flash("Email is already in use.", "danger")
+        validation_error = validate_profile_update(
+            student_id=student.id,
+            username=username,
+            email=email,
+            phone=phone,
+            password=password,
+        )
+        if validation_error:
+            flash(validation_error, "danger")
             return redirect(url_for("student.setup"))
 
         try:
-            if username:
-                student.username = username
-            if first_name:
-                student.first_name = first_name
-            if middle_name:
-                student.middle_name = middle_name
-            if last_name:
-                student.last_name = last_name
-            if email:
-                student.email = email
-            if phone:
-                student.phone = phone
-            if password:
-                student.set_password(password)
+            update_student_profile(
+                student=student,
+                username=username,
+                first_name=first_name,
+                middle_name=middle_name,
+                last_name=last_name,
+                email=email,
+                phone=phone,
+                password=password,
+            )
 
             db.session.commit()
-
-            session["user_name"] = get_full_name(student) or student.email
+            session["user_name"] = get_full_name(student)
 
             flash("Profile updated successfully!", "success")
             log_action(student.email, "Updated profile information")
@@ -495,18 +525,22 @@ def setup():
 
 
 @student_bp.route("/view_request/<int:request_id>")
-@require_role("Student")
+@require_role("Student", allow_inactive_notice_endpoint="student.inactive_notice")
 def view_request(request_id):
-    student = get_current_student()
-    if not student:
-        session.clear()
-        flash("Session expired. Please log in again.", "warning")
-        return redirect(url_for("login"))
+    student, response = require_active_user(
+        role="Student",
+        allow_inactive_notice_endpoint="student.inactive_notice",
+    )
+    if response:
+        return response
 
-    req = PromissoryRequest.query.filter_by(
-        id=request_id,
-        student_id=student.id,
-    ).first()
+    req = (
+        PromissoryRequest.query.filter_by(
+            id=request_id,
+            student_id=student.id,
+        )
+        .first()
+    )
 
     if not req:
         flash("Request not found.", "danger")
@@ -521,6 +555,7 @@ def view_request(request_id):
 
 
 @student_bp.route("/logout", methods=["POST"])
+@require_role("Student", allow_inactive_notice_endpoint="student.inactive_notice")
 def logout():
     user_name = session.get("user_name", "Student User")
     session.clear()
