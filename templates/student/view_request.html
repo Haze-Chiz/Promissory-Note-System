@@ -1,473 +1,616 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>View Request | Student Promissory Notes System</title>
-    <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
-    <style>
-        :root {
-            --nav-width: 250px;
-            --primary: #4b6cb7;
-            --secondary: #182848;
-            --accent: #f8b500;
-            --bg: #f4f7fc;
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --radius: 16px;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            --border: rgba(0, 0, 0, 0.06);
-            --text: #111;
-            --text-light: #555;
-            --success: #2ecc71;
-            --danger: #e74c3c;
-            --warning: #f1c40f;
-            --font: 'Inter', system-ui, sans-serif;
-            --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Request | Student Promissory Notes System</title>
+  <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: var(--font);
-        }
+  <style>
+    :root {
+      --primary: #1e2a78;
+      --primary-light: #3a4bb3;
+      --primary-dark: #16205d;
+      --bg: #f4f7fc;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --hover: #eef2ff;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --radius: 14px;
+      --sidebar-width: 240px;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --info: #0891b2;
+    }
 
-        body {
-            min-height: 100vh;
-            background: var(--bg);
-            color: var(--text);
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        a {
-            text-decoration: none;
-            color: inherit;
-            transition: 0.3s ease;
-        }
+    html {
+      scroll-behavior: smooth;
+    }
 
-        .app {
-            display: flex;
-            min-height: 100vh;
-            flex-direction: row;
-        }
+    body {
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background-color: var(--bg);
+    }
 
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: var(--nav-width);
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-            padding: 30px 20px;
-            background: linear-gradient(180deg, var(--primary), var(--secondary));
-            color: #fff;
-            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
-            z-index: 10;
-        }
+    img {
+      display: block;
+      max-width: 100%;
+    }
 
-        .brand {
-            font-weight: 700;
-            text-align: center;
-            font-size: 18px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
-        .brand span {
-            font-size: 12px;
-            opacity: 0.85;
-        }
+    button {
+      font: inherit;
+    }
 
-        .nav {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 25px;
-        }
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1100;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      font-size: 18px;
+    }
 
-        .nav a {
-            padding: 14px 18px;
-            border-radius: var(--radius);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: 0.3s ease, transform 0.2s ease;
-            position: relative;
-        }
+    .sidebar-toggle:focus-visible,
+    .sidebar a:focus-visible,
+    .logout-link:focus-visible,
+    .btn-back:focus-visible,
+    .file-link:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 2px;
+    }
 
-        .nav a:hover,
-        .nav a.active {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateX(6px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
+    .app {
+      min-height: 100vh;
+    }
 
-        .logout-btn {
-            margin-top: auto;
-            padding: 14px 18px;
-            border-radius: var(--radius);
-            background: rgba(255, 255, 255, 0.15);
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            border: none;
-            transition: 0.3s ease, transform 0.2s ease;
-            display: block;
-            width: 100%;
-        }
+    .sidebar {
+      width: var(--sidebar-width);
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--primary), var(--primary-light));
+      color: #fff;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0 16px;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
 
-        .logout-btn:hover {
-            background: var(--accent);
-            color: var(--secondary);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            transform: translateY(-2px);
-        }
+    .sidebar-header {
+      padding: 0 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      margin-bottom: 12px;
+    }
 
-        .main {
-            margin-left: var(--nav-width);
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
+    .sidebar-header h1 {
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.4;
+      word-break: break-word;
+    }
 
-        .topbar {
-            height: 80px;
-            padding: 0 40px;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-        }
+    .sidebar-header span {
+      display: block;
+      font-size: 13px;
+      font-weight: 400;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
 
-        .welcome {
-            font-size: 20px;
-            font-weight: 700;
-        }
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 10px;
+      flex: 1;
+    }
 
-        .role {
-            font-size: 13px;
-            color: var(--text-light);
-        }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+      font-weight: 600;
+    }
 
-        .content {
-            padding: 30px 40px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+    .sidebar a.active {
+      background-color: rgba(255, 255, 255, 0.22);
+      font-weight: 700;
+    }
 
-        .btn,
-        .btn-back {
-            display: inline-flex;
-            align-items: center;
-            /* centers icon vertically with text */
-            gap: 6px;
-            /* space between icon and text */
-            padding: 10px 18px;
-            border-radius: var(--radius);
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s ease;
-            border: 1px solid var(--border);
-            background: #fff;
-            text-decoration: none;
-        }
+    .sidebar a:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
+    }
 
-        .btn:hover,
-        .btn-back:hover {
-            background: var(--primary);
-            color: #fff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
+    .sidebar-footer {
+      padding: 12px 10px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      margin-top: 12px;
+    }
 
-        .btn-back-icon {
-            width: 16px;
-            height: 16px;
-            display: inline-block;
-        }
+    .logout-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 14px;
+      color: #fff;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+    }
 
-        .btn-ghost {
-            background: #fff;
-            border: 1px solid var(--border);
-        }
+    .logout-link:hover {
+      background: rgba(255, 255, 255, 0.16);
+      transform: translateY(-1px);
+    }
 
-        .btn-ghost:hover {
-            background: var(--primary);
-            color: #fff;
-        }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 999;
+    }
 
-        .card {
-            background: var(--card-bg);
-            padding: 24px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            transition: 0.3s ease;
-        }
+    .sidebar-overlay.show {
+      display: block;
+    }
 
-        .info label {
-            font-weight: 600;
-            font-size: 14px;
-        }
+    .main {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      padding: 24px;
+      transition: margin-left 0.3s ease;
+    }
 
-        .info p,
-        .info a {
-            margin-top: 4px;
-            font-size: 14px;
-            color: var(--text-light);
-        }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: var(--surface);
+      padding: 18px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
 
-        .status-badge {
-            padding: 6px 14px;
-            border-radius: 12px;
-            font-weight: 700;
-            display: inline-block;
-            font-size: 12px;
-        }
+    .header h2 {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 28px;
+    }
 
-        .status-pending {
-            background: rgba(241, 196, 15, 0.15);
-            color: var(--warning);
-            border: 1px solid var(--warning);
-        }
+    .header-user {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+      text-align: right;
+    }
 
-        .status-approved {
-            background: rgba(46, 204, 113, 0.15);
-            color: var(--success);
-            border: 1px solid var(--success);
-        }
+    .header-user strong {
+      color: var(--text);
+    }
 
-        .status-declined {
-            background: rgba(231, 76, 60, 0.15);
-            color: var(--danger);
-            border: 1px solid var(--danger);
-        }
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
-        .comments-box {
-            padding: 16px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            background: #fff;
-            transition: 0.3s ease;
-        }
+    .top-actions {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
 
-        .comments-box:hover {
-            background: rgba(255, 255, 255, 0.9);
-        }
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      background: #eef2ff;
+      color: var(--primary);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
 
-        .sidebar-toggle {
-            display: none;
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            z-index: 1100;
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            padding: 10px 14px;
-            border-radius: 6px;
-            font-size: 18px;
-            cursor: pointer;
-        }
+    .btn-back:hover {
+      background: #dbe4ff;
+      transform: translateY(-1px);
+    }
 
-        @media (max-width: 900px) {
+    .btn-back img {
+      width: 18px;
+      height: 18px;
+    }
 
-            /* Sidebar becomes hidden and slides in */
-            .sidebar {
-                width: 200px;
-                padding: 20px 14px;
-                position: fixed;
-                left: -220px;
-                top: 0;
-                height: 100%;
-                z-index: 1000;
-                transition: left 0.3s ease;
-            }
+    .section-card {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
 
-            .sidebar-toggle {
-                display: block;
-            }
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 18px;
+    }
 
-            /* When toggled, visible */
-            .sidebar.active {
-                left: 0;
-            }
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px 20px;
+    }
 
-            /* Main shifts back to full width */
-            .main {
-                margin-left: 0;
-                width: 100%;
-            }
+    .info-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
 
-            /* Topbar spacing adjusts */
-            .topbar {
-                height: 70px;
-                padding: 0 20px;
-            }
+    .info-card.full-width {
+      grid-column: 1 / -1;
+    }
 
-            /* Page content compresses spacing */
-            .content {
-                padding: 16px;
-            }
+    .info-card label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
 
-            /* Cards stack cleanly */
-            .card {
-                padding: 18px;
-            }
+    .info-card p,
+    .info-card a {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.6;
+      word-break: break-word;
+    }
 
-            /* Info text improves readability */
-            .info label {
-                font-size: 13px;
-            }
+    .file-link {
+      color: var(--primary);
+      font-weight: 700;
+    }
 
-            .info p,
-            .info a {
-                font-size: 13px;
-            }
+    .file-link:hover {
+      color: var(--primary-light);
+      text-decoration: underline;
+    }
 
-            /* Buttons become full width on small screen */
-            .btn,
-            .btn-back {
-                width: 100%;
-                text-align: center;
-            }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 12px;
+      min-width: 90px;
+      text-align: center;
+      white-space: nowrap;
+    }
 
-            /* Comments box adjust */
-            .comments-box {
-                padding: 12px;
-            }
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
+    }
 
-            /* Sidebar logout stays at bottom */
-            .logout-btn {
-                margin-top: auto;
-            }
-        }
-    </style>
+    .status-approved {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+    }
+
+    .status-declined {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+
+    .comments-box {
+      padding: 18px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #fafbff;
+    }
+
+    .comments-box strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--primary);
+      font-size: 15px;
+    }
+
+    .comments-box p {
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+
+    @media (max-width: 980px) {
+      .sidebar-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 76px 16px 20px;
+      }
+
+      .header h2 {
+        font-size: 24px;
+      }
+
+      .header-user {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .info-card.full-width {
+        grid-column: auto;
+      }
+
+      .btn-back {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <div class="app">
-        <button class="sidebar-toggle"
-            onclick="document.querySelector('.sidebar').classList.toggle('active')">☰</button>
+  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false"
+    aria-label="Toggle navigation menu">
+    ☰
+  </button>
 
-        <aside class="sidebar">
-            <div class="brand">Student<br><span>Promissory Notes System</span></div>
-            <nav class="nav">
-                <a href="{{ url_for('student.dashboard') }}">Dashboard</a>
-                <a href="{{ url_for('student.request_promissory') }}">Request Promissory</a>
-                <a href="{{ url_for('student.history') }}">History</a>
-                <a href="{{ url_for('student.setup') }}">Account</a>
-            </nav>
-            <button class="logout-btn" onclick="window.location.href='{{ url_for('student.logout') }}'">Logout</button>
-        </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-        <main class="main">
-            <header class="topbar">
-                <div>
-                    <div class="welcome">{{ student.first_name }} {{ student.last_name }}</div>
-                    <div class="role">{{ student.role }}</div>
-                </div>
-            </header>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Student navigation">
+      <div class="sidebar-header">
+        <h1>Student</h1>
+        <span>Promissory Notes System</span>
+      </div>
 
-            <div class="content">
-                <a href="{{ url_for('student.history') }}" class="btn-back">
-                    <img src="{{ url_for('static', filename='images/back.png') }}"
-                        style="width: 16px; margin-right: 6px; top: 2px; ">
-                    Back to History
-                </a>
+      <nav class="sidebar-nav">
+        <a href="{{ url_for('student.dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('student.request_promissory') }}">Request Promissory</a>
+        <a href="{{ url_for('student.history') }}" class="active">History</a>
+        <a href="{{ url_for('student.setup') }}">Account</a>
+      </nav>
 
-                <h2>View Promissory Request</h2>
+      <div class="sidebar-footer">
+        <button class="logout-link" type="button" onclick="window.location.href='{{ url_for('student.logout') }}'">
+          Logout
+        </button>
+      </div>
+    </aside>
 
-                <div class="card">
+    <main class="main">
+      <header class="header">
+        <h2>View Promissory Request</h2>
+        <div class="header-user">
+          <strong>{{ student.first_name }} {{ student.last_name }}</strong><br>
+          {{ student.role }}
+        </div>
+      </header>
 
-                    <div class="info">
-                        <label>Request Date:</label>
-                        <p>{{ request.requested_at.strftime('%B %d, %Y %I:%M %p') }}</p>
-                    </div>
+      <div class="content">
+        <div class="top-actions">
+          <a href="{{ url_for('student.history') }}" class="btn-back">
+            <img src="{{ url_for('static', filename='images/back.png') }}" alt="">
+            <span>Back to History</span>
+          </a>
+        </div>
 
-                    <div class="info">
-                        <label>Year Level:</label>
-                        <p>{{ request.year_level }}</p>
-                    </div>
+        <section class="section-card">
+          <h3 class="section-title">Request Details</h3>
 
-                    <div class="info">
-                        <label>Course:</label>
-                        <p>{{ request.course }}</p>
-                    </div>
-
-                    <div class="info">
-                        <label>Semester:</label>
-                        <p>{{ request.semester or "Not specified" }}</p>
-                    </div>
-
-                    <div class="info">
-                        <label>Semester Type:</label>
-                        <p>{{ request.semester_type or "Not specified" }}</p>
-                    </div>
-
-                    {% if request.program %}
-                    <div class="info">
-                        <label>Program:</label>
-                        <p>{{ request.program }}</p>
-                    </div>
-                    {% endif %}
-
-                    <div class="info">
-                        <label>Email:</label>
-                        <p>{{ request.email }}</p>
-                    </div>
-
-                    <div class="info">
-                        <label>Status:</label>
-                        <span class="status-badge
-                        {% if request.status == 'Pending' %}status-pending
-                        {% elif request.status == 'Approved' %}status-approved
-                        {% else %}status-declined{% endif %}">
-                            {{ request.status.upper() }}
-                        </span>
-                    </div>
-
-                    <div class="info">
-                        <label>Reason:</label>
-                        {% if request.reason_text %}
-                        <p>{{ request.reason_text }}</p>
-                        {% elif request.reason_doc %}
-                        <a href="{{ url_for('static', filename='uploads/' + request.reason_doc) }}" target="_blank">View
-                            Document</a>
-                        {% else %}
-                        <p>Not provided</p>
-                        {% endif %}
-                    </div>
-
-                    <div class="info">
-                        <label>Valid ID:</label>
-                        {% if request.valid_id %}
-                        <a href="{{ url_for('static', filename='uploads/' + request.valid_id) }}" target="_blank">View
-                            Document</a>
-                        {% else %}
-                        <p>Not uploaded</p>
-                        {% endif %}
-                    </div>
-
-                    <div class="comments-box">
-                        <strong>Comments from Finance:</strong>
-                        <p>{{ request.comments or "No comments yet." }}</p>
-                    </div>
-                </div>
+          <div class="details-grid">
+            <div class="info-card">
+              <label>Request Date</label>
+              <p>{{ request.requested_at.strftime('%B %d, %Y %I:%M %p') }}</p>
             </div>
-        </main>
-    </div>
+
+            <div class="info-card">
+              <label>Status</label>
+              <span class="status-badge {% if request.status == 'Pending' %}status-pending{% elif request.status == 'Approved' %}status-approved{% else %}status-declined{% endif %}">
+                {{ request.status.upper() }}
+              </span>
+            </div>
+
+            <div class="info-card">
+              <label>Year Level</label>
+              <p>{{ request.year_level }}</p>
+            </div>
+
+            <div class="info-card">
+              <label>Course</label>
+              <p>{{ request.course }}</p>
+            </div>
+
+            <div class="info-card">
+              <label>Semester</label>
+              <p>{{ request.semester or "Not specified" }}</p>
+            </div>
+
+            <div class="info-card">
+              <label>Semester Type</label>
+              <p>{{ request.semester_type or "Not specified" }}</p>
+            </div>
+
+            {% if request.program %}
+            <div class="info-card">
+              <label>Program</label>
+              <p>{{ request.program }}</p>
+            </div>
+            {% endif %}
+
+            <div class="info-card">
+              <label>Email</label>
+              <p>{{ request.email }}</p>
+            </div>
+
+            <div class="info-card full-width">
+              <label>Reason</label>
+              {% if request.reason_text %}
+              <p>{{ request.reason_text }}</p>
+              {% elif request.reason_doc %}
+              <a class="file-link" href="{{ url_for('static', filename='uploads/' + request.reason_doc) }}" target="_blank">
+                View Document
+              </a>
+              {% else %}
+              <p>Not provided</p>
+              {% endif %}
+            </div>
+
+            <div class="info-card full-width">
+              <label>Valid ID</label>
+              {% if request.valid_id %}
+              <a class="file-link" href="{{ url_for('static', filename='uploads/' + request.valid_id) }}" target="_blank">
+                View Document
+              </a>
+              {% else %}
+              <p>Not uploaded</p>
+              {% endif %}
+            </div>
+
+            <div class="info-card full-width">
+              <div class="comments-box">
+                <strong>Comments from Finance</strong>
+                <p>{{ request.comments or "No comments yet." }}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      sidebarOverlay.hidden = false;
+      sidebarOverlay.classList.add('show');
+      sidebarToggle.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('show');
+      sidebarOverlay.hidden = true;
+      sidebarToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleSidebar() {
+      if (sidebar.classList.contains('open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    }
+
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeSidebar();
+      }
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 980) {
+        closeSidebar();
+      }
+    });
+  </script>
 </body>
 
 </html>

@@ -1,519 +1,920 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Promissory Notes Statistics</title>
-<link rel="icon" type="image/x-icon" href="./static/images/logo.png">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promissory Notes Statistics</title>
+  <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
 
-<style>
-/* Reset and base styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-body {
-    font-family: 'Arial', sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background-color: #f9f9f9;
-}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
-/* Sidebar */
-.sidebar {
-    width: 220px;
-    height: 100vh;
-    background: linear-gradient(135deg, #1e2a78, #3a4bb3);
-    color: #fff;
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding-top: 20px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-}
-.sidebar h2 {
-    text-align: center;
-    font-size: 16px;
-    margin: 0 10px 30px;
-    font-weight: 300;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.sidebar a {
-    display: flex;
-    align-items: center;
-    padding: 12px 20px;
-    color: #fff;
-    text-decoration: none;
-    margin: 5px 0;
-    transition: 0.3s;
-}
-.sidebar a:hover {
-    background-color: rgba(255,255,255,0.1);
-}
-.sidebar a.active {
-    background-color: rgba(255,255,255,0.25);
-    font-weight: 600;
-}
-.sidebar img.icon {
-    width: 30px;
-    height: 30px;
-    margin-right: 10px;
-    background: #fff;
-    border-radius: 50%;
-    padding: 6px;
-}
-.logout-btn {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 12px 20px;
-}
+  <style>
+    :root {
+      --primary: #1e2a78;
+      --primary-light: #3a4bb3;
+      --primary-dark: #16205d;
+      --bg: #f4f7fc;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --hover: #eef2ff;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --radius: 14px;
+      --sidebar-width: 240px;
+      --success: #16a34a;
+      --danger: #dc3545;
+    }
 
-/* Main content */
-.main-content {
-    margin-left: 220px;
-    padding: 20px;
-    min-height: 100vh;
-}
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #fff;
-    padding: 15px 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-}
-.header h2 {
-    font-weight: 300;
-    color: #2c3e50;
-}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-/* Cards */
-.cards {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    margin-bottom: 30px;
-}
-.card {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 20px;
-    min-height: 150px;
-}
-.card .course-code {
-    font-size: 16px;
-    font-weight: 500;
-    color: #1e2a78;
-    line-height: 1.2;
-    margin-bottom: 10px;
-}
-.card p {
-    font-size: 24px;
-    font-weight: 600;
-    color: #333;
-}
+    html {
+      scroll-behavior: smooth;
+    }
 
-/* Filter card */
-.card-filter {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    padding: 25px;
-    margin-bottom: 30px;
-}
-.card-filter form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    align-items: flex-end;
-}
-.card-filter form > div {
-    display: flex;
-    flex-direction: column;
-}
-.card-filter label {
-    font-weight: 500;
-    color: #1e2a78;
-    display: block;
-    margin-bottom: 6px;
-}
-.card-filter select,
-.card-filter input {
-    padding: 10px 16px;
-    font-size: 14px;
-    border: none;
-    border-radius: 50px;
-    background-color: #f1f3f8;
-    color: #333;
-    min-width: 160px;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
-.card-filter select:focus,
-.card-filter input:focus {
-    outline: none;
-    background-color: #e6ebff;
-    box-shadow: 0 4px 10px rgba(58, 75, 179, 0.2);
-}
-.card-filter button {
-    background-color: #dc3545;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    font-size: 14px;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-.card-filter button:hover {
-    background-color: #b02a37;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background-color: var(--bg);
+    }
 
-/* Chart cards */
-.chart-card {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-    padding: 30px;
-    margin-bottom: 30px;
-}
-.chart-card h3 {
-    color: #1e2a78;
-    font-weight: 400;
-    font-size: 20px;
-    margin-bottom: 25px;
-    text-align: center;
-}
-.chart-container {
-    width: 100%;
-    height: 400px;
-}
+    img {
+      display: block;
+      max-width: 100%;
+    }
 
-/* Download / Export buttons */
-.download-btn {
-    background: #1e2a78;
-    color: #fff;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    margin-left: 5px;
-}
-.download-btn:hover {
-    background: #3a4bb3;
-}
-.export-btn {
-    background-color: #1e2a78;
-    color: #fff;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-right: 10px;
-    transition: 0.3s;
-    display: inline-flex;
-    align-items: center;
-}
-.export-btn:hover {
-    background-color: #3a4bb3;
-}
-.export-btn i {
-    margin-right: 6px;
-}
-</style>
+    button,
+    select,
+    input {
+      font: inherit;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1100;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      font-size: 18px;
+    }
+
+    .sidebar-toggle:focus-visible,
+    .sidebar a:focus-visible,
+    .logout-link:focus-visible,
+    .card-filter select:focus-visible,
+    .card-filter input:focus-visible,
+    .btn:focus-visible,
+    .download-btn:focus-visible,
+    .export-btn:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 2px;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--primary), var(--primary-light));
+      color: #fff;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0 16px;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 0 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      margin-bottom: 12px;
+    }
+
+    .sidebar-header h1 {
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .sidebar-header span {
+      display: block;
+      font-size: 13px;
+      font-weight: 400;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 10px;
+      flex: 1;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .sidebar a:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
+    }
+
+    .sidebar a.active {
+      background-color: rgba(255, 255, 255, 0.22);
+      font-weight: 700;
+    }
+
+    .sidebar img.icon {
+      width: 30px;
+      height: 30px;
+      background: #fff;
+      border-radius: 50%;
+      padding: 6px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer {
+      padding: 12px 10px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      margin-top: 12px;
+    }
+
+    .logout-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .logout-link:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 999;
+    }
+
+    .sidebar-overlay.show {
+      display: block;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 24px;
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: var(--surface);
+      padding: 18px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .header h2 {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 28px;
+    }
+
+    .header-meta {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .header-meta strong {
+      color: var(--text);
+    }
+
+    .card-filter {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card-filter form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: end;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 170px;
+      flex: 1 1 170px;
+    }
+
+    .card-filter label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .card-filter select,
+    .card-filter input {
+      padding: 11px 14px;
+      font-size: 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background-color: #f9fafb;
+      color: var(--text);
+      min-width: 0;
+      transition: all 0.2s ease;
+    }
+
+    .card-filter select:focus,
+    .card-filter input:focus {
+      outline: none;
+      border-color: #a5b4fc;
+      background-color: #fff;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+    }
+
+    .filter-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn,
+    .download-btn,
+    .export-btn,
+    .clear-btn {
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .clear-btn {
+      background-color: var(--danger);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(220, 53, 69, 0.18);
+    }
+
+    .clear-btn:hover {
+      background-color: #b02a37;
+      transform: translateY(-1px);
+    }
+
+    .export-bar {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .export-btn {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      box-shadow: 0 2px 8px rgba(30, 42, 120, 0.2);
+    }
+
+    .export-btn:hover {
+      background-color: var(--primary-light);
+      transform: translateY(-1px);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 24px 20px;
+      min-height: 160px;
+    }
+
+    .card .course-code {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--primary);
+      line-height: 1.3;
+      margin-bottom: 12px;
+    }
+
+    .card p {
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .chart-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .chart-card h3 {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 20px;
+      margin: 0;
+    }
+
+    .download-btn {
+      background: var(--primary);
+      color: #fff;
+      padding: 9px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      box-shadow: 0 2px 8px rgba(30, 42, 120, 0.2);
+    }
+
+    .download-btn:hover {
+      background: var(--primary-light);
+      transform: translateY(-1px);
+    }
+
+    .chart-container {
+      width: 100%;
+      height: 420px;
+      position: relative;
+    }
+
+    @media (max-width: 980px) {
+      .sidebar-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 76px 16px 20px;
+      }
+
+      .header h2 {
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-group {
+        flex: 1 1 100%;
+      }
+
+      .filter-actions {
+        width: 100%;
+      }
+
+      .clear-btn {
+        width: 100%;
+      }
+
+      .export-bar {
+        justify-content: stretch;
+      }
+
+      .export-btn {
+        width: 100%;
+      }
+
+      .chart-card {
+        padding: 18px;
+      }
+
+      .chart-container {
+        height: 340px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
-<nav class="sidebar">
-    <h2>{{ finance_user }}<br>Promissory Notes</h2>
-    <a href="{{ url_for('finance.dashboard') }}" class="{% if request.endpoint=='finance.dashboard' %}active{% endif %}">
-        <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon"> Dashboard
-    </a>
-    <a href="{{ url_for('finance.promissory_notes') }}" class="{% if request.endpoint=='finance.promissory_notes' %}active{% endif %}">
-        <img src="{{ url_for('static', filename='images/notes.png') }}" class="icon"> Promissory Notes
-    </a>
-    <a href="{{ url_for('finance.all_promissory') }}" class="{% if request.endpoint=='finance.all_promissory' %}active{% endif %}">
-        <img src="{{ url_for('static', filename='images/notes.png') }}" class="icon"> Statistics
-    </a>
-    <a href="{{ url_for('finance.students_promissory') }}" class="{% if request.endpoint=='finance.students_promissory' %}active{% endif %}">
-        <img src="{{ url_for('static', filename='images/students.png') }}" class="icon"> Students
-    </a>
-    <a href="{{ url_for('finance.logout') }}" class="logout-btn">
-        <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon"> Logout
-    </a>
-</nav>
+  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false"
+    aria-label="Toggle navigation menu">
+    ☰
+  </button>
 
-<main class="main-content">
-    <header class="header">
-        <h2>Promissory Notes Statistics</h2>
-        <div>Active Semester: <strong>{{ active_semester }}</strong> | S.Y.: <strong>{{ active_school_year }}</strong></div>
-    </header>
+  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-    <!-- Filter Section -->
-    <section class="card-filter">
-        <form id="filterForm">
-            <div>
-                <label>Course</label>
-                <select name="course" id="courseFilter">
-                    <option value="">All</option>
-                    {% for course in courses %}
-                    <option value="{{ course }}" {% if course==selected_course %}selected{% endif %}>{{ course }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label>Semester</label>
-                <select name="semester" id="semesterFilter">
-                    <option value="all" {% if selected_semester == 'all' %}selected{% endif %}>All</option>
-                    {% for sem in semesters %}
-                    <option value="{{ sem }}" {% if sem == selected_semester %}selected{% endif %}>{{ sem }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label>Status</label>
-                <select name="status" id="statusFilter">
-                    <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
-                    <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Approved</option>
-                    <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>Rejected</option>
-                    <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All</option>
-                </select>
-            </div>
-            <div>
-                <label>Examination Type</label>
-                <select name="semester_type" id="semesterTypeFilter">
-                    <option value="">All</option>
-                    {% for semt in semester_types %}
-                    <option value="{{ semt }}" {% if semt==selected_semester_type %}selected{% endif %}>{{ semt }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label>School Year</label>
-                <select name="school_year" id="schoolYearFilter">
-                    <option value="all" {% if selected_school_year == 'all' %}selected{% endif %}>All</option>
-                    {% for sy in school_years %}
-                    <option value="{{ sy }}" {% if sy == selected_school_year %}selected{% endif %}>{{ sy }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <button type="button" onclick="clearFilters()">Clear</button>
-            </div>
-        </form>
-    </section>
-
-    <!-- Export Buttons -->
-    <div style="margin-bottom: 20px; text-align:right;">
-        <a href="{{ url_for('finance.all_promissory', export='excel', course=selected_course if selected_course else None, semester=selected_semester if selected_semester else None, semester_type=selected_semester_type if selected_semester_type else None, school_year=selected_school_year if selected_school_year else None, status=selected_status) }}" class="export-btn">Export Excel</a>
-
-        <a href="{{ url_for('finance.all_promissory', export='csv', course=selected_course if selected_course else None, semester=selected_semester if selected_semester else None, semester_type=selected_semester_type if selected_semester_type else None, school_year=selected_school_year if selected_school_year else None, status=selected_status) }}" class="export-btn">Export CSV</a>
+  <nav class="sidebar" id="sidebar" aria-label="Finance navigation">
+    <div class="sidebar-header">
+      <h1>{{ finance_user }}</h1>
+      <span>Promissory Notes</span>
     </div>
 
-    <!-- Statistic Cards -->
-    <section class="cards">
-        <div class="card">
-            <div class="course-code">Total Students</div>
-            <p>{{ total_students }}</p>
+    <div class="sidebar-nav">
+      <a href="{{ url_for('finance.dashboard') }}"
+         class="{% if request.endpoint == 'finance.dashboard' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'finance.dashboard' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon" alt="">
+        <span>Dashboard</span>
+      </a>
+
+      <a href="{{ url_for('finance.promissory_notes') }}"
+         class="{% if request.endpoint == 'finance.promissory_notes' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'finance.promissory_notes' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/notes.png') }}" class="icon" alt="">
+        <span>Promissory Notes</span>
+      </a>
+
+      <a href="{{ url_for('finance.all_promissory') }}"
+         class="{% if request.endpoint == 'finance.all_promissory' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'finance.all_promissory' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/notes.png') }}" class="icon" alt="">
+        <span>Statistics</span>
+      </a>
+
+      <a href="{{ url_for('finance.students_promissory') }}"
+         class="{% if request.endpoint == 'finance.students_promissory' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'finance.students_promissory' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/students.png') }}" class="icon" alt="">
+        <span>Students</span>
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('finance.logout') }}" class="logout-link">
+        <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon" alt="">
+        <span>Logout</span>
+      </a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <header class="header">
+      <h2>Promissory Notes Statistics</h2>
+      <div class="header-meta">
+        Active Semester: <strong>{{ active_semester }}</strong> |
+        S.Y.: <strong>{{ active_school_year }}</strong>
+      </div>
+    </header>
+
+    <section class="card-filter" aria-labelledby="filters-title">
+      <h3 id="filters-title" class="sr-only">Filter statistics</h3>
+
+      <form id="filterForm" method="GET">
+        <div class="filter-group">
+          <label for="courseFilter">Course</label>
+          <select name="course" id="courseFilter">
+            <option value="">All</option>
+            {% for course in courses %}
+            <option value="{{ course }}" {% if course == selected_course %}selected{% endif %}>{{ course }}</option>
+            {% endfor %}
+          </select>
         </div>
-        <div class="card">
-            <div class="course-code">Total Students Requested Promissory</div>
-            <p>{{ total_requested }}</p>
+
+        <div class="filter-group">
+          <label for="semesterFilter">Semester</label>
+          <select name="semester" id="semesterFilter">
+            <option value="all" {% if selected_semester == 'all' %}selected{% endif %}>All</option>
+            {% for sem in semesters %}
+            <option value="{{ sem }}" {% if sem == selected_semester %}selected{% endif %}>{{ sem }}</option>
+            {% endfor %}
+          </select>
         </div>
+
+        <div class="filter-group">
+          <label for="statusFilter">Status</label>
+          <select name="status" id="statusFilter">
+            <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Approved</option>
+            <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>Rejected</option>
+            <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="semesterTypeFilter">Examination Type</label>
+          <select name="semester_type" id="semesterTypeFilter">
+            <option value="">All</option>
+            {% for semt in semester_types %}
+            <option value="{{ semt }}" {% if semt == selected_semester_type %}selected{% endif %}>{{ semt }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="schoolYearFilter">School Year</label>
+          <select name="school_year" id="schoolYearFilter">
+            <option value="all" {% if selected_school_year == 'all' %}selected{% endif %}>All</option>
+            {% for sy in school_years %}
+            <option value="{{ sy }}" {% if sy == selected_school_year %}selected{% endif %}>{{ sy }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button type="button" class="clear-btn" id="clearFiltersBtn">Clear</button>
+        </div>
+      </form>
     </section>
 
-    <!-- Charts -->
-    <section class="chart-card">
-        <h3>Total vs Total Students Requested Promissory
-            <button class="download-btn" onclick="downloadChartHighRes('promissoryChart','total_vs_requested.png')">Download</button>
-        </h3>
-        <div class="chart-container">
-            <canvas id="promissoryChart"></canvas>
-        </div>
+    <div class="export-bar">
+      <a href="{{ url_for('finance.all_promissory', export='excel', course=selected_course if selected_course else None, semester=selected_semester if selected_semester else None, semester_type=selected_semester_type if selected_semester_type else None, school_year=selected_school_year if selected_school_year else None, status=selected_status) }}"
+         class="export-btn">
+        Export Excel
+      </a>
+
+      <a href="{{ url_for('finance.all_promissory', export='csv', course=selected_course if selected_course else None, semester=selected_semester if selected_semester else None, semester_type=selected_semester_type if selected_semester_type else None, school_year=selected_school_year if selected_school_year else None, status=selected_status) }}"
+         class="export-btn">
+        Export CSV
+      </a>
+    </div>
+
+    <section class="cards" aria-label="Statistics summary cards">
+      <article class="card">
+        <div class="course-code">Total Students</div>
+        <p>{{ total_students }}</p>
+      </article>
+
+      <article class="card">
+        <div class="course-code">Total Students Requested Promissory</div>
+        <p>{{ total_requested }}</p>
+      </article>
     </section>
 
-    <section class="chart-card">
-        <h3>Course Requests (Lowest → Highest)
-            <button class="download-btn" onclick="downloadChartHighRes('courseBarChart','course_requests.png')">Download</button>
-        </h3>
-        <div class="chart-container">
-            <canvas id="courseBarChart"></canvas>
-        </div>
+    <section class="chart-card" aria-labelledby="total-chart-title">
+      <div class="chart-card-header">
+        <h3 id="total-chart-title">Total vs Total Students Requested Promissory</h3>
+        <button class="download-btn" type="button"
+          onclick="downloadChartHighRes('promissoryChart', 'total_vs_requested.png')">
+          Download
+        </button>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="promissoryChart" aria-label="Bar chart comparing total students and total requested promissory" role="img"></canvas>
+      </div>
     </section>
 
-</main>
+    <section class="chart-card" aria-labelledby="course-chart-title">
+      <div class="chart-card-header">
+        <h3 id="course-chart-title">Course Requests (Lowest → Highest)</h3>
+        <button class="download-btn" type="button"
+          onclick="downloadChartHighRes('courseBarChart', 'course_requests.png')">
+          Download
+        </button>
+      </div>
 
-<script>
-// Apply filters
-function applyFilters() {
-    const course = document.getElementById('courseFilter').value;
-    const semester = document.getElementById('semesterFilter').value;
-    const semester_type = document.getElementById('semesterTypeFilter').value;
-    const school_year = document.getElementById('schoolYearFilter').value;
-    const status = document.getElementById('statusFilter').value;
+      <div class="chart-container">
+        <canvas id="courseBarChart" aria-label="Bar chart showing requests by course" role="img"></canvas>
+      </div>
+    </section>
+  </main>
 
-    const params = new URLSearchParams(window.location.search);
-    course ? params.set('course', course) : params.delete('course');
-    semester ? params.set('semester', semester) : params.delete('semester');
-    semester_type ? params.set('semester_type', semester_type) : params.delete('semester_type');
-    school_year ? params.set('school_year', school_year) : params.delete('school_year');
-    status ? params.set('status', status) : params.delete('status'); 
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-    window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
-    window.location.reload();
-}
+    const filterForm = document.getElementById('filterForm');
+    const courseFilter = document.getElementById('courseFilter');
+    const semesterFilter = document.getElementById('semesterFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const semesterTypeFilter = document.getElementById('semesterTypeFilter');
+    const schoolYearFilter = document.getElementById('schoolYearFilter');
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
 
-// Event listeners for filters
-['courseFilter','semesterFilter','semesterTypeFilter','schoolYearFilter','statusFilter'].forEach(id =>
-    document.getElementById(id).addEventListener('change', applyFilters)
-);
-
-// Clear filters
-function clearFilters() {
-    ['courseFilter','semesterFilter','semesterTypeFilter','schoolYearFilter'].forEach(id => {
-        document.getElementById(id).value = '';
-    });
-    applyFilters();
-}
-
-// Download chart in high resolution
-function downloadChartHighRes(chartId, filename) {
-    const originalCanvas = document.getElementById(chartId);
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = 1920;
-    tempCanvas.height = 1080;
-    const ctx = tempCanvas.getContext('2d');
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0,0,tempCanvas.width,tempCanvas.height);
-    const scale = Math.min(tempCanvas.width/originalCanvas.width, tempCanvas.height/originalCanvas.height);
-    const offsetX = (tempCanvas.width - originalCanvas.width*scale)/2;
-    const offsetY = (tempCanvas.height - originalCanvas.height*scale)/2;
-    ctx.drawImage(originalCanvas, offsetX, offsetY, originalCanvas.width*scale, originalCanvas.height*scale);
-    const link = document.createElement('a');
-    link.href = tempCanvas.toDataURL('image/png',1.0);
-    link.download = filename;
-    link.click();
-}
-
-// Export data
-function exportData(format) {
-    const params = new URLSearchParams(window.location.search);
-    params.set('export', format);
-
-    const course = document.getElementById('courseFilter').value;
-    const semester = document.getElementById('semesterFilter').value;
-    const semester_type = document.getElementById('semesterTypeFilter').value;
-    const school_year = document.getElementById('schoolYearFilter').value;
-
-    course ? params.set('course', course) : params.delete('course');
-    semester ? params.set('semester', semester) : params.delete('semester');
-    semester_type ? params.set('semester_type', semester_type) : params.delete('semester_type');
-    school_year ? params.set('school_year', school_year) : params.delete('school_year');
-
-    window.location.href = `${window.location.pathname}?${params.toString()}`;
-}
-
-// Charts
-const promissoryCtx = document.getElementById('promissoryChart').getContext('2d');
-new Chart(promissoryCtx,{
-    type:'bar',
-    data:{
-        labels:['Total Students','Total Students Requested Promissory'],
-        datasets:[{
-            label:'Students',
-            data:[{{ total_students }}, {{ total_requested }}],
-            backgroundColor:['#1e2a78','#28a745'],
-            borderColor:['#1e2a78','#28a745'],
-            borderWidth:2,
-            borderRadius:6
-        }]
-    },
-    options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        plugins:{
-            legend:{ display:false },
-            datalabels:{
-                color:'#fff',
-                anchor:'center',
-                align:'center',
-                font:{ weight:'bold', size:14 },
-                formatter:(value,ctx) => {
-                    const total = ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
-                    return `${value} (${((value/total)*100).toFixed(0)}%)`;
-                }
-            }
-        },
-        scales:{
-            y:{ beginAtZero:true, ticks:{ precision:0 } },
-            x:{ grid:{ display:false } }
-        }
-    },
-    plugins:[ChartDataLabels]
-});
-
-new Chart(document.getElementById('courseBarChart').getContext('2d'),{
-    type:'bar',
-    data:{
-        labels: {{ courses_sorted|safe }},
-        datasets:[{
-            label:'Student Requests',
-            data: {{ counts_sorted|safe }},
-            backgroundColor:'#1e2a78',
-            borderColor:'#1e2a78',
-            borderWidth:2,
-            borderRadius:6
-        }]
-    },
-    options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        layout:{ padding:{ bottom:120 } },
-        plugins:{
-            legend:{ display:false },
-            datalabels:{ display:false },
-            tooltip:{
-                callbacks:{
-                    label:function(context){
-                        const index=context.dataIndex;
-                        const requests=context.dataset.data[index];
-                        const total={{ totals_sorted|safe }}[index];
-                        const percent={{ percentages_sorted|safe }}[index];
-                        return `Requests: ${requests}, Total Students: ${total} (${percent}%)`;
-                    }
-                }
-            }
-        },
-        scales:{
-            y:{ beginAtZero:true, ticks:{ precision:0 } },
-            x:{ grid:{ display:false }, ticks:{ autoSkip:false, maxRotation:90, minRotation:90, font:{ size:10 } } }
-        }
+    function openSidebar() {
+      sidebar.classList.add('open');
+      sidebarOverlay.hidden = false;
+      sidebarOverlay.classList.add('show');
+      sidebarToggle.setAttribute('aria-expanded', 'true');
     }
-});
-</script>
 
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('show');
+      sidebarOverlay.hidden = true;
+      sidebarToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleSidebar() {
+      if (sidebar.classList.contains('open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    }
+
+    function applyFilters() {
+      const params = new URLSearchParams(window.location.search);
+
+      const course = courseFilter.value;
+      const semester = semesterFilter.value;
+      const semesterType = semesterTypeFilter.value;
+      const schoolYear = schoolYearFilter.value;
+      const status = statusFilter.value;
+
+      course ? params.set('course', course) : params.delete('course');
+      semester ? params.set('semester', semester) : params.delete('semester');
+      semesterType ? params.set('semester_type', semesterType) : params.delete('semester_type');
+      schoolYear ? params.set('school_year', schoolYear) : params.delete('school_year');
+      status ? params.set('status', status) : params.delete('status');
+
+      params.delete('export');
+
+      window.location.href = `${window.location.pathname}?${params.toString()}`;
+    }
+
+    function clearFilters() {
+      courseFilter.value = '';
+      semesterFilter.value = 'all';
+      statusFilter.value = 'all';
+      semesterTypeFilter.value = '';
+      schoolYearFilter.value = 'all';
+      applyFilters();
+    }
+
+    function downloadChartHighRes(chartId, filename) {
+      const originalCanvas = document.getElementById(chartId);
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = 1920;
+      tempCanvas.height = 1080;
+
+      const ctx = tempCanvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+      const sourceWidth = originalCanvas.width;
+      const sourceHeight = originalCanvas.height;
+
+      const scale = Math.min(tempCanvas.width / sourceWidth, tempCanvas.height / sourceHeight);
+      const drawWidth = sourceWidth * scale;
+      const drawHeight = sourceHeight * scale;
+      const offsetX = (tempCanvas.width - drawWidth) / 2;
+      const offsetY = (tempCanvas.height - drawHeight) / 2;
+
+      ctx.drawImage(originalCanvas, offsetX, offsetY, drawWidth, drawHeight);
+
+      const link = document.createElement('a');
+      link.href = tempCanvas.toDataURL('image/png', 1.0);
+      link.download = filename;
+      link.click();
+    }
+
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeSidebar();
+      }
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 980) {
+        closeSidebar();
+      }
+    });
+
+    [courseFilter, semesterFilter, statusFilter, semesterTypeFilter, schoolYearFilter].forEach(function (element) {
+      element.addEventListener('change', applyFilters);
+    });
+
+    clearFiltersBtn.addEventListener('click', clearFilters);
+
+    Chart.register(ChartDataLabels);
+
+    const totalStudents = Number({{ total_students|default(0) }});
+    const totalRequested = Number({{ total_requested|default(0) }});
+
+    const promissoryCtx = document.getElementById('promissoryChart').getContext('2d');
+    new Chart(promissoryCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Total Students', 'Total Students Requested Promissory'],
+        datasets: [{
+          label: 'Students',
+          data: [totalStudents, totalRequested],
+          backgroundColor: ['#1e2a78', '#16a34a'],
+          borderColor: ['#1e2a78', '#16a34a'],
+          borderWidth: 2,
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          datalabels: {
+            color: '#ffffff',
+            anchor: 'center',
+            align: 'center',
+            font: {
+              weight: 'bold',
+              size: 14
+            },
+            formatter: function (value, context) {
+              const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+              const percent = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
+              return `${value} (${percent}%)`;
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                return `Students: ${context.parsed.y}`;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+
+    const courseBarCtx = document.getElementById('courseBarChart').getContext('2d');
+    new Chart(courseBarCtx, {
+      type: 'bar',
+      data: {
+        labels: {{ courses_sorted|safe }},
+        datasets: [{
+          label: 'Student Requests',
+          data: {{ counts_sorted|safe }},
+          backgroundColor: '#1e2a78',
+          borderColor: '#1e2a78',
+          borderWidth: 2,
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            bottom: 80
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          datalabels: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const index = context.dataIndex;
+                const requests = context.dataset.data[index];
+                const total = {{ totals_sorted|safe }}[index];
+                const percent = {{ percentages_sorted|safe }}[index];
+                return `Requests: ${requests}, Total Students: ${total} (${percent}%)`;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              autoSkip: false,
+              maxRotation: 70,
+              minRotation: 45,
+              font: {
+                size: 11
+              }
+            }
+          }
+        }
+      }
+    });
+  </script>
 </body>
+
 </html>

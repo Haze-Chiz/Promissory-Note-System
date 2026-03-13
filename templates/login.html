@@ -6,20 +6,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Promissory App — Login</title>
   <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
+
   <style>
+    :root {
+      --primary: #1e2a78;
+      --primary-light: #3a4bb3;
+      --primary-dark: #16205d;
+      --bg-soft: #dbeafe;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+      --radius: 16px;
+      --success-bg: #ecfdf5;
+      --success-text: #166534;
+      --success-border: #86efac;
+      --danger-bg: #fef2f2;
+      --danger-text: #991b1b;
+      --danger-border: #fca5a5;
+      --warning-bg: #fffbeb;
+      --warning-text: #92400e;
+      --warning-border: #fcd34d;
+      --info-bg: #ecfeff;
+      --info-text: #155e75;
+      --info-border: #67e8f9;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
+    html {
+      height: 100%;
+    }
+
     body {
-      font-family: 'Arial', sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background: linear-gradient(to bottom, #dbeafe, #ffffff);
-      height: 100vh;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background: linear-gradient(to bottom, var(--bg-soft), #ffffff);
       display: flex;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    button,
+    input {
+      font: inherit;
     }
 
     .left {
@@ -32,109 +72,195 @@
 
     .login-box {
       width: 100%;
-      max-width: 360px;
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      background: var(--surface);
+      padding: 32px 28px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
-      align-items: stretch;
-      transition: transform 0.2s ease;
     }
 
-    .login-box h2 {
+    .brand {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .brand img {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      border-radius: 14px;
+    }
+
+    .login-box h1 {
       text-align: center;
-      margin-bottom: 20px;
-      color: #1e2a78;
-      font-size: 22px;
-      font-weight: 300;
+      margin-bottom: 8px;
+      color: var(--primary);
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 22px;
+    }
+
+    .flash-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .flash {
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      text-align: center;
+      font-weight: 600;
+      border: 1px solid transparent;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .flash.success {
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border-color: var(--success-border);
+    }
+
+    .flash.danger {
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border-color: var(--danger-border);
+    }
+
+    .flash.warning {
+      background-color: var(--warning-bg);
+      color: var(--warning-text);
+      border-color: var(--warning-border);
+    }
+
+    .flash.info {
+      background-color: var(--info-bg);
+      color: var(--info-text);
+      border-color: var(--info-border);
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
     }
 
     .form-group {
-      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
       position: relative;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
     }
 
     .form-group input {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      padding: 12px 44px 12px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
       font-size: 14px;
-      transition: border-color 0.3s ease;
+      background: #fafafa;
+      color: var(--text);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    .form-group input[type="email"] {
+      padding-right: 12px;
     }
 
     .form-group input:focus {
-      border-color: #1e2a78;
+      border-color: #a5b4fc;
       outline: none;
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
     }
 
     .toggle-password {
       position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
+      right: 10px;
+      top: 38px;
       background: none;
       border: none;
-      color: #1e2a78;
+      color: var(--primary);
       font-size: 13px;
+      font-weight: 700;
       cursor: pointer;
-      padding: 3px;
+      padding: 4px 6px;
+      border-radius: 8px;
+    }
+
+    .toggle-password:hover {
+      background: #eef2ff;
+    }
+
+    .toggle-password:focus-visible,
+    .form-group input:focus-visible,
+    .login-btn:focus-visible,
+    .remember-row input:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 2px;
+    }
+
+    .remember-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 2px;
+    }
+
+    .remember-row input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .remember-row label {
+      cursor: pointer;
+      user-select: none;
     }
 
     .btn {
       width: 100%;
       padding: 12px;
       font-size: 15px;
-      border-radius: 5px;
+      font-weight: 700;
+      border-radius: 12px;
       border: none;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      transition: background-color 0.3s ease;
-      top: 6px;
-      position: relative;
+      transition: background-color 0.2s ease, transform 0.2s ease;
     }
 
     .login-btn {
-      background: #1e2a78;
+      background: var(--primary);
       color: #fff;
+      margin-top: 4px;
     }
 
     .login-btn:hover {
-      background: #3a4bb3;
-    }
-
-    .flash {
-      padding: 12px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      font-size: 14px;
-      text-align: center;
-      font-weight: 500;
-    }
-
-    .flash.success {
-      background-color: #d1fae5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
-    }
-
-    .flash.danger {
-      background-color: #fee2e2;
-      color: #b91c1c;
-      border: 1px solid #fca5a5;
-      border-radius: 8px;
-      padding: 12px 15px;
-      font-weight: 500;
-      font-size: 14px;
-      text-align: center;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background: var(--primary-light);
+      transform: translateY(-1px);
     }
 
     .right {
@@ -142,15 +268,25 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #1e2a78, #3a4bb3);
-      padding: 20px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      padding: 32px;
+    }
+
+    .right-inner {
+      width: min(520px, 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .right-img {
       max-width: 100%;
-      max-height: 100%;
+      max-height: 70vh;
       object-fit: contain;
-      border-radius: 12px;
+      border-radius: 18px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 14px;
     }
 
     @media (max-width: 900px) {
@@ -160,7 +296,12 @@
 
       .right {
         order: -1;
-        height: 250px;
+        min-height: 240px;
+        padding: 24px 20px;
+      }
+
+      .right-img {
+        max-height: 180px;
       }
 
       .left {
@@ -171,76 +312,90 @@
         max-width: 100%;
       }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
   </style>
 </head>
 
 <body>
   <main class="left">
-    <div class="login-box">
-      <h2>Login</h2>
+    <section class="login-box" aria-labelledby="login-title">
+      <div class="brand">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Promissory App logo">
+      </div>
+
+      <h1 id="login-title">Login</h1>
+      <p class="subtitle">Sign in to continue to Promissory App</p>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-      {% for category, message in messages %}
-      <div class="flash {{ category }}">{{ message }}</div>
-      {% endfor %}
+      <div class="flash-container" aria-live="polite" aria-atomic="true">
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
       {% endif %}
       {% endwith %}
 
       <form method="POST" action="{{ url_for('login') }}">
-
         <div class="form-group">
-          <input type="email" name="email" placeholder="Email" autocomplete="username" required>
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" autocomplete="username" required>
         </div>
 
         <div class="form-group">
-          <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password"
-            required>
-          <button type="button" class="toggle-password" onclick="togglePassword()">Show</button>
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter your password"
+            autocomplete="current-password" required>
+          <button type="button" class="toggle-password" id="togglePasswordBtn" aria-label="Show password">
+            Show
+          </button>
         </div>
 
-        <div class="options">
-          <label>
-            <input type="checkbox" name="remember">
-            Remember Me
-          </label>
+        <div class="remember-row">
+          <input type="checkbox" id="remember" name="remember">
+          <label for="remember">Remember Me</label>
         </div>
 
         <button type="submit" class="btn login-btn">LOGIN</button>
       </form>
-
-    </div>
+    </section>
   </main>
 
-  <aside class="right">
-    <img src="{{ url_for('static', filename='images/FCPC.jpg') }}" alt="Logo" class="right-img">
+  <aside class="right" aria-label="App illustration">
+    <div class="right-inner">
+      <img src="{{ url_for('static', filename='images/FCPC.jpg') }}" alt="School logo" class="right-img">
+    </div>
   </aside>
 
   <script>
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+
     function togglePassword() {
-      const input = document.getElementById("password");
-      const btn = document.querySelector(".toggle-password");
-
-      if (input.type === "password") {
-        input.type = "text";
-        btn.textContent = "Hide";
-      } else {
-        input.type = "password";
-        btn.textContent = "Show";
-      }
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      togglePasswordBtn.textContent = isPassword ? 'Hide' : 'Show';
+      togglePasswordBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
     }
-  </script>
 
-  <script>
+    togglePasswordBtn.addEventListener('click', togglePassword);
+
     setTimeout(() => {
-      document.querySelectorAll(".flash").forEach((flash) => {
-        flash.style.transition = "opacity 0.5s ease";
-        flash.style.opacity = "0";
+      document.querySelectorAll('.flash').forEach((flash) => {
+        flash.style.transition = 'opacity 0.5s ease';
+        flash.style.opacity = '0';
         setTimeout(() => flash.remove(), 500);
       });
     }, 5000);
   </script>
-
 </body>
 
 </html>

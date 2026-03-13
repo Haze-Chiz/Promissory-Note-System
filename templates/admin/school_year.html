@@ -6,155 +6,370 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Activate School Year - Admin</title>
   <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
+
   <style>
+    :root {
+      --primary: #1e2a78;
+      --primary-light: #3a4bb3;
+      --primary-dark: #16205d;
+      --bg: #f4f7fc;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --hover: #eef2ff;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --radius: 14px;
+      --sidebar-width: 240px;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --info: #2563eb;
+      --warning: #d97706;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: 'Arial', sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background-color: #f9f9f9;
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background-color: var(--bg);
     }
 
-    .sidebar {
-      width: 220px;
-      height: 100vh;
-      background: linear-gradient(135deg, #1e2a78, #3a4bb3);
-      color: #fff;
-      position: fixed;
-      top: 0;
-      left: 0;
-      padding-top: 20px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
+    img {
+      display: block;
+      max-width: 100%;
     }
 
-    .sidebar h2 {
-      text-align: center;
-      font-size: 16px;
-      margin: 0 10px 30px;
-      font-weight: 300;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      padding: 12px 20px;
-      color: #fff;
+    a {
+      color: inherit;
       text-decoration: none;
-      margin: 5px 0;
-      transition: background-color 0.3s ease;
     }
 
-    .sidebar a.active {
-      background-color: rgba(255, 255, 255, 0.25);
-      font-weight: 600;
+    button,
+    input {
+      font: inherit;
     }
 
-    .sidebar a:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .sidebar img.icon {
-      width: 30px;
-      height: 30px;
-      margin-right: 10px;
-      background: #fff;
-      border-radius: 50%;
-      padding: 6px;
-    }
-
-    .logout-btn {
+    .sr-only {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 12px 20px;
-    }
-
-    .main-content {
-      margin-left: 220px;
-      padding: 30px;
-      min-height: 100vh;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     .sidebar-toggle {
       display: none;
       position: fixed;
-      top: 10px;
-      left: 10px;
-      background: #1e2a78;
-      color: #fff;
+      top: 16px;
+      left: 16px;
+      z-index: 1100;
       border: none;
-      padding: 10px;
-      border-radius: 5px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
       cursor: pointer;
+      box-shadow: var(--shadow);
+      font-size: 18px;
+    }
+
+    .sidebar-toggle:focus-visible,
+    .sidebar a:focus-visible,
+    .logout-link:focus-visible,
+    input:focus-visible,
+    .btn:focus-visible,
+    .btn-confirm:focus-visible,
+    .btn-cancel:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 2px;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--primary), var(--primary-light));
+      color: #fff;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0 16px;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
       z-index: 1000;
+      transition: transform 0.3s ease;
     }
 
-    @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .main-content {
-        margin-left: 0;
-      }
-
-      .sidebar-toggle {
-        display: block;
-      }
+    .sidebar-header {
+      padding: 0 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      margin-bottom: 12px;
     }
 
-    .container {
-      width: 80%;
-      margin: 50px auto;
+    .sidebar-header h1 {
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .sidebar-header span {
+      display: block;
+      font-size: 13px;
+      font-weight: 400;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 10px;
+      flex: 1;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .sidebar a.active {
+      background-color: rgba(255, 255, 255, 0.22);
+      font-weight: 700;
+    }
+
+    .sidebar a:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
+    }
+
+    .sidebar img.icon {
+      width: 30px;
+      height: 30px;
       background: #fff;
-      padding: 35px 30px;
-      border-radius: 12px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      padding: 6px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer {
+      padding: 12px 10px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      margin-top: 12px;
+    }
+
+    .logout-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .logout-link:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 999;
+    }
+
+    .sidebar-overlay.show {
+      display: block;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 24px;
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .page-card {
+      width: min(760px, 100%);
+      margin: 24px auto 0;
+      background: var(--surface);
+      padding: 32px 28px;
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .page-title {
+      font-size: 28px;
+      color: var(--primary);
+      margin-bottom: 24px;
+      font-weight: 700;
       text-align: center;
     }
 
-    h1 {
-      font-size: 26px;
-      color: #1e2a78;
-      margin-bottom: 30px;
-      font-weight: 600;
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     label {
       display: block;
-      margin-bottom: 10px;
-      font-weight: 500;
-      font-size: 15px;
+      font-weight: 600;
+      font-size: 14px;
       text-align: left;
+      color: var(--muted);
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 14px;
+      font-size: 15px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--text);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    input:focus {
+      border-color: #a5b4fc;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+      outline: none;
+      background: #fff;
+    }
+
+    .helper-text {
+      text-align: left;
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .validation-message {
+      margin-top: 8px;
+      min-height: 20px;
+      font-size: 13px;
+      color: var(--danger);
+      text-align: left;
+    }
+
+    .btn {
+      margin-top: 18px;
+      padding: 12px 18px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 2px 8px rgba(30, 42, 120, 0.18);
+    }
+
+    .btn:hover {
+      background: var(--primary-light);
+      transform: translateY(-1px);
+    }
+
+    .info-box {
+      background: #eef3ff;
+      padding: 18px 20px;
+      margin-top: 28px;
+      border-radius: 14px;
+      text-align: left;
+      font-size: 15px;
+      line-height: 1.6;
+      border: 1px solid #dbe7ff;
+    }
+
+    .info-box strong {
+      color: var(--primary);
+    }
+
+    #flash-messages {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 3000;
+      max-width: 320px;
+    }
+
+    .alert {
+      padding: 15px 18px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      background: #fff;
+      border-left: 5px solid transparent;
+      color: var(--text);
+    }
+
+    .alert-success {
+      background-color: #ecfdf5;
+      color: #166534;
+      border-left-color: #22c55e;
+    }
+
+    .alert-danger {
+      background-color: #fef2f2;
+      color: #991b1b;
+      border-left-color: #ef4444;
+    }
+
+    .alert-warning {
+      background-color: #fffbeb;
+      color: #92400e;
+      border-left-color: #f59e0b;
+    }
+
+    .alert-info {
+      background-color: #ecfeff;
+      color: #155e75;
+      border-left-color: #06b6d4;
+    }
+
+    .alert.show {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .modal {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 1000;
+      z-index: 2000;
+      padding: 20px;
     }
 
     .hidden {
@@ -163,181 +378,209 @@
 
     .modal-content {
       background: #fff;
-      padding: 25px 30px;
-      border-radius: 12px;
+      padding: 24px;
+      border-radius: 16px;
       text-align: center;
-      max-width: 400px;
-      width: 90%;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-      font-size: 16px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+      animation: modalSlide 0.22s ease-out;
     }
 
-    .btn-confirm {
-      background: #28a745;
-      color: #fff;
-      margin-right: 10px;
+    @keyframes modalSlide {
+      from {
+        transform: translateY(-16px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
 
-    .btn-cancel {
-      background: #dc3545;
-      color: #fff;
+    .modal-content h2 {
+      font-size: 22px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .modal-content p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
     .btn-confirm,
     .btn-cancel {
       padding: 10px 18px;
       border: none;
-      border-radius: 6px;
+      border-radius: 10px;
       cursor: pointer;
       font-size: 14px;
+      font-weight: 700;
+      transition: background 0.2s ease, transform 0.2s ease;
     }
 
-    input {
-      width: 100%;
-      padding: 14px 12px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      transition: border 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    input:focus {
-      border-color: #4b6cb7;
-      box-shadow: 0 0 5px rgba(75, 108, 183, 0.3);
-      outline: none;
-    }
-
-    .btn {
-      margin-top: 25px;
-      padding: 14px 22px;
-      background: #1e2a78;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 500;
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-
-    .btn:hover {
-      background: #39549b;
+    .btn-confirm:hover,
+    .btn-cancel:hover {
       transform: translateY(-1px);
     }
 
-    .info-box {
-      background: #eef3ff;
-      padding: 20px;
-      margin-top: 30px;
-      border-radius: 8px;
-      text-align: left;
-      font-size: 15px;
-      line-height: 1.5;
+    .btn-confirm {
+      background: var(--success);
+      color: #fff;
     }
 
-    a.back {
-      display: inline-block;
-      margin-bottom: 20px;
-      text-decoration: none;
-      color: #4b6cb7;
-      font-size: 14px;
-      transition: color 0.2s ease;
+    .btn-confirm:hover {
+      background: #15803d;
     }
 
-    a.back:hover {
-      text-decoration: underline;
-      color: #39549b;
+    .btn-cancel {
+      background: #e5e7eb;
+      color: #374151;
     }
 
-    #flash-messages {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 9999;
-      max-width: 320px;
+    .btn-cancel:hover {
+      background: #d1d5db;
     }
 
-    /* Flash cards */
-    .alert {
-      padding: 15px 20px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      font-weight: 500;
-      opacity: 0;
-      transform: translateY(-20px);
-      transition: transform 0.3s ease, opacity 0.3s ease;
+    @media (max-width: 980px) {
+      .sidebar-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 76px 16px 20px;
+      }
     }
 
-    /* Types of messages */
-    .alert-success {
-      background-color: #d4edda;
-      color: #155724;
-      border-left: 5px solid #28a745;
+    @media (max-width: 700px) {
+      .page-card {
+        padding: 24px 18px;
+      }
+
+      .page-title {
+        font-size: 24px;
+      }
+
+      .modal-actions {
+        flex-direction: column;
+      }
+
+      .modal-actions button {
+        width: 100%;
+      }
+
+      #flash-messages {
+        left: 16px;
+        right: 16px;
+        max-width: none;
+      }
     }
 
-    .alert-danger {
-      background-color: #f8d7da;
-      color: #721c24;
-      border-left: 5px solid #dc3545;
-    }
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
 
-    .alert-warning {
-      background-color: #fff3cd;
-      color: #856404;
-      border-left: 5px solid #ffc107;
-    }
-
-    .alert-info {
-      background-color: #d1ecf1;
-      color: #0c5460;
-      border-left: 5px solid #17a2b8;
-    }
-
-    /* Slide-in animation when displayed */
-    .alert.show {
-      opacity: 1;
-      transform: translateY(0);
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
+        animation: none !important;
+      }
     }
   </style>
 </head>
 
 <body>
+  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false"
+    aria-label="Toggle navigation menu">
+    ☰
+  </button>
 
-  <nav class="sidebar" id="sidebar">
-    <h2>School Admin<br>Promissory Notes</h2>
+  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-    <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon" alt="Dashboard Icon"> Dashboard
-    </a>
+  <nav class="sidebar" id="sidebar" aria-label="Admin navigation">
+    <div class="sidebar-header">
+      <h1>School Admin</h1>
+      <span>Promissory Notes</span>
+    </div>
 
-    <a href="{{ url_for('admin.accounts') }}" class="{% if request.endpoint == 'admin.accounts' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/accounts.png') }}" class="icon" alt="Accounts Icon"> Accounts
-    </a>
+    <div class="sidebar-nav">
+      <a href="{{ url_for('admin.dashboard') }}"
+         class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.dashboard' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon" alt="">
+        <span>Dashboard</span>
+      </a>
 
-    <a href="{{ url_for('admin.semester') }}" class="{% if request.endpoint == 'admin.semester' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/semester.png') }}" class="icon" alt="Semester Icon"> Semester
-    </a>
+      <a href="{{ url_for('admin.accounts') }}"
+         class="{% if request.endpoint == 'admin.accounts' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.accounts' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/accounts.png') }}" class="icon" alt="">
+        <span>Accounts</span>
+      </a>
 
-    <a href="{{ url_for('admin.school_year') }}"
-      class="{% if request.endpoint == 'admin.school_year' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/schoolyear.png') }}" class="icon" alt="School Year Icon"> School
-      Year
-    </a>
-    <a href="{{ url_for('admin.course') }}" class="{% if request.endpoint == 'admin.course' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/course.png') }}" class="icon"> Active Course
-    </a>
-    <a href="{{ url_for('admin.logs') }}" class="{% if request.endpoint == 'admin.logs' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/log.png') }}" class="icon" alt="Logs Icon"> System Logs
-    </a>
-    <a href="{{ url_for('admin.logout') }}" class="logout-btn">
-      <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon"> Logout
-    </a>
+      <a href="{{ url_for('admin.semester') }}"
+         class="{% if request.endpoint == 'admin.semester' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.semester' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/semester.png') }}" class="icon" alt="">
+        <span>Semester</span>
+      </a>
+
+      <a href="{{ url_for('admin.school_year') }}"
+         class="{% if request.endpoint == 'admin.school_year' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.school_year' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/schoolyear.png') }}" class="icon" alt="">
+        <span>School Year</span>
+      </a>
+
+      <a href="{{ url_for('admin.course') }}"
+         class="{% if request.endpoint == 'admin.course' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.course' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/course.png') }}" class="icon" alt="">
+        <span>Active Course</span>
+      </a>
+
+      <a href="{{ url_for('admin.logs') }}"
+         class="{% if request.endpoint == 'admin.logs' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.logs' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/log.png') }}" class="icon" alt="">
+        <span>System Logs</span>
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('admin.logout') }}" class="logout-link">
+        <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon" alt="">
+        <span>Logout</span>
+      </a>
+    </div>
   </nav>
 
   <main class="main-content">
-
-    <div id="flash-messages">
+    <div id="flash-messages" aria-live="polite" aria-atomic="true">
       {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
       {% for category, message in messages %}
@@ -349,74 +592,185 @@
       {% endwith %}
     </div>
 
-    <div class="container">
-
-      <h1>Active School Year</h1>
+    <section class="page-card" aria-labelledby="page-title">
+      <h1 class="page-title" id="page-title">Active School Year</h1>
 
       <form id="schoolYearForm" method="POST">
-        <label for="school_year">Current School Year</label>
-        <input type="text" id="school_year" name="school_year" placeholder="2024-2025" required autocomplete="off">
-
-        <button class="btn" type="button" onclick="showConfirmation()">Save</button>
-      </form>
-
-      <!-- Custom Confirmation Modal -->
-      <div id="confirmModal" class="modal hidden">
-        <div class="modal-content">
-          <p>Are you sure you want to make this the active school year?</p>
-          <div style="margin-top: 20px;">
-            <button class="btn btn-confirm" onclick="submitForm()">Yes</button>
-            <button class="btn btn-cancel" onclick="hideConfirmation()">No</button>
-          </div>
+        <div class="form-group">
+          <label for="school_year">Current School Year</label>
+          <input
+            type="text"
+            id="school_year"
+            name="school_year"
+            placeholder="2024-2025"
+            value="{{ active_school_year or '' }}"
+            required
+            autocomplete="off"
+            inputmode="numeric"
+            aria-describedby="schoolYearHelp schoolYearError">
+          <div id="schoolYearHelp" class="helper-text">Format example: 2024-2025</div>
+          <div id="schoolYearError" class="validation-message" aria-live="polite"></div>
         </div>
-      </div>
+
+        <button class="btn" type="button" id="saveBtn">Save</button>
+      </form>
 
       <div class="info-box">
         <strong>Current Active School Year:</strong><br>
-        {{ active_school_year }}
+        {{ active_school_year or 'No active school year set' }}
       </div>
-
-    </div>
-
+    </section>
   </main>
 
+  <div id="confirmModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+      <h2 id="confirmTitle">Confirm School Year Change</h2>
+      <p id="confirmText">Are you sure you want to make this the active school year?</p>
+      <div class="modal-actions">
+        <button class="btn-confirm" id="confirmYes" type="button">Yes</button>
+        <button class="btn-cancel" id="confirmNo" type="button">No</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    function toggleSidebar() {
-      document.getElementById("sidebar").classList.toggle("open");
-    }
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
     const modal = document.getElementById('confirmModal');
     const form = document.getElementById('schoolYearForm');
+    const schoolYearInput = document.getElementById('school_year');
+    const schoolYearError = document.getElementById('schoolYearError');
+    const saveBtn = document.getElementById('saveBtn');
+    const confirmYes = document.getElementById('confirmYes');
+    const confirmNo = document.getElementById('confirmNo');
+
+    let previousFocus = null;
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      sidebarOverlay.hidden = false;
+      sidebarOverlay.classList.add('show');
+      sidebarToggle.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('show');
+      sidebarOverlay.hidden = true;
+      sidebarToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleSidebar() {
+      if (sidebar.classList.contains('open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    }
+
+    function validateSchoolYear() {
+      const value = schoolYearInput.value.trim();
+      const pattern = /^\d{4}-\d{4}$/;
+
+      if (!value) {
+        schoolYearError.textContent = 'Please enter a school year first.';
+        schoolYearInput.setAttribute('aria-invalid', 'true');
+        schoolYearInput.focus();
+        return false;
+      }
+
+      if (!pattern.test(value)) {
+        schoolYearError.textContent = 'Use the format YYYY-YYYY, like 2024-2025.';
+        schoolYearInput.setAttribute('aria-invalid', 'true');
+        schoolYearInput.focus();
+        return false;
+      }
+
+      const [startYear, endYear] = value.split('-').map(Number);
+      if (endYear !== startYear + 1) {
+        schoolYearError.textContent = 'The ending year must be exactly one year after the starting year.';
+        schoolYearInput.setAttribute('aria-invalid', 'true');
+        schoolYearInput.focus();
+        return false;
+      }
+
+      schoolYearError.textContent = '';
+      schoolYearInput.removeAttribute('aria-invalid');
+      return true;
+    }
 
     function showConfirmation() {
-      if (!form.school_year.value.trim()) {
-        alert('Please enter a school year first.');
-        return;
-      }
+      if (!validateSchoolYear()) return;
+
+      previousFocus = document.activeElement;
       modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden', 'false');
+      confirmYes.focus();
     }
 
     function hideConfirmation() {
       modal.classList.add('hidden');
+      modal.setAttribute('aria-hidden', 'true');
+
+      if (previousFocus) {
+        previousFocus.focus();
+      }
     }
 
     function submitForm() {
       form.submit();
     }
-    document.addEventListener("DOMContentLoaded", () => {
+
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    saveBtn.addEventListener('click', showConfirmation);
+    confirmYes.addEventListener('click', submitForm);
+    confirmNo.addEventListener('click', hideConfirmation);
+
+    schoolYearInput.addEventListener('input', function () {
+      if (schoolYearInput.value.trim()) {
+        schoolYearError.textContent = '';
+        schoolYearInput.removeAttribute('aria-invalid');
+      }
+    });
+
+    modal.addEventListener('click', function (event) {
+      if (event.target === modal) {
+        hideConfirmation();
+      }
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        if (!modal.classList.contains('hidden')) {
+          hideConfirmation();
+          return;
+        }
+        closeSidebar();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
       const alerts = document.querySelectorAll('.alert');
       alerts.forEach(alert => {
-        // Trigger slide-in
         setTimeout(() => alert.classList.add('show'), 50);
 
-        // Auto-hide after 5 seconds
         setTimeout(() => {
           alert.classList.remove('show');
-          setTimeout(() => alert.remove(), 300); // remove after transition
+          setTimeout(() => alert.remove(), 300);
         }, 5000);
       });
     });
-  </script>
 
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 980) {
+        closeSidebar();
+      }
+    });
+  </script>
 </body>
 
 </html>

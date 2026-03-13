@@ -6,113 +6,351 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Students Promissory - Finance</title>
   <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
+
   <style>
+    :root {
+      --primary: #1e2a78;
+      --primary-light: #3a4bb3;
+      --primary-dark: #16205d;
+      --bg: #f4f7fc;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --hover: #eef2ff;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --radius: 14px;
+      --sidebar-width: 240px;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: 'Arial', sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background-color: #f9f9f9;
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background-color: var(--bg);
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1100;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      font-size: 18px;
+    }
+
+    .sidebar-toggle:focus-visible,
+    .sidebar a:focus-visible,
+    .logout-link:focus-visible,
+    .filters input:focus-visible,
+    .filters select:focus-visible,
+    .btn:focus-visible,
+    .btn-clear:focus-visible,
+    .btn-primary:focus-visible,
+    .pagination a:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 2px;
     }
 
     .sidebar {
-      width: 220px;
-      height: 100vh;
-      background: linear-gradient(135deg, #1e2a78, #3a4bb3);
+      width: var(--sidebar-width);
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--primary), var(--primary-light));
       color: #fff;
       position: fixed;
       top: 0;
       left: 0;
-      padding-top: 20px;
       display: flex;
       flex-direction: column;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px 0 16px;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+      z-index: 1000;
       transition: transform 0.3s ease;
     }
 
-    .sidebar h2 {
-      text-align: center;
-      font-size: 16px;
-      margin: 0 10px 30px;
-      font-weight: 300;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .sidebar-header {
+      padding: 0 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      margin-bottom: 12px;
+    }
+
+    .sidebar-header h1 {
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .sidebar-header span {
+      display: block;
+      font-size: 13px;
+      font-weight: 400;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 10px;
+      flex: 1;
     }
 
     .sidebar a {
       display: flex;
       align-items: center;
-      padding: 12px 20px;
+      gap: 10px;
+      padding: 12px 14px;
       color: #fff;
-      text-decoration: none;
-      margin: 5px 0;
-      transition: background-color 0.3s ease;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
     }
 
     .sidebar a:hover {
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
     }
 
     .sidebar a.active {
-      background-color: rgba(255, 255, 255, 0.25);
-      font-weight: 600;
+      background-color: rgba(255, 255, 255, 0.22);
+      font-weight: 700;
     }
 
     .sidebar img.icon {
       width: 30px;
-      height: px;
-      margin-right: 10px;
+      height: 30px;
       background: #fff;
       border-radius: 50%;
       padding: 6px;
+      flex-shrink: 0;
     }
 
-    .logout-btn {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 12px 20px;
-      text-decoration: none;
-      border-radius: 0;
+    .sidebar-footer {
+      padding: 12px 10px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      margin-top: 12px;
+    }
+
+    .logout-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .logout-link:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 999;
+    }
+
+    .sidebar-overlay.show {
+      display: block;
     }
 
     .main-content {
-      margin-left: 220px;
-      padding: 20px;
+      margin-left: var(--sidebar-width);
+      padding: 24px;
       min-height: 100vh;
+      transition: margin-left 0.3s ease;
     }
 
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #fff;
-      padding: 15px 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      gap: 16px;
+      flex-wrap: wrap;
+      background: var(--surface);
+      padding: 18px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       margin-bottom: 20px;
     }
 
     .header h2 {
-      font-weight: 300;
-      color: #2c3e50;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 28px;
+    }
+
+    .header-meta {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .header-meta strong {
+      color: var(--text);
+    }
+
+    .filters {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: end;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 170px;
+      flex: 1 1 170px;
+    }
+
+    .filter-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .filters input,
+    .filters select {
+      padding: 11px 14px;
+      font-size: 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background-color: #f9fafb;
+      color: var(--text);
+      min-width: 0;
+      transition: all 0.2s ease;
+    }
+
+    .filters input:focus,
+    .filters select:focus {
+      outline: none;
+      border-color: #a5b4fc;
+      background-color: #fff;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .export-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn,
+    .btn-clear,
+    .btn-primary,
+    .pagination a {
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 10px 18px;
+      font-size: 14px;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(30, 42, 120, 0.2);
+      gap: 6px;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-light);
+      transform: translateY(-1px);
+    }
+
+    .btn-clear {
+      background-color: #6b7280;
+      color: #fff;
+      padding: 10px 18px;
+      font-size: 14px;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(107, 114, 128, 0.15);
+    }
+
+    .btn-clear:hover {
+      background-color: #4b5563;
+      transform: translateY(-1px);
     }
 
     .table-container {
       overflow-x: auto;
       width: 100%;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       margin-bottom: 20px;
-      display: block;
+      border: 1px solid var(--border);
     }
 
     table {
@@ -122,116 +360,37 @@
     }
 
     thead {
-      background: linear-gradient(135deg, #1e2a78, #3a4bb3);
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
       color: #fff;
     }
 
     th,
     td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #eee;
+      padding: 14px 15px;
+      border-bottom: 1px solid #edf0f5;
       text-align: left;
+      vertical-align: middle;
+      font-size: 14px;
+    }
+
+    th {
+      font-weight: 700;
+      white-space: nowrap;
     }
 
     tbody tr:nth-child(even) {
-      background: #f8f9fa;
+      background: #fafbff;
     }
 
     tbody tr:hover {
-      background: #e3eaff;
-      transition: 0.2s ease;
-    }
-
-    .filters {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 20px;
-      padding: 10px 15px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    }
-
-    .filters input,
-    .filters select {
-      padding: 10px 16px;
-      font-size: 14px;
-      border: none;
-      border-radius: 50px;
-      background-color: #f1f3f8;
-      color: #333;
-      min-width: 160px;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    }
-
-    .filters input:focus,
-    .filters select:focus {
-      outline: none;
-      background-color: #e6ebff;
-      box-shadow: 0 4px 10px rgba(58, 75, 179, 0.2);
-    }
-
-    .export-buttons {
-      left: 20px;
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .export-buttons .btn {
-      border-radius: 50px;
-      padding: 10px 18px;
-      font-size: 14px;
-    }
-
-    .filters .btn-clear,
-    .filters .btn-primary {
-      border-radius: 50px;
-      padding: 10px 20px;
-      font-size: 14px;
-    }
-
-    .btn,
-    .btn-clear,
-    .btn-primary {
-      padding: 8px 14px;
-      font-size: 13px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .btn-clear {
-      background-color: #6c757d;
-      color: #fff;
-    }
-
-    .btn-clear:hover {
-      background-color: #5a6268;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    }
-
-    .btn-primary {
-      background-color: #1e2a78;
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background-color: #3a4bb3;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      background: #edf2ff;
+      transition: background-color 0.2s ease;
     }
 
     .no-data {
       text-align: center;
       padding: 40px;
-      color: #6c757d;
+      color: var(--muted);
       font-style: italic;
     }
 
@@ -241,161 +400,285 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 12px;
+    }
+
+    .results-info {
+      color: var(--muted);
+      font-size: 14px;
     }
 
     .pagination {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
-    }
-
-    .pagination button {
-      background: #fff;
-      border: 1px solid #ccc;
-      padding: 8px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .pagination button.active {
-      background: #1e2a78;
-      color: #fff;
-      border-color: #1e2a78;
-    }
-
-    .pagination button:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-    }
-
-    .sidebar-toggle {
-      display: none;
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background: #1e2a78;
-      color: #fff;
-      border: none;
-      padding: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 1000;
-    }
-
-    .export-buttons .btn {
       align-items: center;
-      gap: 5px;
-      font-weight: 500;
+    }
+
+    .pagination a,
+    .pagination span {
+      background: #fff;
+      border: 1px solid #d1d5db;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: var(--text);
+      min-width: 40px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .pagination a:hover {
+      background: #f3f4f6;
+    }
+
+    .pagination a.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .pagination .disabled {
+      opacity: 0.5;
+      pointer-events: none;
+      background: #f9fafb;
+    }
+
+    .pagination .ellipsis {
+      cursor: default;
+      background: transparent;
+      border-color: transparent;
+      padding-left: 2px;
+      padding-right: 2px;
+    }
+
+    @media (max-width: 980px) {
+      .sidebar-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 76px 16px 20px;
+      }
+
+      .header h2 {
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .filters {
+        padding: 14px;
+      }
+
+      .filter-group {
+        flex: 1 1 100%;
+      }
+
+      .filter-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .export-buttons {
+        width: 100%;
+        flex-direction: column;
+      }
+
+      .export-buttons .btn-primary,
+      .btn-clear {
+        width: 100%;
+      }
+
+      .pagination-container {
+        align-items: flex-start;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
+        animation: none !important;
+      }
     }
   </style>
 </head>
 
 <body>
+  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false"
+    aria-label="Toggle navigation menu">
+    ☰
+  </button>
 
-  <nav class="sidebar" id="sidebar">
-    <h2>{{ finance_user }}<br>Promissory Notes</h2>
-    {% set links = [
-    ('finance.dashboard','Dashboard','dashboard.png'),
-    ('finance.promissory_notes','Promissory Notes','notes.png'),
-    ('finance.all_promissory','Statistics','notes.png'),
-    ('finance.students_promissory','Students','students.png')
-    ] %}
-    {% for endpoint, text, icon in links %}
-    <a href="{{ url_for(endpoint) }}" class="{% if request.endpoint==endpoint %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/' + icon) }}" class="icon"> {{ text }}
-    </a>
-    {% endfor %}
-    <a href="{{ url_for('finance.logout') }}" class="logout-btn">
-      <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon"> Logout
-    </a>
+  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
+
+  <nav class="sidebar" id="sidebar" aria-label="Finance navigation">
+    <div class="sidebar-header">
+      <h1>{{ finance_user }}</h1>
+      <span>Promissory Notes</span>
+    </div>
+
+    <div class="sidebar-nav">
+      {% set links = [
+        ('finance.dashboard', 'Dashboard', 'dashboard.png'),
+        ('finance.promissory_notes', 'Promissory Notes', 'notes.png'),
+        ('finance.all_promissory', 'Statistics', 'notes.png'),
+        ('finance.students_promissory', 'Students', 'students.png')
+      ] %}
+
+      {% for endpoint, text, icon in links %}
+      <a href="{{ url_for(endpoint) }}"
+         class="{% if request.endpoint == endpoint %}active{% endif %}"
+         aria-current="{% if request.endpoint == endpoint %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/' + icon) }}" class="icon" alt="">
+        <span>{{ text }}</span>
+      </a>
+      {% endfor %}
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('finance.logout') }}" class="logout-link">
+        <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon" alt="">
+        <span>Logout</span>
+      </a>
+    </div>
   </nav>
 
   <main class="main-content">
     <header class="header">
       <h2>Students Promissory Requests</h2>
-      <div>Active Semester: <strong>{{ active_semester }}</strong> | S.Y.: <strong>{{ active_school_year }}</strong>
+      <div class="header-meta">
+        Active Semester: <strong>{{ active_semester }}</strong> |
+        S.Y.: <strong>{{ active_school_year }}</strong>
       </div>
     </header>
 
-    <form method="GET" class="filters">
-      <input type="text" name="search" placeholder="Search by student name" value="{{ search or '' }}" autocomplete="off">
+    <form method="GET" class="filters" id="filterForm" aria-label="Filter student promissory requests">
+      <div class="filter-group">
+        <label for="search">Search</label>
+        <input
+          type="text"
+          id="search"
+          name="search"
+          placeholder="Search by student name"
+          value="{{ search or '' }}"
+          autocomplete="off">
+      </div>
 
-      <select name="course">
-        <option value="" {% if not selected_course %}selected{% endif %}>All Courses</option>
-        {% for course in all_courses %}
+      <div class="filter-group">
+        <label for="course">Course</label>
+        <select name="course" id="course">
+          <option value="" {% if not selected_course %}selected{% endif %}>All Courses</option>
+          {% for course in all_courses %}
           <option value="{{ course }}" {% if selected_course == course %}selected{% endif %}>{{ course }}</option>
-        {% endfor %}
-      </select>
+          {% endfor %}
+        </select>
+      </div>
 
-      <select name="year_level">
-        <option value="" {% if not selected_year_level %}selected{% endif %}>All Year Levels</option>
-        {% for y in ['1st Year','2nd Year','3rd Year','4th Year'] %}
+      <div class="filter-group">
+        <label for="year_level">Year Level</label>
+        <select name="year_level" id="year_level">
+          <option value="" {% if not selected_year_level %}selected{% endif %}>All Year Levels</option>
+          {% for y in ['1st Year', '2nd Year', '3rd Year', '4th Year'] %}
           <option value="{{ y }}" {% if selected_year_level == y %}selected{% endif %}>{{ y }}</option>
-        {% endfor %}
-      </select>
+          {% endfor %}
+        </select>
+      </div>
 
-      <select name="semester">
-        <option value="" {% if not selected_semester %}selected{% endif %}>All Semesters</option>
-        {% for sem in all_semesters %}
+      <div class="filter-group">
+        <label for="semester">Semester</label>
+        <select name="semester" id="semester">
+          <option value="" {% if not selected_semester %}selected{% endif %}>All Semesters</option>
+          {% for sem in all_semesters %}
           <option value="{{ sem }}" {% if selected_semester == sem %}selected{% endif %}>{{ sem }}</option>
-        {% endfor %}
-      </select>
+          {% endfor %}
+        </select>
+      </div>
 
-      <select name="semester_type">
-        <option value="" {% if not selected_semester_type %}selected{% endif %}>All Examination Types</option>
-        {% for type in ['Prelims','Midterms','Finals'] %}
+      <div class="filter-group">
+        <label for="semester_type">Examination Type</label>
+        <select name="semester_type" id="semester_type">
+          <option value="" {% if not selected_semester_type %}selected{% endif %}>All Examination Types</option>
+          {% for type in ['Prelims', 'Midterms', 'Finals'] %}
           <option value="{{ type }}" {% if selected_semester_type == type %}selected{% endif %}>{{ type }}</option>
-        {% endfor %}
-      </select>
+          {% endfor %}
+        </select>
+      </div>
 
-      <select name="school_year">
+      <div class="filter-group">
+        <label for="school_year">School Year</label>
+        <select name="school_year" id="school_year">
           <option value="" {% if not selected_school_year %}selected{% endif %}>All School Years</option>
           {% for sy in all_school_years %}
-          <option value="{{ sy }}" {% if selected_school_year==sy %}selected{% endif %}>{{ sy }}</option>
+          <option value="{{ sy }}" {% if selected_school_year == sy %}selected{% endif %}>{{ sy }}</option>
           {% endfor %}
-      </select>
+        </select>
+      </div>
 
-      <a href="{{ url_for('finance.students_promissory') }}" class="btn btn-clear">Clear</a>
+      <div class="filter-actions">
+        <a href="{{ url_for('finance.students_promissory') }}" class="btn-clear">Clear</a>
 
-      <div class="export-buttons">
-        <button type="button" class="btn btn-primary"
-          onclick="window.location='?export=csv&search={{ search or '' }}&course={{ selected_course or '' }}&year_level={{ selected_year_level or '' }}&semester={{ selected_semester or '' }}&semester_type={{ selected_semester_type or '' }}'">📄 Export CSV</button>
-        <button type="button" class="btn btn-primary"
-          onclick="window.location='?export=excel&search={{ search or '' }}&course={{ selected_course or '' }}&year_level={{ selected_year_level or '' }}&semester={{ selected_semester or '' }}&semester_type={{ selected_semester_type or '' }}'">🗒️ Export Excel</button>
+        <div class="export-buttons">
+          <button type="button" class="btn-primary" id="exportCsvBtn">📄 Export CSV</button>
+          <button type="button" class="btn-primary" id="exportExcelBtn">🗒️ Export Excel</button>
+        </div>
       </div>
     </form>
 
-
     <div class="table-container">
-      <table>
+      <table aria-describedby="students-table-description">
+        <caption id="students-table-description" class="sr-only">
+          List of students with promissory requests, including course, year level, semester, examination type, school year, and request count.
+        </caption>
         <thead>
           <tr>
-            <th>Student Name</th>
-            <th>Course</th>
-            <th>Year Level</th>
-            <th>Semester</th>
-            <th>Examination Type</th>
-            <th>School Year</th>
-            <th>Requests Count</th>
+            <th scope="col">Student Name</th>
+            <th scope="col">Course</th>
+            <th scope="col">Year Level</th>
+            <th scope="col">Semester</th>
+            <th scope="col">Examination Type</th>
+            <th scope="col">School Year</th>
+            <th scope="col">Requests Count</th>
           </tr>
         </thead>
         <tbody>
           {% if students.items %}
             {% for s, requests_count in students.items %}
-              <tr>
-                <td>{{ s.first_name }} {{ s.middle_name or '' }} {{ s.last_name }} {{ s.suffix or '' }}</td>
-                <td>{{ s.course }}</td>
-                <td>{{ s.year_level }}</td>
-                <td>{{ selected_semester if selected_semester and selected_semester != 'All Semester' else 'All Semester' }}</td>
-                <td>{{ selected_semester_type if selected_semester_type and selected_semester_type != 'All Examination' else 'All Examination' }}</td>
-                <td>{{ selected_school_year if selected_school_year and selected_school_year != 'All School Year' else 'All School Year' }}</td>
-                <td>{{ requests_count or 0 }}</td>
-              </tr>
+            <tr>
+              <td>
+                {{ s.first_name }}
+                {{ s.middle_name or '' }}
+                {{ s.last_name }}
+                {{ s.suffix or '' }}
+              </td>
+              <td>{{ s.course }}</td>
+              <td>{{ s.year_level }}</td>
+              <td>{{ selected_semester if selected_semester else 'All Semesters' }}</td>
+              <td>{{ selected_semester_type if selected_semester_type else 'All Examination Types' }}</td>
+              <td>{{ selected_school_year if selected_school_year else 'All School Years' }}</td>
+              <td>{{ requests_count or 0 }}</td>
+            </tr>
             {% endfor %}
           {% else %}
             <tr>
-              <td colspan="6" class="no-data">No student promissory requests found for the current filters.</td>
+              <td colspan="7" class="no-data">No student promissory requests found for the current filters.</td>
             </tr>
           {% endif %}
         </tbody>
@@ -405,9 +688,10 @@
     <div class="pagination-container">
       <div class="results-info">Page {{ students.page }} of {{ students.pages }}</div>
 
-      <div class="pagination">
-        <!-- Previous Button -->
-        <button {% if not students.has_prev %}disabled{% endif %} onclick="location.href='{{ url_for('finance.students_promissory',
+      <nav class="pagination" aria-label="Pagination">
+        {% if students.has_prev %}
+          <a href="{{ url_for(
+            'finance.students_promissory',
             page=students.prev_num,
             search=search,
             semester=selected_semester,
@@ -415,133 +699,217 @@
             school_year=selected_school_year,
             course=selected_course,
             year_level=selected_year_level
-          ) }}'">Previous</button>
-        </button>
+          ) }}">Previous</a>
+        {% else %}
+          <span class="disabled">Previous</span>
+        {% endif %}
 
         {% set total_pages = students.pages %}
         {% set current = students.page %}
 
-        {% if total_pages <= 7 %} {% for p in range(1, total_pages + 1) %} <button
-          class="{% if p == current %}active{% endif %}" onclick="location.href='{{ url_for('finance.students_promissory',
-            page=p,
-            search=search,
-            semester=selected_semester,
-            school_year=selected_school_year,
-            year_level=selected_year_level
-          ) }}'">
-          {{ p }}
-          </button>
-          {% endfor %}
-
-          {% else %}
-
-          {% for p in range(1, 4) %}
-          <button class="{% if p == current %}active{% endif %}" onclick="location.href='{{ url_for('finance.students_promissory',
-            page=p,
-            search=search,
-            semester=selected_semester,
-            semester_type=selected_semester_type,
-            school_year=selected_school_year,
-            year_level=selected_year_level
-          ) }}'">
-            {{ p }}
-          </button>
-          {% endfor %}
-
-          {% if current > 4 and current < total_pages - 3 %} <button disabled>...</button>
-
-            {% for p in range(current-1, current+2) %}
-            <button class="{% if p == current %}active{% endif %}" onclick="location.href='{{ url_for('finance.students_promissory',
-              page=p,
-              search=search,
-              semester=selected_semester,
-              semester_type=selected_semester_type,
-              school_year=selected_school_year,
-              year_level=selected_year_level
-            ) }}'">
+        {% if total_pages <= 7 %}
+          {% for p in range(1, total_pages + 1) %}
+            <a
+              href="{{ url_for(
+                'finance.students_promissory',
+                page=p,
+                search=search,
+                semester=selected_semester,
+                semester_type=selected_semester_type,
+                school_year=selected_school_year,
+                course=selected_course,
+                year_level=selected_year_level
+              ) }}"
+              class="{% if p == current %}active{% endif %}">
               {{ p }}
-            </button>
+            </a>
+          {% endfor %}
+        {% else %}
+          {% for p in range(1, 4) %}
+            <a
+              href="{{ url_for(
+                'finance.students_promissory',
+                page=p,
+                search=search,
+                semester=selected_semester,
+                semester_type=selected_semester_type,
+                school_year=selected_school_year,
+                course=selected_course,
+                year_level=selected_year_level
+              ) }}"
+              class="{% if p == current %}active{% endif %}">
+              {{ p }}
+            </a>
+          {% endfor %}
+
+          {% if current > 4 and current < total_pages - 3 %}
+            <span class="ellipsis">...</span>
+
+            {% for p in range(current - 1, current + 2) %}
+              <a
+                href="{{ url_for(
+                  'finance.students_promissory',
+                  page=p,
+                  search=search,
+                  semester=selected_semester,
+                  semester_type=selected_semester_type,
+                  school_year=selected_school_year,
+                  course=selected_course,
+                  year_level=selected_year_level
+                ) }}"
+                class="{% if p == current %}active{% endif %}">
+                {{ p }}
+              </a>
             {% endfor %}
 
-            <button disabled>...</button>
-
-            {% elif current <= 4 %} {% for p in range(4, 6) %} <button class="{% if p == current %}active{% endif %}"
-              onclick="location.href='{{ url_for('finance.students_promissory',
-              page=p,
-              search=search,
-              semester=selected_semester,
-              semester_type=selected_semester_type,
-              school_year=selected_school_year,
-              year_level=selected_year_level
-            ) }}'">
-              {{ p }}
-              </button>
-              {% endfor %}
-              <button disabled>...</button>
-
-              {% else %}
-              <button disabled>...</button>
-
-              {% for p in range(total_pages-5, total_pages-2) %}
-              <button class="{% if p == current %}active{% endif %}" onclick="location.href='{{ url_for('finance.students_promissory',
-              page=p,
-              search=search,
-              semester=selected_semester,
-              semester_type=selected_semester_type,
-              school_year=selected_school_year,
-              year_level=selected_year_level
-            ) }}'">
+            <span class="ellipsis">...</span>
+          {% elif current <= 4 %}
+            {% for p in range(4, 6) %}
+              <a
+                href="{{ url_for(
+                  'finance.students_promissory',
+                  page=p,
+                  search=search,
+                  semester=selected_semester,
+                  semester_type=selected_semester_type,
+                  school_year=selected_school_year,
+                  course=selected_course,
+                  year_level=selected_year_level
+                ) }}"
+                class="{% if p == current %}active{% endif %}">
                 {{ p }}
-              </button>
-              {% endfor %}
-              {% endif %}
+              </a>
+            {% endfor %}
+            <span class="ellipsis">...</span>
+          {% else %}
+            <span class="ellipsis">...</span>
 
-              {% for p in range(total_pages-2, total_pages+1) %}
-              <button class="{% if p == current %}active{% endif %}" onclick="location.href='{{ url_for('finance.students_promissory',
-            page=p,
+            {% for p in range(total_pages - 5, total_pages - 2) %}
+              <a
+                href="{{ url_for(
+                  'finance.students_promissory',
+                  page=p,
+                  search=search,
+                  semester=selected_semester,
+                  semester_type=selected_semester_type,
+                  school_year=selected_school_year,
+                  course=selected_course,
+                  year_level=selected_year_level
+                ) }}"
+                class="{% if p == current %}active{% endif %}">
+                {{ p }}
+              </a>
+            {% endfor %}
+          {% endif %}
+
+          {% for p in range(total_pages - 2, total_pages + 1) %}
+            <a
+              href="{{ url_for(
+                'finance.students_promissory',
+                page=p,
+                search=search,
+                semester=selected_semester,
+                semester_type=selected_semester_type,
+                school_year=selected_school_year,
+                course=selected_course,
+                year_level=selected_year_level
+              ) }}"
+              class="{% if p == current %}active{% endif %}">
+              {{ p }}
+            </a>
+          {% endfor %}
+        {% endif %}
+
+        {% if students.has_next %}
+          <a href="{{ url_for(
+            'finance.students_promissory',
+            page=students.next_num,
             search=search,
             semester=selected_semester,
             semester_type=selected_semester_type,
             school_year=selected_school_year,
+            course=selected_course,
             year_level=selected_year_level
-          ) }}'">
-                {{ p }}
-              </button>
-              {% endfor %}
-
-              {% endif %}
-
-              <!-- Next Button -->
-              <button {% if not students.has_next %}disabled{% endif %} onclick="location.href='{{ url_for('finance.students_promissory',
-        page=students.next_num,
-        search=search,
-        semester=selected_semester,
-        semester_type=selected_semester_type,
-        school_year=selected_school_year,
-        year_level=selected_year_level
-      ) }}'">
-                Next
-              </button>
-      </div>
+          ) }}">Next</a>
+        {% else %}
+          <span class="disabled">Next</span>
+        {% endif %}
+      </nav>
     </div>
-
   </main>
 
-<script>
-  function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-  }
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const filterForm = document.getElementById('filterForm');
+    const filterSelects = filterForm.querySelectorAll('select');
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
+    const exportExcelBtn = document.getElementById('exportExcelBtn');
 
-  const filterForm = document.querySelector('.filters');
-  const filterSelects = filterForm.querySelectorAll('select');
+    function openSidebar() {
+      sidebar.classList.add('open');
+      sidebarOverlay.hidden = false;
+      sidebarOverlay.classList.add('show');
+      sidebarToggle.setAttribute('aria-expanded', 'true');
+    }
 
-  // Only auto-submit on select change
-  filterSelects.forEach(el => {
-    el.addEventListener('change', () => filterForm.submit());
-  });
-</script>
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('show');
+      sidebarOverlay.hidden = true;
+      sidebarToggle.setAttribute('aria-expanded', 'false');
+    }
 
+    function toggleSidebar() {
+      if (sidebar.classList.contains('open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    }
 
+    function buildExportUrl(format) {
+      const formData = new FormData(filterForm);
+      const params = new URLSearchParams();
+
+      for (const [key, value] of formData.entries()) {
+        params.set(key, value);
+      }
+
+      params.set('export', format);
+      return `${window.location.pathname}?${params.toString()}`;
+    }
+
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeSidebar();
+      }
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 980) {
+        closeSidebar();
+      }
+    });
+
+    filterSelects.forEach(function (select) {
+      select.addEventListener('change', function () {
+        filterForm.submit();
+      });
+    });
+
+    exportCsvBtn.addEventListener('click', function () {
+      window.location.href = buildExportUrl('csv');
+    });
+
+    exportExcelBtn.addEventListener('click', function () {
+      window.location.href = buildExportUrl('excel');
+    });
+  </script>
 </body>
 
 </html>

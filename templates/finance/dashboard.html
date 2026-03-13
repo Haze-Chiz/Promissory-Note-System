@@ -7,188 +7,317 @@
   <title>Dashboard - Promissory Notes</title>
   <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
   <style>
+    :root {
+      --primary: #1e2a78;
+      --primary-light: #3a4bb3;
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --hover: #eef2ff;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --radius: 14px;
+      --sidebar-width: 240px;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: 'Arial', sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background-color: #f9f9f9;
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    a,
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1100;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      font-size: 18px;
+    }
+
+    .sidebar-toggle:focus-visible,
+    .sidebar a:focus-visible,
+    .logout-link:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 2px;
     }
 
     .sidebar {
-      width: 220px;
-      height: 100vh;
-      background: linear-gradient(135deg, #1e2a78, #3a4bb3);
+      width: var(--sidebar-width);
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--primary), var(--primary-light));
       color: #fff;
       position: fixed;
       top: 0;
       left: 0;
-      padding-top: 20px;
       display: flex;
       flex-direction: column;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px 0 16px;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+      z-index: 1000;
       transition: transform 0.3s ease;
     }
 
-    .sidebar h2 {
-      text-align: center;
-      font-size: 16px;
-      margin: 0 10px 30px;
-      font-weight: 300;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .sidebar-header {
+      padding: 0 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      margin-bottom: 12px;
+    }
+
+    .sidebar-header h1 {
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .sidebar-header span {
+      display: block;
+      font-size: 13px;
+      font-weight: 400;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 10px;
+      flex: 1;
     }
 
     .sidebar a {
       display: flex;
       align-items: center;
-      padding: 12px 20px;
+      gap: 10px;
+      padding: 12px 14px;
       color: #fff;
       text-decoration: none;
-      margin: 5px 0;
-      transition: background-color 0.3s ease;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
     }
 
     .sidebar a:hover {
-      background-color: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
+    }
+
+    .sidebar a.active {
+      background: rgba(255, 255, 255, 0.22);
+      font-weight: 700;
     }
 
     .sidebar img.icon {
       width: 30px;
       height: 30px;
-      margin-right: 10px;
       background: #fff;
       border-radius: 50%;
       padding: 6px;
+      flex-shrink: 0;
     }
 
-    .logout-btn {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 12px 20px;
+    .sidebar-footer {
+      padding: 12px 10px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      margin-top: 12px;
     }
 
-    .sidebar a.active {
-      background-color: rgba(255, 255, 255, 0.25);
-      font-weight: 600;
+    .logout-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .logout-link:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
     }
 
     .main-content {
-      margin-left: 220px;
-      padding: 20px;
+      margin-left: var(--sidebar-width);
       min-height: 100vh;
+      padding: 24px;
+      transition: margin-left 0.3s ease;
     }
 
     .header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      background: #fff;
-      padding: 15px 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
+      justify-content: space-between;
+      gap: 16px;
       flex-wrap: wrap;
-      gap: 10px;
+      background: var(--surface);
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
     }
 
     .header h2 {
-      font-weight: 300;
-      color: #2c3e50;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .header-meta {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .header-meta strong {
+      color: var(--text);
     }
 
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 20px;
-      margin: 20px 0;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
     }
 
     .card {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       padding: 20px;
       text-align: center;
-      transition: transform 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
     }
 
     .card h3 {
-      margin: 0;
-      font-size: 16px;
-      color: #1e2a78;
-      font-weight: 300;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 10px;
     }
 
     .card p {
-      margin: 10px 0 0;
-      font-size: 24px;
-      font-weight: 600;
-      color: #333;
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--text);
     }
 
     .table-card {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       padding: 20px;
-      margin-top: 20px;
-      overflow-x: auto;
     }
 
     .table-card h3 {
-      color: #1e2a78;
-      font-size: 16px;
-      font-weight: 300;
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 8px;
-      margin-top: 0;
+      font-size: 18px;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      min-width: 760px;
+    }
+
+    caption {
+      text-align: left;
+      padding: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      background: #fafbff;
+      border-bottom: 1px solid var(--border);
     }
 
     th,
     td {
-      border-bottom: 1px solid #eee;
       text-align: left;
-      padding: 12px;
+      padding: 14px 12px;
       font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
     }
 
     th {
-      background: #f3f4f6;
-      color: #1e2a78;
-      font-weight: 500;
+      background: #f8faff;
+      color: var(--primary);
+      font-weight: 700;
+      white-space: nowrap;
     }
 
     tbody tr:nth-child(even) {
-      background: #f8f9fa;
+      background: #fcfcfd;
     }
 
     tbody tr:hover {
-      background: #e9ecef;
-      transition: background-color 0.2s ease;
+      background: var(--hover);
     }
 
     .status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       padding: 6px 10px;
-      border-radius: 5px;
-      font-weight: 600;
+      border-radius: 999px;
       font-size: 12px;
+      font-weight: 700;
       text-transform: capitalize;
-      display: inline-block;
+      white-space: nowrap;
     }
 
     .pending {
@@ -197,125 +326,273 @@
     }
 
     .approved {
-      background: #d4edda;
-      color: #155724;
+      background: #d1fae5;
+      color: #065f46;
     }
 
     .rejected {
-      background: #f8d7da;
-      color: #721c24;
+      background: #fee2e2;
+      color: #991b1b;
     }
 
-    .sidebar-toggle {
+    .no-data {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px;
+      font-style: italic;
+    }
+
+    .sidebar-overlay {
       display: none;
       position: fixed;
-      top: 10px;
-      left: 10px;
-      background: #1e2a78;
-      color: #fff;
-      border: none;
-      padding: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 1000;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 999;
+    }
+
+    .sidebar-overlay.show {
+      display: block;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 76px 16px 20px;
+      }
+
+      .header {
+        padding: 18px;
+      }
+
+      .header h2 {
+        font-size: 24px;
+      }
+
+      .cards {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 18px;
+      }
+
+      .card p {
+        font-size: 26px;
+      }
+
+      .table-card {
+        padding: 16px;
+      }
+
+      th,
+      td {
+        padding: 12px 10px;
+        font-size: 13px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        scroll-behavior: auto;
+      }
+
+      .sidebar,
+      .main-content,
+      .card,
+      .sidebar a,
+      .logout-link {
+        transition: none;
+      }
     }
   </style>
 </head>
 
 <body>
-  <nav class="sidebar" id="sidebar">
-    <h2>{{ finance_user }}<br>Promissory Notes</h2>
+  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar"
+    aria-expanded="false" aria-label="Toggle navigation menu">
+    ☰
+  </button>
 
-    <a href="{{ url_for('finance.dashboard') }}"
-      class="{% if request.endpoint == 'finance.dashboard' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon" alt="Dashboard Icon"> Dashboard
-    </a>
+  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-    <a href="{{ url_for('finance.promissory_notes') }}"
-      class="{% if request.endpoint == 'finance.promissory_notes' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/notes.png') }}" class="icon" alt="Notes Icon"> Promissory Notes
-    </a>
+  <nav class="sidebar" id="sidebar" aria-label="Sidebar navigation">
+    <div class="sidebar-header">
+      <h1>{{ finance_user }}</h1>
+      <span>Promissory Notes</span>
+    </div>
 
-    <a href="{{ url_for('finance.all_promissory') }}"
-      class="{% if request.endpoint == 'finance.all_promissory' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/notes.png') }}" class="icon" alt="Statistics Icon"> Statistics
-    </a>
+    <div class="sidebar-nav">
+      <a href="{{ url_for('finance.dashboard') }}"
+        class="{% if request.endpoint == 'finance.dashboard' %}active{% endif %}"
+        aria-current="{% if request.endpoint == 'finance.dashboard' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon" alt="">
+        <span>Dashboard</span>
+      </a>
 
-    <a href="{{ url_for('finance.students_promissory') }}"
-      class="{% if request.endpoint=='finance.students_promissory' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/students.png') }}" class="icon" alt="Students Icon"> Students
-    </a>
+      <a href="{{ url_for('finance.promissory_notes') }}"
+        class="{% if request.endpoint == 'finance.promissory_notes' %}active{% endif %}"
+        aria-current="{% if request.endpoint == 'finance.promissory_notes' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/notes.png') }}" class="icon" alt="">
+        <span>Promissory Notes</span>
+      </a>
 
-    <a href="{{ url_for('finance.logout') }}" class="logout-btn">
-      <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon" alt="Logout Icon"> Logout
-    </a>
+      <a href="{{ url_for('finance.all_promissory') }}"
+        class="{% if request.endpoint == 'finance.all_promissory' %}active{% endif %}"
+        aria-current="{% if request.endpoint == 'finance.all_promissory' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/notes.png') }}" class="icon" alt="">
+        <span>Statistics</span>
+      </a>
+
+      <a href="{{ url_for('finance.students_promissory') }}"
+        class="{% if request.endpoint == 'finance.students_promissory' %}active{% endif %}"
+        aria-current="{% if request.endpoint == 'finance.students_promissory' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/students.png') }}" class="icon" alt="">
+        <span>Students</span>
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('finance.logout') }}" class="logout-link">
+        <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon" alt="">
+        <span>Logout</span>
+      </a>
+    </div>
   </nav>
 
-  <main class="main-content">
+  <main class="main-content" id="mainContent">
     <header class="header">
-      <h2>Dashboard</h2>
-      <div>Active Semester: <strong>{{ active_semester }}</strong> | S.Y.: <strong>{{ active_school_year }}</strong>
+      <div>
+        <h2>Dashboard</h2>
       </div>
+      <p class="header-meta">
+        Active Semester: <strong>{{ active_semester }}</strong>
+        |
+        S.Y.: <strong>{{ active_school_year }}</strong>
+      </p>
     </header>
 
-    <section class="cards">
-      <div class="card">
+    <section class="cards" aria-label="Promissory summary cards">
+      <article class="card">
         <h3>Total Promissory</h3>
         <p>{{ data.total_promissory }}</p>
-      </div>
-      <div class="card">
+      </article>
+
+      <article class="card">
         <h3>Pending</h3>
         <p>{{ data.total_pending }}</p>
-      </div>
-      <div class="card">
+      </article>
+
+      <article class="card">
         <h3>Approved</h3>
         <p>{{ data.total_approved }}</p>
-      </div>
-      <div class="card">
+      </article>
+
+      <article class="card">
         <h3>Rejected</h3>
         <p>{{ data.total_rejected }}</p>
-      </div>
+      </article>
     </section>
 
-    <section class="table-card">
-      <h3>Recent Promissory Requests</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Student Name</th>
-            <th>Course</th>
-            <th>Semester</th>
-            <th>Examination Type</th>
-            <th>Date Submitted</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% if recent_requests %}
-          {% for req in recent_requests %}
-          <tr>
-            <td>{{ req.student_name }}</td>
-            <td>{{ req.course }}</td>
-            <td>{{ req.semester }}</td>
-            <td>{{ req.semester_type }}</td>
-            <td>{{ req.date_submitted.strftime('%b %d, %Y') }}</td>
-            <td><span class="status {{ req.status|lower }}">{{ req.status }}</span></td>
-          </tr>
-          {% endfor %}
-          {% else %}
-          <tr>
-            <td colspan="6" class="no-data">No recent requests found.</td>
-          </tr>
-          {% endif %}
-        </tbody>
-      </table>
+    <section class="table-card" aria-labelledby="recent-requests-title">
+      <h3 id="recent-requests-title">Recent Promissory Requests</h3>
+
+      <div class="table-wrapper">
+        <table>
+          <caption class="sr-only">List of recent promissory note requests</caption>
+          <thead>
+            <tr>
+              <th scope="col">Student Name</th>
+              <th scope="col">Course</th>
+              <th scope="col">Semester</th>
+              <th scope="col">Examination Type</th>
+              <th scope="col">Date Submitted</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if recent_requests %}
+              {% for req in recent_requests %}
+              <tr>
+                <td>{{ req.student_name }}</td>
+                <td>{{ req.course }}</td>
+                <td>{{ req.semester }}</td>
+                <td>{{ req.semester_type }}</td>
+                <td>{{ req.date_submitted.strftime('%b %d, %Y') }}</td>
+                <td>
+                  <span class="status {{ req.status|lower }}">{{ req.status }}</span>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="6" class="no-data">No recent requests found.</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
     </section>
   </main>
 
   <script>
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('open');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      sidebarOverlay.hidden = false;
+      sidebarOverlay.classList.add('show');
+      sidebarToggle.setAttribute('aria-expanded', 'true');
     }
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('show');
+      sidebarOverlay.hidden = true;
+      sidebarToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleSidebar() {
+      const isOpen = sidebar.classList.contains('open');
+      if (isOpen) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    }
+
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 900) {
+        closeSidebar();
+      }
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeSidebar();
+      }
+    });
   </script>
 </body>
 

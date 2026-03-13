@@ -6,207 +6,428 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Accounts - Promissory App</title>
   <link rel="icon" type="image/x-icon" href="/images/FCPC.jpg">
-  <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
+    :root {
+      --primary: #1e2a78;
+      --primary-light: #3a4bb3;
+      --primary-dark: #16205d;
+      --bg: #f4f7fc;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --hover: #eef2ff;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --radius: 14px;
+      --sidebar-width: 240px;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --info: #0891b2;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: 'Arial', sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background-color: #f9f9f9;
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background-color: var(--bg);
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1100;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      font-size: 18px;
+    }
+
+    .sidebar-toggle:focus-visible,
+    .sidebar a:focus-visible,
+    .logout-link:focus-visible,
+    .filters input:focus-visible,
+    .filters select:focus-visible,
+    .btn:focus-visible,
+    .dropdown-btn:focus-visible,
+    .dropdown-content a:focus-visible,
+    .pagination a:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 2px;
     }
 
     .sidebar {
-      width: 220px;
-      height: 100vh;
-      background: linear-gradient(135deg, #1e2a78, #3a4bb3);
+      width: var(--sidebar-width);
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--primary), var(--primary-light));
       color: #fff;
       position: fixed;
       top: 0;
       left: 0;
-      padding-top: 20px;
       display: flex;
       flex-direction: column;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px 0 16px;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+      z-index: 1000;
       transition: transform 0.3s ease;
     }
 
-    .sidebar h2 {
-      text-align: center;
-      font-size: 16px;
-      margin-bottom: 30px;
-      font-weight: 300;
+    .sidebar-header {
+      padding: 0 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      margin-bottom: 12px;
+    }
+
+    .sidebar-header h1 {
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .sidebar-header span {
+      display: block;
+      font-size: 13px;
+      font-weight: 400;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 10px;
+      flex: 1;
     }
 
     .sidebar a {
       display: flex;
       align-items: center;
-      padding: 12px 20px;
+      gap: 10px;
+      padding: 12px 14px;
       color: #fff;
-      text-decoration: none;
-      margin: 5px 0;
-      border-radius: 5px;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
     }
 
     .sidebar a.active {
-      background-color: rgba(255, 255, 255, 0.25);
-      font-weight: 600;
+      background-color: rgba(255, 255, 255, 0.22);
+      font-weight: 700;
     }
 
     .sidebar a:hover {
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
     }
 
     .sidebar img.icon {
       width: 30px;
       height: 30px;
-      margin-right: 10px;
       background: #fff;
       border-radius: 50%;
       padding: 6px;
+      flex-shrink: 0;
     }
 
-    .logout-btn {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
+    .sidebar-footer {
+      padding: 12px 10px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      margin-top: 12px;
+    }
+
+    .logout-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .logout-link:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 999;
+    }
+
+    .sidebar-overlay.show {
+      display: block;
     }
 
     .main-content {
-      margin-left: 220px;
-      padding: 20px;
+      margin-left: var(--sidebar-width);
+      padding: 24px;
       min-height: 100vh;
+      transition: margin-left 0.3s ease;
     }
 
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #fff;
-      padding: 15px 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      gap: 16px;
+      flex-wrap: wrap;
+      background: var(--surface);
+      padding: 18px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       margin-bottom: 20px;
+    }
+
+    .header h2 {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 28px;
     }
 
     .header-info {
       text-align: right;
       font-size: 14px;
-      color: #444;
-      line-height: 1.3;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .header-info strong {
+      color: var(--text);
     }
 
     .filters {
       display: flex;
-      gap: 15px;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: end;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .filters-left,
+    .filters-right {
+      display: flex;
+      gap: 10px;
       flex-wrap: wrap;
       align-items: center;
-      margin-bottom: 20px;
-      padding: 10px 15px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .filters-left {
+      flex: 1 1 520px;
+      min-width: 0;
+    }
+
+    .filters-right {
+      margin-left: auto;
     }
 
     .filters input,
     .filters select {
-      padding: 10px 16px;
+      padding: 11px 14px;
       font-size: 14px;
-      border: none;
-      border-radius: 50px;
-      background-color: #f1f3f8;
-      color: #333;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background-color: #f9fafb;
+      color: var(--text);
       min-width: 160px;
       transition: all 0.2s ease;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .filters input {
+      flex: 1 1 220px;
+      min-width: 180px;
     }
 
     .filters input:focus,
     .filters select:focus {
       outline: none;
-      background-color: #e6ebff;
-      box-shadow: 0 4px 10px rgba(58, 75, 179, 0.2);
+      border-color: #a5b4fc;
+      background-color: #fff;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
     }
 
     .btn,
-    .btn-clear {
-      padding: 8px 14px;
-      font-size: 13px;
-      border-radius: 8px;
+    .btn-clear,
+    .btn-primary,
+    .btn-add,
+    .btn-edit,
+    .btn-delete,
+    .dropdown-btn,
+    .pagination a {
+      padding: 10px 16px;
+      font-size: 14px;
+      border-radius: 10px;
       border: none;
       cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      text-decoration: none;
+      gap: 6px;
+    }
+
+    .btn:hover,
+    .btn-clear:hover,
+    .btn-primary:hover,
+    .btn-add:hover,
+    .btn-edit:hover,
+    .btn-delete:hover,
+    .dropdown-btn:hover,
+    .pagination a:hover {
+      transform: translateY(-1px);
     }
 
     .btn-clear {
-      background-color: #6c757d;
+      background-color: #6b7280;
       color: #fff;
+    }
+
+    .btn-clear:hover {
+      background-color: #4b5563;
     }
 
     .btn-primary {
-      background: #28a745;
+      background: var(--success);
       color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #15803d;
     }
 
     .btn-add {
-      background: #1e2a78;
+      background: var(--primary);
       color: #fff;
     }
 
-    /* Dropdown Styles */
+    .btn-add:hover {
+      background: var(--primary-light);
+    }
+
+    .btn-edit {
+      background: var(--success);
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+
+    .btn-edit:hover {
+      background: #15803d;
+    }
+
+    .btn-delete {
+      background: var(--danger);
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+
+    .btn-delete:hover {
+      background: #b91c1c;
+    }
+
     .dropdown {
       position: relative;
       display: inline-block;
     }
 
     .dropdown-btn {
-      background: #1e2a78;
+      background: var(--primary);
       color: #fff;
-      padding: 8px 14px;
-      font-size: 13px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      display: flex;
-      align-items: center;
-      gap: 5px;
     }
 
     .dropdown-btn:hover {
-      background: #2a3a98;
+      background: var(--primary-light);
     }
 
     .dropdown-content {
       display: none;
       position: absolute;
       background-color: #fff;
-      min-width: 180px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
-      z-index: 1;
-      margin-top: 5px;
+      min-width: 190px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+      border-radius: 12px;
+      z-index: 30;
+      margin-top: 8px;
       overflow: hidden;
-      right: 0px;
+      right: 0;
+      border: 1px solid var(--border);
     }
 
-    .dropdown-content a {
-      color: #333;
+    .dropdown-content a,
+    .dropdown-content button {
+      color: var(--text);
       padding: 12px 16px;
       text-decoration: none;
       display: block;
+      width: 100%;
+      background: #fff;
+      border: none;
+      text-align: left;
+      cursor: pointer;
       transition: background 0.2s ease;
+      font-size: 14px;
     }
 
-    .dropdown-content a:hover {
-      background-color: #f1f3f8;
+    .dropdown-content a:hover,
+    .dropdown-content button:hover {
+      background-color: #f8fafc;
     }
 
     .dropdown.active .dropdown-content {
@@ -215,7 +436,7 @@
 
     .dropdown-arrow {
       font-size: 10px;
-      margin-left: 5px;
+      margin-left: 2px;
       transition: transform 0.3s ease;
     }
 
@@ -226,141 +447,231 @@
     .table-container {
       overflow-x: auto;
       width: 100%;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
+      min-width: 900px;
       background: #fff;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     thead {
-      background: linear-gradient(135deg, #1e2a78, #3a4bb3);
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
       color: #fff;
     }
 
     th,
     td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #eee;
+      padding: 14px 15px;
+      border-bottom: 1px solid #edf0f5;
       text-align: left;
+      vertical-align: middle;
+      font-size: 14px;
+    }
+
+    th {
+      font-weight: 700;
+      white-space: nowrap;
     }
 
     tbody tr:nth-child(even) {
-      background: #f8f9fa;
+      background: #fafbff;
     }
 
-    .btn-edit {
-      background: #28a745;
-      color: #fff;
+    tbody tr:hover {
+      background: #edf2ff;
     }
 
-    .btn-delete {
-      background: #dc3545;
-      color: #fff;
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-active {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+    }
+
+    .status-inactive {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      background: #e0e7ff;
+      color: #3730a3;
+      border: 1px solid #c7d2fe;
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .empty-cell {
+      color: transparent;
+      user-select: none;
     }
 
     .pagination-container {
       margin-top: 20px;
-      display: block;
+      display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 12px;
+    }
+
+    .results-info {
+      color: var(--muted);
+      font-size: 14px;
     }
 
     .pagination {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+      align-items: center;
     }
 
-    .pagination button {
+    .pagination a,
+    .pagination span {
       background: #fff;
-      border: 1px solid #ccc;
+      border: 1px solid #d1d5db;
       padding: 8px 12px;
-      border-radius: 5px;
-      cursor: pointer;
+      border-radius: 8px;
+      color: var(--text);
+      min-width: 40px;
+      text-align: center;
+      font-size: 14px;
+      box-shadow: none;
     }
 
-    .pagination button.active {
-      background: #1e2a78;
+    .pagination a.active {
+      background: var(--primary);
       color: #fff;
-      border-color: #1e2a78;
+      border-color: var(--primary);
     }
 
-    .pagination button:disabled {
-      opacity: .5;
-      cursor: not-allowed;
+    .pagination .disabled {
+      opacity: 0.5;
+      pointer-events: none;
+      background: #f9fafb;
+    }
+
+    .pagination .ellipsis {
+      cursor: default;
+      background: transparent;
+      border-color: transparent;
+      padding-left: 2px;
+      padding-right: 2px;
     }
 
     .hidden {
       display: none;
     }
 
-    .sidebar-toggle {
-      display: none;
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background: #1e2a78;
-      color: #fff;
-      border: none;
-      padding: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 1000;
-    }
-
     #flash-messages {
       position: fixed;
       top: 20px;
       right: 20px;
-      z-index: 9999;
+      z-index: 3000;
       max-width: 320px;
     }
 
     .alert {
-      padding: 15px 20px;
-      border-radius: 8px;
+      padding: 15px 18px;
+      border-radius: 12px;
       margin-bottom: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
       font-weight: 500;
       opacity: 0;
       transform: translateY(-20px);
       transition: transform 0.3s ease, opacity 0.3s ease;
+      background: #fff;
+      border-left: 5px solid transparent;
+      color: var(--text);
     }
 
     .alert-success {
-      background-color: #d4edda;
-      color: #155724;
-      border-left: 5px solid #28a745;
+      background-color: #ecfdf5;
+      color: #166534;
+      border-left-color: #22c55e;
     }
 
     .alert-danger {
-      background-color: #f8d7da;
-      color: #721c24;
-      border-left: 5px solid #dc3545;
+      background-color: #fef2f2;
+      color: #991b1b;
+      border-left-color: #ef4444;
     }
 
     .alert-warning {
-      background-color: #fff3cd;
-      color: #856404;
-      border-left: 5px solid #ffc107;
+      background-color: #fffbeb;
+      color: #92400e;
+      border-left-color: #f59e0b;
     }
 
     .alert-info {
-      background-color: #d1ecf1;
-      color: #0c5460;
-      border-left: 5px solid #17a2b8;
+      background-color: #ecfeff;
+      color: #155e75;
+      border-left-color: #06b6d4;
     }
 
     .alert.show {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    @media (max-width: 980px) {
+      .sidebar-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 76px 16px 20px;
+      }
+
+      .header h2 {
+        font-size: 24px;
+      }
+
+      .header-info {
+        text-align: left;
+      }
     }
 
     @media (max-width: 768px) {
@@ -369,54 +680,121 @@
         align-items: stretch;
       }
 
-      .filters > div {
+      .filters-left,
+      .filters-right {
         width: 100%;
+        margin-left: 0;
       }
 
       .filters input,
-      .filters select {
+      .filters select,
+      .btn-clear,
+      .btn-add,
+      .btn-primary,
+      .dropdown,
+      .dropdown-btn {
         width: 100%;
+      }
+
+      .dropdown-content {
+        left: 0;
+        right: 0;
+      }
+
+      .pagination-container {
+        align-items: flex-start;
+      }
+
+      #flash-messages {
+        left: 16px;
+        right: 16px;
+        max-width: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
+        animation: none !important;
       }
     }
   </style>
 </head>
 
 <body>
+  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false"
+    aria-label="Toggle navigation menu">
+    ☰
+  </button>
 
-  <nav class="sidebar" id="sidebar">
-    <h2>School Admin<br>Promissory Notes</h2>
+  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-    <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon" alt="Dashboard Icon"> Dashboard
-    </a>
+  <nav class="sidebar" id="sidebar" aria-label="Admin navigation">
+    <div class="sidebar-header">
+      <h1>School Admin</h1>
+      <span>Promissory Notes</span>
+    </div>
 
-    <a href="{{ url_for('admin.accounts') }}" class="{% if request.endpoint == 'admin.accounts' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/accounts.png') }}" class="icon" alt="Accounts Icon"> Accounts
-    </a>
+    <div class="sidebar-nav">
+      <a href="{{ url_for('admin.dashboard') }}"
+         class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.dashboard' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon" alt="">
+        <span>Dashboard</span>
+      </a>
 
-    <a href="{{ url_for('admin.semester') }}" class="{% if request.endpoint == 'admin.semester' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/semester.png') }}" class="icon" alt="Semester Icon"> Semester
-    </a>
+      <a href="{{ url_for('admin.accounts') }}"
+         class="{% if request.endpoint == 'admin.accounts' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.accounts' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/accounts.png') }}" class="icon" alt="">
+        <span>Accounts</span>
+      </a>
 
-    <a href="{{ url_for('admin.school_year') }}"
-      class="{% if request.endpoint == 'admin.school_year' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/schoolyear.png') }}" class="icon" alt="School Year Icon"> School
-      Year
-    </a>
-    <a href="{{ url_for('admin.course') }}" class="{% if request.endpoint == 'admin.course' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/course.png') }}" class="icon"> Active Course
-    </a>
-    <a href="{{ url_for('admin.logs') }}" class="{% if request.endpoint == 'admin.logs' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/log.png') }}" class="icon" alt="Logs Icon"> System Logs
-    </a>
-    <a href="{{ url_for('admin.logout') }}" class="logout-btn">
-      <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon"> Logout
-    </a>
+      <a href="{{ url_for('admin.semester') }}"
+         class="{% if request.endpoint == 'admin.semester' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.semester' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/semester.png') }}" class="icon" alt="">
+        <span>Semester</span>
+      </a>
+
+      <a href="{{ url_for('admin.school_year') }}"
+         class="{% if request.endpoint == 'admin.school_year' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.school_year' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/schoolyear.png') }}" class="icon" alt="">
+        <span>School Year</span>
+      </a>
+
+      <a href="{{ url_for('admin.course') }}"
+         class="{% if request.endpoint == 'admin.course' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.course' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/course.png') }}" class="icon" alt="">
+        <span>Active Course</span>
+      </a>
+
+      <a href="{{ url_for('admin.logs') }}"
+         class="{% if request.endpoint == 'admin.logs' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.logs' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/log.png') }}" class="icon" alt="">
+        <span>System Logs</span>
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('admin.logout') }}" class="logout-link">
+        <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon" alt="">
+        <span>Logout</span>
+      </a>
+    </div>
   </nav>
 
-  <main class="main-content ">
-
-    <div id="flash-messages">
+  <main class="main-content">
+    <div id="flash-messages" aria-live="polite" aria-atomic="true">
       {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
       {% for category, message in messages %}
@@ -437,74 +815,76 @@
       </div>
     </header>
 
-    <!-- Filters Form -->
-    <form method="get" class="filters">
-      <div style="display:flex; flex-wrap:wrap; gap:10px; flex:1;">
-        <input type="text" name="search" placeholder="Search" value="{{ search }}" autocomplete="off">
-        <select name="role">
+    <form method="get" class="filters" id="filterForm" aria-label="Filter accounts">
+      <div class="filters-left">
+        <label for="search" class="sr-only">Search</label>
+        <input type="text" id="search" name="search" placeholder="Search" value="{{ search }}" autocomplete="off">
+
+        <label for="role" class="sr-only">Role</label>
+        <select name="role" id="role">
           <option value="" {% if not role_filter %}selected{% endif %}>All Roles</option>
-          <option value="Admin" {% if role_filter=='Admin' %}selected{% endif %}>Admin</option>
-          <option value="Student" {% if role_filter=='Student' %}selected{% endif %}>Student</option>
-          <option value="Finance" {% if role_filter=='Finance' %}selected{% endif %}>Finance</option>
+          <option value="Admin" {% if role_filter == 'Admin' %}selected{% endif %}>Admin</option>
+          <option value="Student" {% if role_filter == 'Student' %}selected{% endif %}>Student</option>
+          <option value="Finance" {% if role_filter == 'Finance' %}selected{% endif %}>Finance</option>
         </select>
 
-        <select name="status">
+        <label for="status" class="sr-only">Status</label>
+        <select name="status" id="status">
           <option value="" {% if not status_filter %}selected{% endif %}>All Status</option>
-          <option value="Active" {% if status_filter=='Active' %}selected{% endif %}>Active</option>
-          <option value="Inactive" {% if status_filter=='Inactive' %}selected{% endif %}>Inactive</option>
+          <option value="Active" {% if status_filter == 'Active' %}selected{% endif %}>Active</option>
+          <option value="Inactive" {% if status_filter == 'Inactive' %}selected{% endif %}>Inactive</option>
         </select>
 
-        <button type="button" class="btn btn-clear" onclick="clearFilters()">Clear</button>
+        <button type="button" class="btn-clear" id="clearFiltersBtn">Clear</button>
       </div>
 
-      <div style="margin-left:auto; display:flex; gap:10px; flex-wrap:wrap;">
-        <button type="button" class="btn btn-primary" onclick="location.href='{{ url_for('admin.add_new_account') }}'">
+      <div class="filters-right">
+        <button type="button" class="btn-add" onclick="location.href='{{ url_for('admin.add_new_account') }}'">
           + Add New
         </button>
 
-        <!-- Import Dropdown -->
         <div class="dropdown" id="importDropdown">
-          <button type="button" class="dropdown-btn" onclick="toggleDropdown('importDropdown')">
+          <button type="button" class="dropdown-btn" aria-expanded="false" aria-controls="importMenu">
             Import
             <span class="dropdown-arrow">▼</span>
           </button>
-          <div class="dropdown-content">
-            <a href="#" onclick="event.preventDefault(); document.getElementById('uploadFile').click();">Import Accounts</a>
-            <a href="{{ url_for('admin.download_template') }}">Download Template</a>
+          <div class="dropdown-content" id="importMenu" role="menu">
+            <button type="button" role="menuitem" id="importAccountsBtn">Import Accounts</button>
+            <a href="{{ url_for('admin.download_template') }}" role="menuitem">Download Template</a>
           </div>
         </div>
 
-        <!-- Export Dropdown -->
         <div class="dropdown" id="exportDropdown">
-          <button type="button" class="dropdown-btn" onclick="toggleDropdown('exportDropdown')">
+          <button type="button" class="dropdown-btn" aria-expanded="false" aria-controls="exportMenu">
             Export
             <span class="dropdown-arrow">▼</span>
           </button>
-          <div class="dropdown-content">
-            <a href="{{ url_for('admin.export_csv') }}">Export as CSV</a>
-            <a href="{{ url_for('admin.export_excel') }}">Export as Excel</a>
+          <div class="dropdown-content" id="exportMenu" role="menu">
+            <a href="{{ url_for('admin.export_csv') }}" role="menuitem">Export as CSV</a>
+            <a href="{{ url_for('admin.export_excel') }}" role="menuitem">Export as Excel</a>
           </div>
         </div>
       </div>
     </form>
 
-    <!-- Upload Form (separate, hidden) -->
     <form id="uploadForm" action="{{ url_for('admin.upload_accounts') }}" method="POST" enctype="multipart/form-data"
-      style="display:none;">
-      <input type="file" name="file" id="uploadFile" accept=".csv,.xlsx,.xls"
-        onchange="document.getElementById('uploadForm').submit();">
+      class="hidden">
+      <input type="file" name="file" id="uploadFile" accept=".csv,.xlsx,.xls">
     </form>
 
     <div class="table-container">
-      <table>
+      <table aria-describedby="accounts-table-description">
+        <caption id="accounts-table-description" class="sr-only">
+          Accounts table showing ID, full name, email, role, status, and actions.
+        </caption>
         <thead>
           <tr>
-            <th style="width:20px">ID</th>
-            <th style="width:400px">Full Name</th>
-            <th style="width:400px">Email</th>
-            <th style="width:100px">Role</th>
-            <th style="width:100px">Status</th>
-            <th style="width:100px">Actions</th>
+            <th scope="col" style="width: 70px;">ID</th>
+            <th scope="col" style="width: 320px;">Full Name</th>
+            <th scope="col" style="width: 320px;">Email</th>
+            <th scope="col" style="width: 140px;">Role</th>
+            <th scope="col" style="width: 140px;">Status</th>
+            <th scope="col" style="width: 140px;">Actions</th>
           </tr>
         </thead>
 
@@ -517,134 +897,217 @@
                 <td>{{ (pagination.page - 1) * pagination.per_page + i + 1 }}</td>
                 <td>{{ acc.full_name }}</td>
                 <td>{{ acc.email }}</td>
-                <td>{{ acc.role }}</td>
-                <td>{{ acc.status }}</td>
+                <td><span class="role-badge">{{ acc.role }}</span></td>
                 <td>
-                  <a href="{{ url_for('admin.edit_account', account_id=acc.id) }}" class="btn btn-edit">Edit</a>
-                  </form>
+                  <span class="status-badge {% if acc.status == 'Active' %}status-active{% else %}status-inactive{% endif %}">
+                    {{ acc.status }}
+                  </span>
+                </td>
+                <td>
+                  <div class="actions-cell">
+                    <a href="{{ url_for('admin.edit_account', account_id=acc.id) }}" class="btn-edit">Edit</a>
+                  </div>
                 </td>
               {% else %}
-                <td>&nbsp;</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td class="empty-cell">&nbsp;</td>
+                <td class="empty-cell">&nbsp;</td>
+                <td class="empty-cell">&nbsp;</td>
+                <td class="empty-cell">&nbsp;</td>
+                <td class="empty-cell">&nbsp;</td>
+                <td class="empty-cell">&nbsp;</td>
               {% endif %}
             </tr>
           {% endfor %}
         </tbody>
-
       </table>
     </div>
 
-    <div class="pagination-container relative bottom-0 w-full max-w-full flex justify-between px-4 py-2">
+    <div class="pagination-container">
       <div class="results-info">
         Page {{ pagination.page }} of {{ total_pages }}
       </div>
 
-      <div class="pagination">
-        <a
-          href="{{ url_for('admin.accounts', page=pagination.prev_num, search=search, role=role_filter, status=status_filter) }}">
-          <button {% if not pagination.has_prev %}disabled{% endif %}>Previous</button>
-        </a>
+      <nav class="pagination" aria-label="Pagination">
+        {% if pagination.has_prev %}
+          <a href="{{ url_for('admin.accounts', page=pagination.prev_num, search=search, role=role_filter, status=status_filter) }}">
+            Previous
+          </a>
+        {% else %}
+          <span class="disabled">Previous</span>
+        {% endif %}
 
         {% set current = pagination.page %}
         {% set total = total_pages %}
 
-        {% if total <= 7 %} {% for p in range(1, total + 1) %} <a
-          href="{{ url_for('admin.accounts', page=p, search=search, role=role_filter, status=status_filter) }}">
-          <button class="{% if p == current %}active{% endif %}">{{ p }}</button>
-          </a>
-          {% endfor %}
-          {% else %}
-          {% for p in range(1, 4) %}
-          <a href="{{ url_for('admin.accounts', page=p, search=search, role=role_filter, status=status_filter) }}">
-            <button class="{% if p == current %}active{% endif %}">{{ p }}</button>
-          </a>
-          {% endfor %}
-
-          {% if current > 4 and current < total - 3 %} <button disabled>...</button>
-            {% for p in range(current-1, current+2) %}
-            <a href="{{ url_for('admin.accounts', page=p, search=search, role=role_filter, status=status_filter) }}">
-              <button class="{% if p == current %}active{% endif %}">{{ p }}</button>
+        {% if total <= 7 %}
+          {% for p in range(1, total + 1) %}
+            <a href="{{ url_for('admin.accounts', page=p, search=search, role=role_filter, status=status_filter) }}"
+               class="{% if p == current %}active{% endif %}">
+              {{ p }}
             </a>
+          {% endfor %}
+        {% else %}
+          {% for p in range(1, 4) %}
+            <a href="{{ url_for('admin.accounts', page=p, search=search, role=role_filter, status=status_filter) }}"
+               class="{% if p == current %}active{% endif %}">
+              {{ p }}
+            </a>
+          {% endfor %}
+
+          {% if current > 4 and current < total - 3 %}
+            <span class="ellipsis">...</span>
+
+            {% for p in range(current - 1, current + 2) %}
+              <a href="{{ url_for('admin.accounts', page=p, search=search, role=role_filter, status=status_filter) }}"
+                 class="{% if p == current %}active{% endif %}">
+                {{ p }}
+              </a>
             {% endfor %}
-            <button disabled>...</button>
-            {% elif current <= 4 %} {% for p in range(4, 6) %} <a
-              href="{{ url_for('admin.accounts', page=p, search=search, role=role_filter, status=status_filter) }}">
-              <button class="{% if p == current %}active{% endif %}">{{ p }}</button>
-              </a>
-              {% endfor %}
-              <button disabled>...</button>
-              {% else %}
-              <button disabled>...</button>
-              {% for p in range(total-5, total-2) %}
-              <a href="{{ url_for('admin.accounts', page=p, search=search, role=role_filter, status=status_filter) }}">
-                <button class="{% if p == current %}active{% endif %}">{{ p }}</button>
-              </a>
-              {% endfor %}
-              {% endif %}
 
-              {% for p in range(total-2, total + 1) %}
-              <a href="{{ url_for('admin.accounts', page=p, search=search, role=role_filter, status=status_filter) }}">
-                <button class="{% if p == current %}active{% endif %}">{{ p }}</button>
+            <span class="ellipsis">...</span>
+          {% elif current <= 4 %}
+            {% for p in range(4, 6) %}
+              <a href="{{ url_for('admin.accounts', page=p, search=search, role=role_filter, status=status_filter) }}"
+                 class="{% if p == current %}active{% endif %}">
+                {{ p }}
               </a>
-              {% endfor %}
-              {% endif %}
+            {% endfor %}
+            <span class="ellipsis">...</span>
+          {% else %}
+            <span class="ellipsis">...</span>
 
-              <a
-                href="{{ url_for('admin.accounts', page=pagination.next_num, search=search, role=role_filter, status=status_filter) }}">
-                <button {% if not pagination.has_next %}disabled{% endif %}>Next</button>
+            {% for p in range(total - 5, total - 2) %}
+              <a href="{{ url_for('admin.accounts', page=p, search=search, role=role_filter, status=status_filter) }}"
+                 class="{% if p == current %}active{% endif %}">
+                {{ p }}
               </a>
-      </div>
+            {% endfor %}
+          {% endif %}
+
+          {% for p in range(total - 2, total + 1) %}
+            <a href="{{ url_for('admin.accounts', page=p, search=search, role=role_filter, status=status_filter) }}"
+               class="{% if p == current %}active{% endif %}">
+              {{ p }}
+            </a>
+          {% endfor %}
+        {% endif %}
+
+        {% if pagination.has_next %}
+          <a href="{{ url_for('admin.accounts', page=pagination.next_num, search=search, role=role_filter, status=status_filter) }}">
+            Next
+          </a>
+        {% else %}
+          <span class="disabled">Next</span>
+        {% endif %}
+      </nav>
     </div>
-
   </main>
 
   <script>
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    const filterForm = document.getElementById('filterForm');
+    const filterSelects = filterForm.querySelectorAll('select');
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+
+    const uploadForm = document.getElementById('uploadForm');
+    const uploadFile = document.getElementById('uploadFile');
+    const importAccountsBtn = document.getElementById('importAccountsBtn');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      sidebarOverlay.hidden = false;
+      sidebarOverlay.classList.add('show');
+      sidebarToggle.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('show');
+      sidebarOverlay.hidden = true;
+      sidebarToggle.setAttribute('aria-expanded', 'false');
+    }
+
     function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('open');
+      if (sidebar.classList.contains('open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
     }
 
     function clearFilters() {
-      location.href = "{{ url_for('admin.accounts') }}";
+      window.location.href = "{{ url_for('admin.accounts') }}";
+    }
+
+    function closeAllDropdowns() {
+      document.querySelectorAll('.dropdown').forEach((dropdown) => {
+        dropdown.classList.remove('active');
+        const button = dropdown.querySelector('.dropdown-btn');
+        if (button) {
+          button.setAttribute('aria-expanded', 'false');
+        }
+      });
     }
 
     function toggleDropdown(dropdownId) {
       const dropdown = document.getElementById(dropdownId);
-      const allDropdowns = document.querySelectorAll('.dropdown');
-      
-      // Close all other dropdowns
-      allDropdowns.forEach(d => {
-        if (d.id !== dropdownId) {
-          d.classList.remove('active');
-        }
-      });
-      
-      // Toggle current dropdown
-      dropdown.classList.toggle('active');
+      const button = dropdown.querySelector('.dropdown-btn');
+      const isActive = dropdown.classList.contains('active');
+
+      closeAllDropdowns();
+
+      if (!isActive) {
+        dropdown.classList.add('active');
+        button.setAttribute('aria-expanded', 'true');
+      }
     }
 
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', function(event) {
-      if (!event.target.closest('.dropdown')) {
-        document.querySelectorAll('.dropdown').forEach(d => {
-          d.classList.remove('active');
-        });
-      }
-    });
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
 
-    const filterForm = document.querySelector('.filters');
-    const filterSelects = filterForm.querySelectorAll('select');
+    clearFiltersBtn.addEventListener('click', clearFilters);
 
-    filterSelects.forEach(el => {
+    filterSelects.forEach((el) => {
       el.addEventListener('change', () => filterForm.submit());
     });
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('.dropdown-btn').forEach((button) => {
+      button.addEventListener('click', function () {
+        const dropdown = this.closest('.dropdown');
+        toggleDropdown(dropdown.id);
+      });
+    });
+
+    document.addEventListener('click', function (event) {
+      if (!event.target.closest('.dropdown')) {
+        closeAllDropdowns();
+      }
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeAllDropdowns();
+        closeSidebar();
+      }
+    });
+
+    importAccountsBtn.addEventListener('click', function () {
+      closeAllDropdowns();
+      uploadFile.click();
+    });
+
+    uploadFile.addEventListener('change', function () {
+      if (this.files && this.files.length > 0) {
+        uploadForm.submit();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
       const alerts = document.querySelectorAll('.alert');
-      alerts.forEach(alert => {
+      alerts.forEach((alert) => {
         setTimeout(() => alert.classList.add('show'), 50);
         setTimeout(() => {
           alert.classList.remove('show');
@@ -652,8 +1115,13 @@
         }, 5000);
       });
     });
-  </script>
 
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 980) {
+        closeSidebar();
+      }
+    });
+  </script>
 </body>
 
 </html>

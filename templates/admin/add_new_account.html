@@ -8,199 +8,349 @@
   <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
 
   <style>
+    :root {
+      --primary: #1e2a78;
+      --primary-light: #3a4bb3;
+      --primary-dark: #16205d;
+      --bg: #f4f7fc;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --hover: #eef2ff;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --radius: 14px;
+      --sidebar-width: 240px;
+      --success: #16a34a;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: 'Arial', sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background-color: #f9f9f9;
-      padding: 0;
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background-color: var(--bg);
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1100;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      font-size: 18px;
+    }
+
+    .sidebar-toggle:focus-visible,
+    .sidebar a:focus-visible,
+    .logout-link:focus-visible,
+    .form-input:focus-visible,
+    .btn:focus-visible,
+    .back-button:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 2px;
     }
 
     .sidebar {
-      width: 220px;
-      height: 100vh;
-      background: linear-gradient(135deg, #1e2a78, #3a4bb3);
+      width: var(--sidebar-width);
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--primary), var(--primary-light));
       color: #fff;
       position: fixed;
       top: 0;
       left: 0;
-      padding-top: 20px;
       display: flex;
       flex-direction: column;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px 0 16px;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+      z-index: 1000;
       transition: transform 0.3s ease;
     }
 
-    .sidebar h2 {
-      text-align: center;
-      font-size: 16px;
-      margin: 0 10px 30px;
-      font-weight: 300;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .sidebar-header {
+      padding: 0 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      margin-bottom: 12px;
+    }
+
+    .sidebar-header h1 {
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .sidebar-header span {
+      display: block;
+      font-size: 13px;
+      font-weight: 400;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 10px;
+      flex: 1;
     }
 
     .sidebar a {
       display: flex;
       align-items: center;
-      padding: 12px 20px;
+      gap: 10px;
+      padding: 12px 14px;
       color: #fff;
-      text-decoration: none;
-      margin: 5px 0;
-      border-radius: 5px;
-      transition: background-color 0.3s ease;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .sidebar a.active {
+      background-color: rgba(255, 255, 255, 0.22);
+      font-weight: 700;
     }
 
     .sidebar a:hover {
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
     }
 
     .sidebar img.icon {
       width: 30px;
       height: 30px;
-      margin-right: 10px;
       background: #fff;
       border-radius: 50%;
       padding: 6px;
+      flex-shrink: 0;
     }
 
-    .logout-btn {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 12px 20px;
-      text-decoration: none;
-      border-radius: 0;
+    .sidebar-footer {
+      padding: 12px 10px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      margin-top: 12px;
+    }
+
+    .logout-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .logout-link:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 999;
+    }
+
+    .sidebar-overlay.show {
+      display: block;
     }
 
     .main-content {
-      margin-left: 220px;
-      padding: 20px;
+      margin-left: var(--sidebar-width);
+      padding: 24px;
       min-height: 100vh;
+      transition: margin-left 0.3s ease;
     }
 
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #fff;
-      padding: 15px 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      gap: 16px;
+      flex-wrap: wrap;
+      background: var(--surface);
+      padding: 18px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       margin-bottom: 20px;
     }
 
     .header h2 {
-      font-weight: 300;
-      color: #2c3e50;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 28px;
+    }
+
+    .header-user {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .header-user strong {
+      color: var(--text);
     }
 
     .card {
-      background: #fff;
-      padding: 20px;
+      background: var(--surface);
+      padding: 22px;
       margin-top: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s ease;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .top-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      background: #eef2ff;
+      color: var(--primary);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .back-button:hover {
+      background: #dbe4ff;
+      transform: translateY(-1px);
+    }
+
+    .back-button img {
+      width: 18px;
+      height: 18px;
     }
 
     .card h3 {
       margin-bottom: 20px;
-      font-weight: 300;
-      color: #2c3e50;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 22px;
     }
 
     .form-row {
       display: flex;
-      gap: 15px;
-      margin-bottom: 15px;
+      gap: 16px;
+      margin-bottom: 16px;
       flex-wrap: wrap;
     }
 
     .form-group {
       flex: 1;
-      min-width: 150px;
+      min-width: 180px;
       display: flex;
       flex-direction: column;
     }
 
     .form-group label {
-      font-weight: 500;
-      margin-bottom: 5px;
-      color: #555;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 14px;
     }
 
     .form-group label span {
-      color: #e74c3c;
+      color: #dc2626;
     }
 
     .form-input {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
       font-size: 14px;
-      transition: border-color 0.3s ease;
+      background: #f9fafb;
+      color: var(--text);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
     }
 
     .form-input:focus {
-      border-color: #1e2a78;
+      border-color: #a5b4fc;
       outline: none;
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
     }
 
     .btn {
-      background: #1e2a78;
+      background: var(--primary);
       color: #fff;
-      padding: 10px 20px;
+      padding: 11px 18px;
       border: none;
-      border-radius: 5px;
+      border-radius: 12px;
       cursor: pointer;
-      font-size: 16px;
-      transition: background-color 0.3s ease;
+      font-size: 15px;
+      font-weight: 700;
+      transition: background-color 0.2s ease, transform 0.2s ease;
       margin-top: 10px;
     }
 
     .btn:hover {
-      background: #3a4bb3;
+      background: var(--primary-light);
+      transform: translateY(-1px);
     }
 
-    .btn-back {
-      background: white;
-      margin-bottom: 15px;
+    .submit-row {
+      margin-top: 6px;
     }
 
-    .btn-back:hover {
-      background: #b3bbc1;
-    }
+    @media (max-width: 980px) {
+      .sidebar-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-    .hidden {
-      display: none;
-    }
-
-    .sidebar-toggle {
-      display: none;
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background: #1e2a78;
-      color: #fff;
-      border: none;
-      padding: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 1000;
-    }
-
-    @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
+        width: 260px;
       }
 
       .sidebar.open {
@@ -209,12 +359,15 @@
 
       .main-content {
         margin-left: 0;
+        padding: 76px 16px 20px;
       }
 
-      .sidebar-toggle {
-        display: block;
+      .header h2 {
+        font-size: 24px;
       }
+    }
 
+    @media (max-width: 768px) {
       .form-row {
         flex-direction: column;
       }
@@ -228,76 +381,159 @@
         align-items: flex-start;
         gap: 10px;
       }
+
+      .top-actions {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
+        animation: none !important;
+      }
     }
   </style>
 </head>
 
 <body>
-  <button class="sidebar-toggle" onclick="toggleSidebar()">☰ Menu</button>
+  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false"
+    aria-label="Toggle navigation menu">
+    ☰
+  </button>
 
-  <nav class="sidebar" id="sidebar">
-    <h2>School Admin<br>Promissory Notes</h2>
-    <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon" alt="Dashboard Icon"> Dashboard
-    </a>
+  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-    <a href="{{ url_for('admin.accounts') }}" class="{% if request.endpoint == 'admin.accounts' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/accounts.png') }}" class="icon" alt="Accounts Icon"> Accounts
-    </a>
+  <nav class="sidebar" id="sidebar" aria-label="Admin navigation">
+    <div class="sidebar-header">
+      <h1>School Admin</h1>
+      <span>Promissory Notes</span>
+    </div>
 
-    <a href="{{ url_for('admin.semester') }}" class="{% if request.endpoint == 'admin.semester' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/semester.png') }}" class="icon" alt="Semester Icon"> Semester
-    </a>
+    <div class="sidebar-nav">
+      <a href="{{ url_for('admin.dashboard') }}"
+         class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.dashboard' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon" alt="">
+        <span>Dashboard</span>
+      </a>
 
-    <a href="{{ url_for('admin.school_year') }}"
-      class="{% if request.endpoint == 'admin.school_year' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/schoolyear.png') }}" class="icon" alt="School Year Icon"> School
-      Year
-    </a>
-    <a href="{{ url_for('admin.course') }}" class="{% if request.endpoint == 'admin.course' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/course.png') }}" class="icon"> Active Course
-    </a>
-    <a href="{{ url_for('admin.logs') }}" class="{% if request.endpoint == 'admin.logs' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/log.png') }}" class="icon" alt="Logs Icon"> System Logs
-    </a>
-    <a href="{{ url_for('admin.logout') }}" class="logout-btn"><img
-        src="{{ url_for('static', filename='images/logout.png') }}" class="icon" alt="Logout Icon"> Logout</a>
+      <a href="{{ url_for('admin.accounts') }}"
+         class="{% if request.endpoint == 'admin.accounts' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.accounts' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/accounts.png') }}" class="icon" alt="">
+        <span>Accounts</span>
+      </a>
+
+      <a href="{{ url_for('admin.semester') }}"
+         class="{% if request.endpoint == 'admin.semester' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.semester' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/semester.png') }}" class="icon" alt="">
+        <span>Semester</span>
+      </a>
+
+      <a href="{{ url_for('admin.school_year') }}"
+         class="{% if request.endpoint == 'admin.school_year' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.school_year' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/schoolyear.png') }}" class="icon" alt="">
+        <span>School Year</span>
+      </a>
+
+      <a href="{{ url_for('admin.course') }}"
+         class="{% if request.endpoint == 'admin.course' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.course' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/course.png') }}" class="icon" alt="">
+        <span>Active Course</span>
+      </a>
+
+      <a href="{{ url_for('admin.logs') }}"
+         class="{% if request.endpoint == 'admin.logs' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.logs' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/log.png') }}" class="icon" alt="">
+        <span>System Logs</span>
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('admin.logout') }}" class="logout-link">
+        <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon" alt="">
+        <span>Logout</span>
+      </a>
+    </div>
   </nav>
 
   <main class="main-content">
     <header class="header">
       <h2>{% if account %}Edit{% else %}Add New{% endif %} Account</h2>
-      <div><strong>{{ admin_user }}</strong></div>
+      <div class="header-user"><strong>{{ admin_user }}</strong></div>
     </header>
 
     <section class="card">
-      <button type="button" onclick="window.history.back()" class="btn btn-back">
-        <img src="{{ url_for('static', filename='images/back.png') }}" alt="Back"
-          style="width:25px; height:25px; margin-right:6p; vertical-align:middle;">
-      </button>
-
+      <div class="top-actions">
+        <button type="button" onclick="window.history.back()" class="back-button" aria-label="Go back">
+          <img src="{{ url_for('static', filename='images/back.png') }}" alt="">
+          <span>Back</span>
+        </button>
+      </div>
 
       <h3>{% if account %}Edit{% else %}Add New{% endif %} Account</h3>
+
       <form method="POST" action="">
         <div class="form-row">
           <div class="form-group">
             <label for="firstName">First Name <span>*</span></label>
-            <input type="text" id="firstName" name="firstName" class="form-input" placeholder="Enter first name"
-              value="{{ account.first_name if account else '' }}" required>
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              class="form-input"
+              placeholder="Enter first name"
+              value="{{ account.first_name if account else '' }}"
+              required>
           </div>
+
           <div class="form-group">
             <label for="middleName">Middle Name (optional)</label>
-            <input type="text" id="middleName" name="middleName" class="form-input" placeholder="Enter middle name"
+            <input
+              type="text"
+              id="middleName"
+              name="middleName"
+              class="form-input"
+              placeholder="Enter middle name"
               value="{{ account.middle_name if account else '' }}">
           </div>
+
           <div class="form-group">
             <label for="lastName">Last Name <span>*</span></label>
-            <input type="text" id="lastName" name="lastName" class="form-input" placeholder="Enter last name"
-              value="{{ account.last_name if account else '' }}" required>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              class="form-input"
+              placeholder="Enter last name"
+              value="{{ account.last_name if account else '' }}"
+              required>
           </div>
+
           <div class="form-group">
             <label for="suffix">Suffix (optional)</label>
-            <input type="text" id="suffix" name="suffix" class="form-input" placeholder="Jr., Sr., III"
+            <input
+              type="text"
+              id="suffix"
+              name="suffix"
+              class="form-input"
+              placeholder="Jr., Sr., III"
               value="{{ account.suffix if account else '' }}">
           </div>
         </div>
@@ -305,8 +541,14 @@
         <div class="form-row">
           <div class="form-group">
             <label for="email">Email <span>*</span></label>
-            <input type="email" id="email" name="email" class="form-input" placeholder="Enter email address"
-              value="{{ account.email if account else '' }}" required>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-input"
+              placeholder="Enter email address"
+              value="{{ account.email if account else '' }}"
+              required>
           </div>
         </div>
 
@@ -315,9 +557,9 @@
             <label for="role">Role <span>*</span></label>
             <select id="role" name="role" class="form-input" required>
               <option value="" disabled {% if not account %}selected{% endif %}>Select role</option>
-              <option value="Student" {% if account and account.role=='Student' %}selected{% endif %}>Student</option>
-              <option value="Admin" {% if account and account.role=='Admin' %}selected{% endif %}>Admin</option>
-              <option value="Finance" {% if account and account.role=='Finance' %}selected{% endif %}>Finance</option>
+              <option value="Student" {% if account and account.role == 'Student' %}selected{% endif %}>Student</option>
+              <option value="Admin" {% if account and account.role == 'Admin' %}selected{% endif %}>Admin</option>
+              <option value="Finance" {% if account and account.role == 'Finance' %}selected{% endif %}>Finance</option>
             </select>
           </div>
         </div>
@@ -327,56 +569,96 @@
             <div class="form-group">
               <label for="yearLevel">Year Level <span>*</span></label>
               <select id="yearLevel" name="year_level" class="form-input">
-                <option value="" disabled {% if not account or not account.year_level %}selected{% endif %}>Select year
-                  level</option>
-                <option value="1st Year" {% if account and account.year_level=='1st Year' %}selected{% endif %}>1st Year
-                </option>
-                <option value="2nd Year" {% if account and account.year_level=='2nd Year' %}selected{% endif %}>2nd Year
-                </option>
-                <option value="3rd Year" {% if account and account.year_level=='3rd Year' %}selected{% endif %}>3rd Year
-                </option>
-                <option value="4th Year" {% if account and account.year_level=='4th Year' %}selected{% endif %}>4th Year
-                </option>
+                <option value="" disabled {% if not account or not account.year_level %}selected{% endif %}>Select year level</option>
+                <option value="1st Year" {% if account and account.year_level == '1st Year' %}selected{% endif %}>1st Year</option>
+                <option value="2nd Year" {% if account and account.year_level == '2nd Year' %}selected{% endif %}>2nd Year</option>
+                <option value="3rd Year" {% if account and account.year_level == '3rd Year' %}selected{% endif %}>3rd Year</option>
+                <option value="4th Year" {% if account and account.year_level == '4th Year' %}selected{% endif %}>4th Year</option>
               </select>
             </div>
 
             <div class="form-group">
               <label for="course">Course <span>*</span></label>
               <select id="course" name="course" class="form-input">
-                <option value="" disabled {% if not account or not account.course %}selected{% endif %}>Select course
-                </option>
-
+                <option value="" disabled {% if not account or not account.course %}selected{% endif %}>Select course</option>
                 {% for course in active_courses %}
-                <option value="{{ course.name }}" {% if account and account.course==course.name %}selected{% endif %}>
+                <option value="{{ course.name }}" {% if account and account.course == course.name %}selected{% endif %}>
                   {{ course.name }}
                 </option>
                 {% endfor %}
-
               </select>
             </div>
           </div>
         </div>
 
-        <button type="submit" class="btn">{% if account %}Update{% else %}Submit{% endif %}</button>
+        <div class="submit-row">
+          <button type="submit" class="btn">{% if account %}Update{% else %}Submit{% endif %}</button>
+        </div>
       </form>
     </section>
   </main>
 
   <script>
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
 
     const roleSelect = document.getElementById('role');
     const studentFields = document.getElementById('studentFields');
+    const yearLevelSelect = document.getElementById('yearLevel');
+    const courseSelect = document.getElementById('course');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      sidebarOverlay.hidden = false;
+      sidebarOverlay.classList.add('show');
+      sidebarToggle.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('show');
+      sidebarOverlay.hidden = true;
+      sidebarToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleSidebar() {
+      if (sidebar.classList.contains('open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    }
 
     function toggleStudentFields() {
       const show = roleSelect.value === 'Student';
       studentFields.classList.toggle('hidden', !show);
-      document.getElementById('yearLevel').required = show;
-      document.getElementById('course').required = show;
+      yearLevelSelect.required = show;
+      courseSelect.required = show;
+
+      if (!show) {
+        yearLevelSelect.value = '';
+        courseSelect.value = '';
+      }
     }
+
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
 
     roleSelect.addEventListener('change', toggleStudentFields);
     toggleStudentFields();
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeSidebar();
+      }
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 980) {
+        closeSidebar();
+      }
+    });
   </script>
 </body>
 

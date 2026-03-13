@@ -1,515 +1,676 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Request | Student Promissory Notes System</title>
-    <link rel="icon" type="image/x-icon" href="/images/FCPC.jpg" />
-    <style>
-      :root {
-        --nav-width: 250px;
-        --primary: #4b6cb7;
-        --secondary: #182848;
-        --accent: #f8b500;
-        --bg: #f4f7fc;
-        --card-bg: rgba(255, 255, 255, 0.95);
-        --radius: 16px;
-        --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        --border: rgba(0, 0, 0, 0.06);
-        --text: #111;
-        --text-light: #555;
-        --font: "Inter", system-ui, sans-serif;
-        --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-      }
 
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: var(--font);
-      }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request | Student Promissory Notes System</title>
+  <link rel="icon" type="image/x-icon" href="/images/FCPC.jpg">
 
-      body {
-        min-height: 100vh;
-        background: var(--bg);
-        color: var(--text);
-      }
+  <style>
+    :root {
+      --primary: #1e2a78;
+      --primary-light: #3a4bb3;
+      --primary-dark: #16205d;
+      --bg: #f4f7fc;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --hover: #eef2ff;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --radius: 14px;
+      --sidebar-width: 240px;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --info: #0891b2;
+    }
 
-      a {
-        text-decoration: none;
-        color: inherit;
-        transition: 0.2s ease;
-      }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-      a:hover {
-        color: var(--accent);
-      }
+    html {
+      scroll-behavior: smooth;
+    }
 
-      .app {
-        display: flex;
-        min-height: 100vh;
-      }
+    body {
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background-color: var(--bg);
+    }
 
-      /* Sidebar */
-      .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
-        width: var(--nav-width);
-        display: flex;
-        flex-direction: column;
-        gap: 30px;
-        padding: 30px 20px;
-        background: linear-gradient(180deg, var(--primary), var(--secondary));
-        color: #fff;
-        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-        transition: left 0.3s ease;
-      }
+    img {
+      display: block;
+      max-width: 100%;
+    }
 
-      .sidebar.active {
-        left: 0;
-      }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
-      .brand {
-        font-weight: 700;
-        text-align: center;
-        font-size: 18px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
 
-      .brand span {
-        font-size: 12px;
-        opacity: 0.85;
-      }
+    .hidden {
+      display: none !important;
+    }
 
-      .nav {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 25px;
-      }
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1100;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      font-size: 18px;
+    }
 
-      .nav a {
-        padding: 14px 18px;
-        border-radius: var(--radius);
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        transition: 0.3s ease, transform 0.2s ease;
-      }
+    .sidebar-toggle:focus-visible,
+    .sidebar a:focus-visible,
+    .logout-link:focus-visible,
+    .form-input:focus-visible,
+    .btn:focus-visible,
+    .upload-input:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 2px;
+    }
 
-      .nav a:hover,
-      .nav a.active {
-        background: rgba(255, 255, 255, 0.2);
-        transform: translateX(6px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-      }
+    .app {
+      min-height: 100vh;
+    }
 
-      .logout-btn {
-        margin-top: auto;
-        padding: 14px 18px;
-        border-radius: var(--radius);
-        background: rgba(255, 255, 255, 0.15);
-        color: #fff;
-        font-weight: 600;
-        cursor: pointer;
-        text-align: center;
-        border: none;
-        display: block;
-        width: 100%;
-        transition: 0.3s ease, transform 0.2s ease;
-      }
+    .sidebar {
+      width: var(--sidebar-width);
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--primary), var(--primary-light));
+      color: #fff;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0 16px;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
 
-      .logout-btn:hover {
-        background: var(--accent);
-        color: var(--secondary);
-        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
-        transform: translateY(-2px);
-      }
+    .sidebar-header {
+      padding: 0 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      margin-bottom: 12px;
+    }
 
-      /* Main content */
-      .main {
-        margin-left: var(--nav-width);
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-      }
+    .sidebar-header h1 {
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.4;
+      word-break: break-word;
+    }
 
-      .topbar {
-        height: 80px;
-        padding: 0 40px;
-        display: flex;
-        align-items: center;
-        border-bottom: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-      }
+    .sidebar-header span {
+      display: block;
+      font-size: 13px;
+      font-weight: 400;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
 
-      .welcome {
-        font-size: 20px;
-        font-weight: 700;
-      }
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 10px;
+      flex: 1;
+    }
 
-      .role {
-        font-size: 13px;
-        color: var(--text-light);
-      }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+      font-weight: 600;
+    }
 
-      .content {
-        flex: 1;
-        padding: 30px 40px;
-        display: flex;
-        flex-direction: column;
-        gap: 28px;
-      }
+    .sidebar a.active {
+      background-color: rgba(255, 255, 255, 0.22);
+      font-weight: 700;
+    }
 
-      .card {
-        background: var(--card-bg);
-        border-radius: var(--radius);
-        padding: 28px;
-        border: 1px solid var(--border);
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(10px);
-        transition: 0.3s ease, transform 0.2s ease;
-      }
+    .sidebar a:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
+    }
 
-      /* Form */
-      .form-two-col {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-      }
+    .sidebar-footer {
+      padding: 12px 10px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      margin-top: 12px;
+    }
 
-      label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 6px;
-        font-size: 14px;
-      }
+    .logout-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 14px;
+      color: #fff;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+    }
 
-      input,
-      select,
-      textarea,
-      .upload-box input[type="file"] {
-        width: 100%;
-        padding: 12px;
-        border-radius: var(--radius);
-        border: 1px solid var(--border);
-        transition: 0.3s ease;
-      }
+    .logout-link:hover {
+      background: rgba(255, 255, 255, 0.16);
+      transform: translateY(-1px);
+    }
 
-      input:focus,
-      select:focus,
-      textarea:focus,
-      .upload-box input[type="file"]:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 8px rgba(75, 108, 183, 0.4);
-      }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 999;
+    }
 
-      textarea {
-        min-height: 120px;
-        resize: vertical;
-      }
+    .sidebar-overlay.show {
+      display: block;
+    }
 
-      .upload-box {
-        border: 2px dashed rgba(0, 0, 0, 0.1);
-        border-radius: var(--radius);
-        padding: 24px;
-        display: flex;
-        flex-direction: column;
+    .main {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      padding: 24px;
+      transition: margin-left 0.3s ease;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: var(--surface);
+      padding: 18px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .header h2 {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 28px;
+    }
+
+    .header-user {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+      text-align: right;
+    }
+
+    .header-user strong {
+      color: var(--text);
+    }
+
+    .flash-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .flash {
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      border-left: 5px solid transparent;
+      background: #fff;
+    }
+
+    .flash.success {
+      background: #ecfdf5;
+      color: #166534;
+      border-left-color: #22c55e;
+    }
+
+    .flash.danger {
+      background: #fef2f2;
+      color: #991b1b;
+      border-left-color: #ef4444;
+    }
+
+    .flash.warning {
+      background: #fffbeb;
+      color: #92400e;
+      border-left-color: #f59e0b;
+    }
+
+    .flash.info {
+      background: #ecfeff;
+      color: #155e75;
+      border-left-color: #06b6d4;
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .section-card {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #f9fafb;
+      color: var(--text);
+      font-size: 14px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    .form-input:focus {
+      border-color: #a5b4fc;
+      outline: none;
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+    }
+
+    .readonly-input {
+      background: #eef2f7;
+      color: #4b5563;
+      cursor: not-allowed;
+    }
+
+    .readonly-input:focus {
+      background: #eef2f7;
+    }
+
+    textarea.form-input {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .upload-box {
+      border: 1px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 18px;
+      background: #fafbff;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .upload-box:hover {
+      border-color: #a5b4fc;
+      background: #f8faff;
+    }
+
+    .upload-title {
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .upload-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .upload-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .form-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .btn {
+      padding: 11px 18px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-light);
+    }
+
+    .btn-ghost {
+      background: #f3f4f6;
+      color: var(--text);
+      border: 1px solid #d1d5db;
+    }
+
+    .btn-ghost:hover {
+      background: #e5e7eb;
+    }
+
+    @media (max-width: 980px) {
+      .sidebar-toggle {
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        text-align: center;
-        background: rgba(255, 255, 255, 0.95);
-        box-shadow: var(--shadow);
-        min-height: 130px;
-        transition: 0.3s ease, transform 0.2s ease;
       }
 
-      .upload-box:hover {
-        background: rgba(255, 255, 255, 1);
-        border-color: var(--primary);
-        box-shadow: var(--hover-shadow);
+      .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 76px 16px 20px;
+      }
+
+      .header h2 {
+        font-size: 24px;
+      }
+
+      .header-user {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions {
+        flex-direction: column;
       }
 
       .btn {
-        padding: 12px 20px;
-        border-radius: var(--radius);
-        font-weight: 700;
-        font-size: 14px;
-        cursor: pointer;
-        border: none;
-        transition: 0.3s ease, transform 0.2s ease;
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
       }
 
-      .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
+        animation: none !important;
       }
+    }
+  </style>
+</head>
 
-      .btn-primary {
-        background: var(--primary);
-        color: #fff;
-      }
+<body>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="flash-container">
+    {% for category, message in messages %}
+    <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
 
-      .btn-primary:hover {
-        background: var(--accent);
-        color: var(--secondary);
-      }
+  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false"
+    aria-label="Toggle navigation menu">
+    ☰
+  </button>
 
-      .btn-ghost {
-        background: rgba(0, 0, 0, 0.05);
-        color: #333;
-        border: 1px solid #ddd;
-      }
+  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-      .btn-ghost:hover {
-        background: rgba(0, 0, 0, 0.1);
-      }
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Student navigation">
+      <div class="sidebar-header">
+        <h1>Student</h1>
+        <span>Promissory Notes System</span>
+      </div>
 
-      /* input color */
-      #semester,
-      #school_year,
-      #yearlevel,
-      #course {
-        background: #eee;
-        cursor: not-allowed;
-      }
+      <nav class="sidebar-nav">
+        <a href="{{ url_for('student.dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('student.request_promissory') }}" class="active">Request Promissory</a>
+        <a href="{{ url_for('student.history') }}">History</a>
+        <a href="{{ url_for('student.setup') }}">Account</a>
+      </nav>
 
-      #semester:hover,
-      #school_year:hover,
-      #yearlevel:hover,
-      #course:hover {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 8px rgba(75, 108, 183, 0.4);
-      }
+      <div class="sidebar-footer">
+        <button class="logout-link" type="button" onclick="window.location.href='{{ url_for('student.logout') }}'">
+          Logout
+        </button>
+      </div>
+    </aside>
 
-      /* Flash messages */
-      #flash-popup {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: #d9534f;
-        color: #fff;
-        padding: 18px 28px;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 1.1rem;
-        z-index: 999999;
-        opacity: 0;
-        animation: flashFadeIn 0.6s forwards, flashFadeOut 0.6s 4.6s forwards;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
-        text-align: center;
-        max-width: 90%;
-      }
-
-      #flash-popup.success {
-        background: #28a745;
-      }
-
-      #flash-popup.danger {
-        background: #d9534f;
-      }
-
-      @keyframes flashFadeIn {
-        from {
-          opacity: 0;
-          transform: translate(-50%, -55%);
-        }
-
-        to {
-          opacity: 1;
-          transform: translate(-50%, -50%);
-        }
-      }
-
-      @keyframes flashFadeOut {
-        from {
-          opacity: 1;
-          transform: translate(-50%, -50%);
-        }
-
-        to {
-          opacity: 0;
-          transform: translate(-50%, -45%);
-        }
-      }
-
-      .sidebar-toggle {
-        display: none;
-        position: fixed;
-        top: 15px;
-        right: 15px;
-        z-index: 1100;
-        background: var(--primary);
-        color: #fff;
-        border: none;
-        padding: 10px 14px;
-        border-radius: 6px;
-        font-size: 18px;
-        cursor: pointer;
-      }
-
-      /* Responsive */
-      @media (max-width: 900px) {
-        .app {
-          flex-direction: column;
-        }
-
-        .sidebar {
-          width: 220px;
-          /* slightly wider for usability */
-          left: -240px;
-          /* offscreen initially */
-          top: 0;
-          height: 100%;
-          padding: 20px 12px;
-          flex-direction: column;
-          transition: left 0.3s ease;
-          z-index: 1000;
-        }
-
-        .sidebar-toggle {
-          display: block;
-        }
-
-        .sidebar.active {
-          left: 0;
-        }
-
-        .main {
-          margin-left: 0;
-          width: 100%;
-        }
-
-        .content {
-          padding: 16px;
-          gap: 20px;
-        }
-
-        .form-two-col {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 12px;
-        }
-
-        input,
-        select,
-        textarea,
-        .upload-box input[type="file"] {
-          padding: 10px;
-          font-size: 14px;
-        }
-
-        .upload-box {
-          min-height: 100px;
-          padding: 14px;
-          border-radius: var(--radius);
-          border: 1px solid var(--border);
-          background: var(--card-bg);
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
-    <div id="flash-popup" class="{{ messages[0][0] }}">{{ messages[0][1] }}</div>
-    {% endif %} {% endwith %}
-
-    <div class="app">
-      <button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('active')">☰</button>
-      <aside class="sidebar">
-        <div class="brand">Student<br /><span>Promissory Notes System</span></div>
-
-        <nav class="nav">
-          <a href="{{ url_for('student.dashboard') }}">Dashboard</a>
-          <a href="{{ url_for('student.request_promissory') }}" class="active">Request Promissory</a>
-          <a href="{{ url_for('student.history') }}">History</a>
-          <a href="{{ url_for('student.setup') }}">Account</a>
-        </nav>
-
-        <button class="logout-btn" onclick="window.location.href='{{ url_for('student.logout') }}'">Logout</button>
-      </aside>
-
-      <main class="main">
-        <header class="topbar">
-          <div>
-            <div class="welcome">{{ student.first_name }} {{ student.last_name }}</div>
-            <div class="role">{{ student.role }}</div>
-          </div>
-        </header>
-
-        <div class="content">
-          <h2>Request Promissory Note</h2>
-
-          <div class="card">
-            <form class="form-two-col" method="POST" enctype="multipart/form-data" autocomplete="off">
-              <div>
-                <label for="yearlevel">Year Level</label>
-                <input type="text" id="yearlevel" name="yearlevel" value="{{ student.year_level }}" readonly />
-              </div>
-
-              <div>
-                <label for="course">Course</label>
-                <input type="text" id="course" name="course" value="{{ student.course }}" readonly />
-              </div>
-
-              <div>
-                <label for="semester">Semester</label>
-                <input type="text" id="semester" name="semester" value="{{ active_semester }}" readonly />
-              </div>
-
-              <div>
-                <label for="school_year">School Year</label>
-                <input type="text" id="school_year" name="school_year" value="{{ active_school_year }}" readonly />
-              </div>
-
-              <div>
-                <label for="semester_type">Examination Type</label>
-                <select id="semester_type" name="semester_type" required>
-                  <option value="" selected disabled>Select Examination Type</option>
-                  <option value="Prelims">Prelims</option>
-                  <option value="Midterms">Midterms</option>
-                  <option value="Finals">Finals</option>
-                </select>
-              </div>
-
-              <div style="grid-column: 1 / -1">
-                <label>Your Reason</label>
-                <textarea name="reason_text" placeholder="Enter your reason here (optional)"></textarea>
-
-                <div class="upload-box" style="margin-top: 10px">
-                  <div>Or drop a document here to upload</div>
-                  <small>Supported: PDF, JPG (Max 5MB)</small>
-                  <input type="file" name="reason_doc" style="margin-top: 10px" />
-                </div>
-              </div>
-
-              <div style="grid-column: 1 / -1">
-                <label>Valid ID</label>
-                <div class="upload-box">
-                  <div>Drop document here to upload</div>
-                  <small>Valid ID of parent/guardian</small>
-                  <input type="file" name="valid_id" style="margin-top: 10px" />
-                </div>
-              </div>
-
-              <div style="grid-column: 1 / -1; display: flex; gap: 12px; margin-top: 12px">
-                <button class="btn btn-primary" type="submit">Submit</button>
-                <button class="btn btn-ghost" type="reset">Cancel</button>
-              </div>
-            </form>
-          </div>
+    <main class="main">
+      <header class="header">
+        <h2>Request Promissory Note</h2>
+        <div class="header-user">
+          <strong>{{ student.first_name }} {{ student.last_name }}</strong><br>
+          {{ student.role }}
         </div>
-      </main>
-    </div>
-  </body>
+      </header>
+
+      <div class="content">
+        <section class="section-card">
+          <h3 class="section-title">Request Promissory Note</h3>
+
+          <form class="form-grid" method="POST" enctype="multipart/form-data" autocomplete="off">
+            <div class="form-group">
+              <label for="yearlevel">Year Level</label>
+              <input
+                type="text"
+                id="yearlevel"
+                name="yearlevel"
+                class="form-input readonly-input"
+                value="{{ student.year_level }}"
+                readonly>
+            </div>
+
+            <div class="form-group">
+              <label for="course">Course</label>
+              <input
+                type="text"
+                id="course"
+                name="course"
+                class="form-input readonly-input"
+                value="{{ student.course }}"
+                readonly>
+            </div>
+
+            <div class="form-group">
+              <label for="semester">Semester</label>
+              <input
+                type="text"
+                id="semester"
+                name="semester"
+                class="form-input readonly-input"
+                value="{{ active_semester }}"
+                readonly>
+            </div>
+
+            <div class="form-group">
+              <label for="school_year">School Year</label>
+              <input
+                type="text"
+                id="school_year"
+                name="school_year"
+                class="form-input readonly-input"
+                value="{{ active_school_year }}"
+                readonly>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="semester_type">Examination Type</label>
+              <select id="semester_type" name="semester_type" class="form-input" required>
+                <option value="" selected disabled>Select Examination Type</option>
+                <option value="Prelims">Prelims</option>
+                <option value="Midterms">Midterms</option>
+                <option value="Finals">Finals</option>
+              </select>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="reason_text">Your Reason</label>
+              <textarea
+                id="reason_text"
+                name="reason_text"
+                class="form-input"
+                placeholder="Enter your reason here (optional)"></textarea>
+
+              <div class="upload-box" style="margin-top: 10px;">
+                <div class="upload-title">Upload supporting reason document</div>
+                <div class="upload-subtitle">Supported: PDF, JPG, PNG (Max 5MB)</div>
+                <input type="file" name="reason_doc" class="upload-input">
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="valid_id">Valid ID</label>
+              <div class="upload-box">
+                <div class="upload-title">Upload valid ID of parent/guardian</div>
+                <div class="upload-subtitle">Supported: PDF, JPG, PNG</div>
+                <input type="file" id="valid_id" name="valid_id" class="upload-input">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Submit</button>
+              <button class="btn btn-ghost" type="reset">Cancel</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      sidebarOverlay.hidden = false;
+      sidebarOverlay.classList.add('show');
+      sidebarToggle.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('show');
+      sidebarOverlay.hidden = true;
+      sidebarToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleSidebar() {
+      if (sidebar.classList.contains('open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    }
+
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeSidebar();
+      }
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 980) {
+        closeSidebar();
+      }
+    });
+  </script>
+</body>
+
 </html>

@@ -6,298 +6,440 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Account - Promissory App</title>
   <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
+
   <style>
+    :root {
+      --primary: #1e2a78;
+      --primary-light: #3a4bb3;
+      --primary-dark: #16205d;
+      --bg: #f4f7fc;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --hover: #eef2ff;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --radius: 14px;
+      --sidebar-width: 240px;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: 'Arial', sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background-color: #f9f9f9;
-      padding: 0;
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background-color: var(--bg);
     }
 
-    .sidebar {
-      width: 220px;
-      height: 100vh;
-      background: linear-gradient(135deg, #1e2a78, #3a4bb3);
-      color: #fff;
-      position: fixed;
-      top: 0;
-      left: 0;
-      padding-top: 20px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar h2 {
-      text-align: center;
-      font-size: 16px;
-      margin: 0 10px 30px;
-      font-weight: 300;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      padding: 12px 20px;
-      color: #fff;
-      text-decoration: none;
-      margin: 5px 0;
-      border-radius: 5px;
-      transition: background-color 0.3s ease;
-    }
-
-    .sidebar a.active {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-
-
-    .sidebar a:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .sidebar img.icon {
-      width: 30px;
-      height: 30px;
-      margin-right: 10px;
-      background: #fff;
-      border-radius: 50%;
-      padding: 6px;
-    }
-
-    .logout-btn {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 12px 20px;
-      text-decoration: none;
-      border-radius: 0;
-    }
-
-    .main-content {
-      margin-left: 220px;
-      padding: 20px;
-      min-height: 100vh;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #fff;
-      padding: 15px 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
-    }
-
-    .header h2 {
-      font-weight: 300;
-      color: #2c3e50;
-    }
-
-    .form-container {
-      background: #fff;
-      padding: 20px;
-      margin-top: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    img {
+      display: block;
       max-width: 100%;
-      transition: transform 0.2s ease;
     }
 
-    .form-container h3 {
-      margin-top: 0;
-      color: #1e2a78;
-      font-weight: 300;
-      margin-bottom: 20px;
+    a {
+      color: inherit;
+      text-decoration: none;
     }
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 15px 20px;
-    }
-
-    .form-group.span-4 {
-      grid-column: span 4;
-    }
-
-    .student-fields {
-      grid-column: span 4;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px 20px;
-      padding-top: 10px;
-      margin-bottom: 5px;
-      border-top: 1px solid #eee;
-    }
-
-    .action-buttons {
-      grid-column: span 4;
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid #ddd;
-    }
-
-    .form-group {
-      margin-bottom: 0;
+    button,
+    input,
+    select {
+      font: inherit;
     }
 
     .hidden {
       display: none !important;
     }
 
-
-    .form-group label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: 500;
-      font-size: 14px;
-      color: #555;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 14px;
-      transition: border-color 0.3s ease;
-    }
-
-    .form-input:focus {
-      border-color: #1e2a78;
-      outline: none;
-    }
-
-    .btn {
-      padding: 10px 16px;
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1100;
       border: none;
-      border-radius: 5px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
       cursor: pointer;
+      box-shadow: var(--shadow);
+      font-size: 18px;
+    }
+
+    .sidebar-toggle:focus-visible,
+    .sidebar a:focus-visible,
+    .logout-link:focus-visible,
+    .form-input:focus-visible,
+    .btn:focus-visible,
+    .back-button:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 2px;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--primary), var(--primary-light));
+      color: #fff;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0 16px;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 0 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      margin-bottom: 12px;
+    }
+
+    .sidebar-header h1 {
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .sidebar-header span {
+      display: block;
+      font-size: 13px;
+      font-weight: 400;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 10px;
+      flex: 1;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .sidebar a.active {
+      background-color: rgba(255, 255, 255, 0.22);
+      font-weight: 700;
+    }
+
+    .sidebar a:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
+    }
+
+    .sidebar img.icon {
+      width: 30px;
+      height: 30px;
+      background: #fff;
+      border-radius: 50%;
+      padding: 6px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer {
+      padding: 12px 10px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      margin-top: 12px;
+    }
+
+    .logout-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .logout-link:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateX(2px);
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 999;
+    }
+
+    .sidebar-overlay.show {
+      display: block;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 24px;
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: var(--surface);
+      padding: 18px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .header h2 {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 28px;
+    }
+
+    .header-user {
+      color: var(--muted);
       font-size: 14px;
-      margin-right: 8px;
-      transition: background-color 0.3s ease;
     }
 
-    .btn-save {
-      background: #28a745;
-      color: #fff;
-    }
-
-    .btn-save:hover {
-      background: #218838;
-    }
-
-    .btn-reset {
-      background: #ffc107;
-      color: #000;
-    }
-
-    .btn-reset:hover {
-      background: #e0a800;
-    }
-
-    .btn-back {
-      background: white;
-      color: #fff;
-    }
-
-    .btn-back:hover {
-      background: #5a6268;
-    }
-
-    .new-password-box {
-      background: #e9f7ef;
-      border: 1px solid #28a745;
-      color: #155724;
-      padding: 12px;
-      border-radius: 5px;
-      margin-bottom: 15px;
-      font-weight: 500;
-      grid-column: span 4;
+    .header-user strong {
+      color: var(--text);
     }
 
     .alert {
-      padding: 15px;
-      margin-bottom: 20px;
-      border: 1px solid transparent;
-      border-radius: 4px;
+      padding: 15px 18px;
+      margin-bottom: 16px;
+      border-radius: 12px;
       font-weight: 600;
       opacity: 1;
-      transition: opacity 0.5s ease-out;
+      transition: opacity 0.4s ease, transform 0.4s ease, margin 0.4s ease, padding 0.4s ease;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
     }
 
     .alert.success {
-      color: #155724;
-      background-color: #d4edda;
-      border-color: #c3e6cb;
+      color: #166534;
+      background-color: #ecfdf5;
+      border-left: 5px solid #22c55e;
     }
 
     .alert.danger {
-      color: #721c24;
-      background-color: #f8d7da;
-      border-color: #f5c6cb;
+      color: #991b1b;
+      background-color: #fef2f2;
+      border-left: 5px solid #ef4444;
     }
 
     .alert.warning {
-      color: #856404;
-      background-color: #fff3cd;
-      border-color: #ffeeba;
+      color: #92400e;
+      background-color: #fffbeb;
+      border-left: 5px solid #f59e0b;
     }
 
     .alert.hidden {
       opacity: 0;
-      height: 0;
-      padding: 0;
       margin: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      height: 0;
       overflow: hidden;
     }
 
-    /* 🚨 END: Alert/Flash Message Styling 🚨 */
+    .form-container {
+      background: var(--surface);
+      padding: 22px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease;
+    }
 
-    .sidebar-toggle {
-      display: none;
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background: #1e2a78;
-      color: #fff;
+    .top-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       border: none;
-      padding: 10px;
-      border-radius: 5px;
+      background: #eef2ff;
+      color: var(--primary);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 700;
       cursor: pointer;
-      z-index: 1000;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .back-button:hover {
+      background: #dbe4ff;
+      transform: translateY(-1px);
+    }
+
+    .back-button img {
+      width: 18px;
+      height: 18px;
+    }
+
+    .form-container h3 {
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+
+    .new-password-box {
+      background: #ecfdf5;
+      border: 1px solid #86efac;
+      color: #166534;
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      font-weight: 600;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px 20px;
+    }
+
+    .form-group {
+      margin-bottom: 0;
+    }
+
+    .form-group.span-4 {
+      grid-column: span 4;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      background: #f9fafb;
+      color: var(--text);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    .form-input:focus {
+      border-color: #a5b4fc;
+      outline: none;
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+    }
+
+    .student-fields {
+      grid-column: span 4;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 20px;
+      padding-top: 16px;
+      margin-top: 4px;
+      border-top: 1px solid var(--border);
+    }
+
+    .action-buttons {
+      grid-column: span 4;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 11px 18px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-save {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .btn-save:hover {
+      background: #15803d;
+    }
+
+    .btn-reset {
+      background: #facc15;
+      color: #1f2937;
+    }
+
+    .btn-reset:hover {
+      background: #eab308;
     }
 
     @media (max-width: 992px) {
       .form-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .form-group.span-4,
       .student-fields,
-      .new-password-box,
       .action-buttons {
         grid-column: span 2;
       }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 980px) {
+      .sidebar-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
       .sidebar {
         transform: translateX(-100%);
+        width: 260px;
       }
 
       .sidebar.open {
@@ -306,20 +448,17 @@
 
       .main-content {
         margin-left: 0;
+        padding: 76px 16px 20px;
       }
 
-      .sidebar-toggle {
-        display: block;
+      .header h2 {
+        font-size: 24px;
       }
+    }
 
+    @media (max-width: 768px) {
       .header {
-        flex-direction: column;
         align-items: flex-start;
-        gap: 10px;
-      }
-
-      .form-container {
-        max-width: unset;
       }
 
       .form-grid,
@@ -329,96 +468,154 @@
 
       .form-group.span-4,
       .student-fields,
-      .new-password-box,
       .action-buttons {
         grid-column: span 1;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .action-buttons .btn {
+        width: 100%;
+      }
+
+      .top-actions {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
+        animation: none !important;
       }
     }
   </style>
 </head>
 
 <body>
-  <button class="sidebar-toggle" onclick="toggleSidebar()">☰ Menu</button>
+  <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false"
+    aria-label="Toggle navigation menu">
+    ☰
+  </button>
 
-  <nav class="sidebar" id="sidebar">
-    <h2>School Admin<br>Promissory Notes</h2>
-    <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon" alt="Dashboard Icon"> Dashboard
-    </a>
+  <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-    <a href="{{ url_for('admin.accounts') }}" class="{% if request.endpoint == 'admin.accounts' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/accounts.png') }}" class="icon" alt="Accounts Icon"> Accounts
-    </a>
+  <nav class="sidebar" id="sidebar" aria-label="Admin navigation">
+    <div class="sidebar-header">
+      <h1>School Admin</h1>
+      <span>Promissory Notes</span>
+    </div>
 
-    <a href="{{ url_for('admin.semester') }}" class="{% if request.endpoint == 'admin.semester' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/semester.png') }}" class="icon" alt="Semester Icon"> Semester
-    </a>
+    <div class="sidebar-nav">
+      <a href="{{ url_for('admin.dashboard') }}"
+         class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.dashboard' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon" alt="">
+        <span>Dashboard</span>
+      </a>
 
-    <a href="{{ url_for('admin.school_year') }}"
-      class="{% if request.endpoint == 'admin.school_year' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/schoolyear.png') }}" class="icon" alt="School Year Icon"> School
-      Year
-    </a>
-    <a href="{{ url_for('admin.course') }}" class="{% if request.endpoint == 'admin.course' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/course.png') }}" class="icon"> Active Course
-    </a>
-    <a href="{{ url_for('admin.logs') }}" class="{% if request.endpoint == 'admin.logs' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='images/log.png') }}" class="icon" alt="Logs Icon"> System Logs
-    </a>
-    <a href="{{ url_for('admin.logout') }}" class="logout-btn">
-      <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon" alt="Logout Icon"> Logout
-    </a>
+      <a href="{{ url_for('admin.accounts') }}"
+         class="{% if request.endpoint == 'admin.accounts' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.accounts' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/accounts.png') }}" class="icon" alt="">
+        <span>Accounts</span>
+      </a>
+
+      <a href="{{ url_for('admin.semester') }}"
+         class="{% if request.endpoint == 'admin.semester' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.semester' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/semester.png') }}" class="icon" alt="">
+        <span>Semester</span>
+      </a>
+
+      <a href="{{ url_for('admin.school_year') }}"
+         class="{% if request.endpoint == 'admin.school_year' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.school_year' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/schoolyear.png') }}" class="icon" alt="">
+        <span>School Year</span>
+      </a>
+
+      <a href="{{ url_for('admin.course') }}"
+         class="{% if request.endpoint == 'admin.course' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.course' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/course.png') }}" class="icon" alt="">
+        <span>Active Course</span>
+      </a>
+
+      <a href="{{ url_for('admin.logs') }}"
+         class="{% if request.endpoint == 'admin.logs' %}active{% endif %}"
+         aria-current="{% if request.endpoint == 'admin.logs' %}page{% endif %}">
+        <img src="{{ url_for('static', filename='images/log.png') }}" class="icon" alt="">
+        <span>System Logs</span>
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('admin.logout') }}" class="logout-link">
+        <img src="{{ url_for('static', filename='images/logout.png') }}" class="icon" alt="">
+        <span>Logout</span>
+      </a>
+    </div>
   </nav>
 
   <main class="main-content">
     <header class="header">
       <h2>Edit Account</h2>
-      <div><strong>{{ admin_user }}</strong></div>
+      <div class="header-user"><strong>{{ admin_user }}</strong></div>
     </header>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="alert {{ category }}" role="alert">
-      {{ message }}
-    </div>
-    {% endfor %}
-    {% endif %}
+      {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert {{ category }}" role="alert">
+          {{ message }}
+        </div>
+        {% endfor %}
+      {% endif %}
     {% endwith %}
 
     <section class="form-container">
-      <button type="button" onclick="window.history.back()" class="btn btn-back">
-        <img src="{{ url_for('static', filename='images/back.png') }}" alt="Back"
-          style="width:25px; height:25px; margin-right:6p; vertical-align:middle;">
-      </button>
-
+      <div class="top-actions">
+        <button type="button" onclick="window.history.back()" class="back-button" aria-label="Go back">
+          <img src="{{ url_for('static', filename='images/back.png') }}" alt="">
+          <span>Back</span>
+        </button>
+      </div>
 
       <h3>Account Details</h3>
 
+      {% if new_password %}
+      <div class="new-password-box">
+        <strong>New Password:</strong> {{ new_password }}
+      </div>
+      {% endif %}
+
       <form method="POST">
-
         <div class="form-grid">
-
-          {% if new_password %}
-          <div class="new-password-box">
-            <strong>New Password:</strong> {{ new_password }}
-          </div>
-          {% endif %}
-
           <div class="form-group">
             <label for="first_name">First Name</label>
-            <input type="text" id="first_name" name="first_name" class="form-input" value="{{ account.first_name }}"
-              required>
+            <input type="text" id="first_name" name="first_name" class="form-input" value="{{ account.first_name }}" required>
           </div>
+
           <div class="form-group">
             <label for="middle_name">Middle Name</label>
             <input type="text" id="middle_name" name="middle_name" class="form-input" value="{{ account.middle_name }}">
           </div>
+
           <div class="form-group">
             <label for="last_name">Last Name</label>
-            <input type="text" id="last_name" name="last_name" class="form-input" value="{{ account.last_name }}"
-              required>
+            <input type="text" id="last_name" name="last_name" class="form-input" value="{{ account.last_name }}" required>
           </div>
+
           <div class="form-group">
             <label for="suffix">Suffix</label>
             <input type="text" id="suffix" name="suffix" class="form-input" value="{{ account.suffix }}">
@@ -432,36 +629,33 @@
           <div class="form-group span-4">
             <label for="role">Role</label>
             <select id="role" name="role" class="form-input">
-              <option value="Admin" {% if account.role=='Admin' %}selected{% endif %}>Admin</option>
-              <option value="Finance" {% if account.role=='Finance' %}selected{% endif %}>Finance</option>
-              <option value="Student" {% if account.role=='Student' %}selected{% endif %}>Student</option>
+              <option value="Admin" {% if account.role == 'Admin' %}selected{% endif %}>Admin</option>
+              <option value="Finance" {% if account.role == 'Finance' %}selected{% endif %}>Finance</option>
+              <option value="Student" {% if account.role == 'Student' %}selected{% endif %}>Student</option>
             </select>
           </div>
-
 
           <div id="studentFields" class="student-fields {% if account.role != 'Student' %}hidden{% endif %}">
             <div class="form-group">
               <label for="year_level">Year Level</label>
-              <select id="year_level" name="year_level" class="form-input" required>
+              <select id="year_level" name="year_level" class="form-input">
                 <option value="" {% if not account.year_level %}selected{% endif %}>— Select Year —</option>
-                <option value="1st Year" {% if account.year_level=='1st Year' %}selected{% endif %}>1st Year</option>
-                <option value="2nd Year" {% if account.year_level=='2nd Year' %}selected{% endif %}>2nd Year</option>
-                <option value="3rd Year" {% if account.year_level=='3rd Year' %}selected{% endif %}>3rd Year</option>
-                <option value="4th Year" {% if account.year_level=='4th Year' %}selected{% endif %}>4th Year</option>
+                <option value="1st Year" {% if account.year_level == '1st Year' %}selected{% endif %}>1st Year</option>
+                <option value="2nd Year" {% if account.year_level == '2nd Year' %}selected{% endif %}>2nd Year</option>
+                <option value="3rd Year" {% if account.year_level == '3rd Year' %}selected{% endif %}>3rd Year</option>
+                <option value="4th Year" {% if account.year_level == '4th Year' %}selected{% endif %}>4th Year</option>
               </select>
             </div>
 
             <div class="form-group">
               <label for="course">Course</label>
-              <select id="course" name="course" class="form-input" required>
+              <select id="course" name="course" class="form-input">
                 <option value="" {% if not account.course %}selected{% endif %}>— Select Course —</option>
-
                 {% for course in active_courses %}
-                <option value="{{ course.name }}" {% if account.course==course.name %}selected{% endif %}>
+                <option value="{{ course.name }}" {% if account.course == course.name %}selected{% endif %}>
                   {{ course.name }}
                 </option>
                 {% endfor %}
-
               </select>
             </div>
           </div>
@@ -469,30 +663,51 @@
           <div class="form-group span-4">
             <label for="status">Status</label>
             <select id="status" name="status" class="form-input">
-              <option value="Active" {% if account.status=='Active' %}selected{% endif %}>Active</option>
-              <option value="Inactive" {% if account.status=='Inactive' %}selected{% endif %}>Inactive</option>
+              <option value="Active" {% if account.status == 'Active' %}selected{% endif %}>Active</option>
+              <option value="Inactive" {% if account.status == 'Inactive' %}selected{% endif %}>Inactive</option>
             </select>
           </div>
 
           <div class="form-group action-buttons">
-            <button type="submit" name="save" class="btn btn-save">Save Changes</button>
-            <button type="submit" name="reset_password" class="btn btn-reset">Reset Password</button>
+            <button type="submit" name="save" value="1" class="btn btn-save">Save Changes</button>
+            <button type="submit" name="reset_password" value="1" class="btn btn-reset">Reset Password</button>
           </div>
-
         </div>
       </form>
     </section>
   </main>
 
   <script>
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('open');
-    }
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
 
     const roleSelect = document.getElementById('role');
     const studentFields = document.getElementById('studentFields');
     const yearLevelSelect = document.getElementById('year_level');
     const courseSelect = document.getElementById('course');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      sidebarOverlay.hidden = false;
+      sidebarOverlay.classList.add('show');
+      sidebarToggle.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('show');
+      sidebarOverlay.hidden = true;
+      sidebarToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleSidebar() {
+      if (sidebar.classList.contains('open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    }
 
     function toggleStudentFields() {
       const isStudent = roleSelect.value === 'Student';
@@ -500,21 +715,39 @@
 
       yearLevelSelect.required = isStudent;
       courseSelect.required = isStudent;
+
+      if (!isStudent) {
+        yearLevelSelect.value = '';
+        courseSelect.value = '';
+      }
     }
+
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
 
     roleSelect.addEventListener('change', toggleStudentFields);
     toggleStudentFields();
 
     document.addEventListener('DOMContentLoaded', () => {
       const alerts = document.querySelectorAll('.alert');
-      alerts.forEach(alert => {
-        if (!alert.classList.contains('new-password-box')) {
-          setTimeout(() => {
-            alert.classList.add('hidden');
-            setTimeout(() => alert.remove(), 500);
-          }, 5000);
-        }
+      alerts.forEach((alert) => {
+        setTimeout(() => {
+          alert.classList.add('hidden');
+          setTimeout(() => alert.remove(), 400);
+        }, 5000);
       });
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeSidebar();
+      }
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 980) {
+        closeSidebar();
+      }
     });
   </script>
 </body>
