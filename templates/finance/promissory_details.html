@@ -7,6 +7,7 @@
   <title>Promissory Note - Student Details</title>
   <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
   <style>
+    /* --- Base Styles --- */
     * {
       margin: 0;
       padding: 0;
@@ -20,6 +21,7 @@
       background-color: #f9f9f9;
     }
 
+    /* --- Sidebar --- */
     .sidebar {
       width: 220px;
       height: 100vh;
@@ -32,7 +34,7 @@
       display: flex;
       flex-direction: column;
       box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
+      z-index: 100;
     }
 
     .sidebar h2 {
@@ -56,17 +58,17 @@
       transition: background-color 0.3s ease;
     }
 
-    .sidebar a:hover {
+    .sidebar a:hover, .sidebar a.active {
       background-color: rgba(255, 255, 255, 0.1);
     }
 
     .sidebar img.icon {
-      width: 30px;
-      height: px;
+      width: 24px;
+      height: 24px;
       margin-right: 10px;
       background: #fff;
       border-radius: 50%;
-      padding: 6px;
+      padding: 4px;
     }
 
     .logout-btn {
@@ -76,9 +78,9 @@
       right: 0;
       padding: 12px 20px;
       text-decoration: none;
-      border-radius: 0;
     }
 
+    /* --- Main Layout --- */
     .main-content {
       margin-left: 220px;
       padding: 20px;
@@ -96,25 +98,17 @@
       margin-bottom: 20px;
     }
 
-    .header h2 {
-      font-weight: 300;
-      color: #2c3e50;
-    }
+    .header h2 { font-weight: 300; color: #2c3e50; }
 
     .back-btn {
       display: inline-block;
-      margin: 15px 0;
+      margin-bottom: 15px;
       color: #1e2a78;
       text-decoration: none;
       font-weight: 600;
-      transition: color 0.3s ease;
     }
 
-    .back-btn:hover {
-      color: #2980b9;
-      text-decoration: underline;
-    }
-
+    /* --- Cards & Grid --- */
     .card {
       background: #fff;
       border-radius: 8px;
@@ -139,91 +133,46 @@
       margin-top: 10px;
     }
 
-    .info-item strong {
-      display: block;
-      font-size: 13px;
-      color: #555;
-      font-weight: 500;
-    }
+    .info-item strong { display: block; font-size: 13px; color: #555; }
+    .info-item span { font-size: 14px; color: #000; }
 
-    .info-item span {
-      font-size: 14px;
-      color: #000;
-    }
-
+    /* --- Table Styles --- */
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
-      background: #fff;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
-    th,
-    td {
+    th, td {
       border: 1px solid #eee;
       padding: 12px;
       font-size: 14px;
       text-align: left;
     }
 
-    th {
-      background: linear-gradient(135deg, #1e2a78, #3a4bb3);
-      color: #fff;
-      font-weight: 500;
-    }
-
-    tbody tr:nth-child(even) {
-      background: #f8f9fa;
-    }
-
-    tbody tr:hover {
-      background: #e9ecef;
-      transition: background-color 0.2s ease;
-    }
+    th { background: #1e2a78; color: #fff; }
+    tbody tr:nth-child(even) { background: #f8f9fa; }
 
     .status {
-      padding: 6px 10px;
+      padding: 4px 10px;
       border-radius: 12px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
-      display: inline-block;
+      text-transform: capitalize;
     }
 
-    .status.approved {
-      background: #e6f4ea;
-      color: #137333;
-      border: 1px solid #b7dfc1;
-    }
+    .status.approved { background: #e6f4ea; color: #137333; }
+    .status.rejected { background: #fce8e6; color: #c5221f; }
+    .status.pending { background: #fff3cd; color: #856404; }
 
-    .status.rejected {
-      background: #fce8e6;
-      color: #c5221f;
-      border: 1px solid #f5c6c4;
-    }
-
-    .status.pending {
-      background: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeeba;
-    }
-
+    /* --- Form Elements --- */
     textarea {
       width: 100%;
       border: 1px solid #ccc;
       border-radius: 5px;
       padding: 10px;
-      font-size: 14px;
-      resize: vertical;
       min-height: 80px;
-      transition: border-color 0.3s ease;
-    }
-
-    textarea:focus {
-      border-color: #1e2a78;
-      outline: none;
+      margin-top: 10px;
     }
 
     .actions {
@@ -237,53 +186,69 @@
       padding: 10px 20px;
       border: none;
       border-radius: 5px;
-      font-size: 14px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    .btn.approve {
-      background: #34a853;
-      color: #fff;
-    }
-
-    .btn.approve:hover {
-      background: #2c8a45;
-    }
-
-    .btn.reject {
-      background: #d93025;
-      color: #fff;
-    }
-
-    .btn.reject:hover {
-      background: #b7241a;
-    }
-
-    .file-link {
-      color: #1e2a78;
-      text-decoration: underline;
       font-weight: 600;
-      transition: color 0.3s ease;
     }
 
-    .file-link:hover {
-      color: #2980b9;
-    }
+    .btn.approve { background: #34a853; color: #fff; }
+    .btn.reject { background: #d93025; color: #fff; }
 
-    .sidebar-toggle {
-      display: none;
+    /* --- MODAL POPUP (The Fix) --- */
+    .confirm-overlay {
+      display: none; 
       position: fixed;
-      top: 10px;
-      left: 10px;
-      background: #1e2a78;
-      color: #fff;
-      border: none;
-      padding: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 1000;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
     }
+
+    .confirm-modal {
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 350px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: modalSlide 0.3s ease-out;
+    }
+
+    @keyframes modalSlide {
+      from { transform: translateY(-30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .confirm-buttons {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .confirm-yes { background: #34a853; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+    .confirm-no { background: #ccc; color: #333; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+
+    /* --- Notifications --- */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #333;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 4px;
+      display: none;
+      z-index: 3000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .notification.show { display: block; }
+
   </style>
 </head>
 
@@ -291,18 +256,13 @@
 
   <nav class="sidebar" id="sidebar">
     <h2>{{ finance_user }}<br>Promissory Notes</h2>
-    <a href="{{ url_for('finance.dashboard') }}"><img src="{{ url_for('static', filename='images/dashboard.png') }}"
-        class="icon"> Dashboard</a>
-    <a href="{{ url_for('finance.promissory_notes') }}"><img src="{{ url_for('static', filename='images/notes.png') }}"
-        class="icon"> Promissory Notes</a>
-    <a href="{{ url_for('finance.all_promissory') }}"><img src="{{ url_for('static', filename='images/notes.png') }}"
-        class="icon"> Statistics</a>
-    <a href="{{ url_for('finance.students_promissory') }}"
-      class="{% if request.endpoint=='finance.students_promissory' %}active{% endif %}">
+    <a href="{{ url_for('finance.dashboard') }}"><img src="{{ url_for('static', filename='images/dashboard.png') }}" class="icon"> Dashboard</a>
+    <a href="{{ url_for('finance.promissory_notes') }}"><img src="{{ url_for('static', filename='images/notes.png') }}" class="icon"> Promissory Notes</a>
+    <a href="{{ url_for('finance.all_promissory') }}"><img src="{{ url_for('static', filename='images/notes.png') }}" class="icon"> Statistics</a>
+    <a href="{{ url_for('finance.students_promissory') }}" class="{% if request.endpoint=='finance.students_promissory' %}active{% endif %}">
       <img src="{{ url_for('static', filename='images/students.png') }}" class="icon"> Students
     </a>
-    <a href="{{ url_for('finance.logout') }}" class="logout-btn"><img
-        src="{{ url_for('static', filename='images/logout.png') }}" class="icon"> Logout</a>
+    <a href="{{ url_for('finance.logout') }}" class="logout-btn"><img src="{{ url_for('static', filename='images/logout.png') }}" class="icon"> Logout</a>
   </nav>
 
   <div class="notification" id="notif"></div>
@@ -319,7 +279,7 @@
       <h2>Promissory Note Details</h2>
     </header>
 
-    <a href="{{ url_for('finance.promissory_notes') }}" class="back-btn">&larr; Back</a>
+    <a href="{{ url_for('finance.promissory_notes') }}" class="back-btn">&larr; Back to List</a>
 
     <section class="card">
       <h3>Student Information</h3>
@@ -339,27 +299,22 @@
         <div class="info-item"><strong>Note ID</strong><span>{{ promissory_data.note_id }}</span></div>
         <div class="info-item"><strong>Date Submitted</strong><span>{{ promissory_data.date_submitted }}</span></div>
         <div class="info-item"><strong>Semester</strong><span>{{ promissory_data.semester|default('N/A') }}</span></div>
-        <div class="info-item"><strong>Examination Type</strong><span>{{ promissory_data.semester_type|default('N/A')
-            }}</span></div>
-        <div class="info-item"><strong>Reason (Text)</strong><span>{{ promissory_data.reason_text or 'Not provided'
-            }}</span></div>
+        <div class="info-item"><strong>Examination Type</strong><span>{{ promissory_data.semester_type|default('N/A') }}</span></div>
+        <div class="info-item"><strong>Reason (Text)</strong><span>{{ promissory_data.reason_text or 'Not provided' }}</span></div>
         <div class="info-item"><strong>Reason Document</strong>
           {% if promissory_data.reason_doc %}
-          <a href="{{ url_for('static', filename=promissory_data.reason_doc) }}" download>Download Reason</a>
+          <a href="{{ url_for('static', filename=promissory_data.reason_doc) }}" class="file-link" download>Download Reason</a>
           {% else %}
           <span>Not uploaded</span>
           {% endif %}
         </div>
-
         <div class="info-item"><strong>Valid ID</strong>
           {% if promissory_data.valid_id %}
-          <a href="{{ url_for('static', filename=promissory_data.valid_id) }}" download>Download Valid ID</a>
+          <a href="{{ url_for('static', filename=promissory_data.valid_id) }}" class="file-link" download>Download Valid ID</a>
           {% else %}
           <span>Not uploaded</span>
           {% endif %}
         </div>
-
-
       </div>
     </section>
 
@@ -371,7 +326,7 @@
             <th>Date</th>
             <th>Note ID</th>
             <th>Semester</th>
-            <th>Examination Type</th>
+            <th>Type</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -382,9 +337,7 @@
             <td>{{ note.note_id }}</td>
             <td>{{ note.semester }}</td>
             <td>{{ note.semester_type }}</td>
-            <td>
-              <span class="status {{ note.status|lower }}">{{ note.status }}</span>
-            </td>
+            <td><span class="status {{ note.status|lower }}">{{ note.status }}</span></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -392,9 +345,8 @@
     </section>
 
     <section class="card">
-      <h3>Add Comments (Optional)</h3>
-      <form id="promissoryForm" method="POST"
-        action="{{ url_for('finance.update_promissory', promissory_id=promissory_data.note_id) }}">
+      <h3>Add Comments & Action</h3>
+      <form id="promissoryForm" method="POST" action="{{ url_for('finance.update_promissory', promissory_id=promissory_data.note_id) }}">
         <textarea name="comments" placeholder="Put comment here...">{{ promissory_data.comments or '' }}</textarea>
         <div class="actions">
           <button type="button" class="btn approve" data-action="approve">Approve</button>
@@ -409,43 +361,52 @@
     <div class="confirm-modal">
       <h3 id="confirmMessage">Are you sure?</h3>
       <div class="confirm-buttons">
-        <button class="confirm-yes" id="confirmYes">Yes</button>
-        <button class="confirm-no" id="confirmNo">No</button>
+        <button class="confirm-yes" id="confirmYes">Yes, Proceed</button>
+        <button class="confirm-no" id="confirmNo">Cancel</button>
       </div>
     </div>
   </div>
 
   <script>
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-
     const modal = document.getElementById('confirmModal');
     const message = document.getElementById('confirmMessage');
-    let formAction = null;
+    const confirmYes = document.getElementById('confirmYes');
+    const confirmNo = document.getElementById('confirmNo');
+    const form = document.getElementById('promissoryForm');
+    let currentAction = null;
 
+    // Open Modal when buttons are clicked
     document.querySelectorAll('.actions .btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        formAction = btn.dataset.action;
-        message.textContent = `Are you sure you want to ${formAction} this promissory note?`;
-        modal.style.display = 'flex';
+        currentAction = btn.dataset.action;
+        message.textContent = `Are you sure you want to ${currentAction} this promissory note?`;
+        modal.style.display = 'flex'; // Triggers centering from CSS
       });
     });
 
-    document.getElementById('confirmYes').addEventListener('click', () => {
-      if (formAction) {
-        const form = document.getElementById('promissoryForm');
-        const hidden = document.createElement('input');
-        hidden.type = 'hidden';
-        hidden.name = 'action';
-        hidden.value = formAction;
-        form.appendChild(hidden);
+    // Handle "Yes" click
+    confirmYes.addEventListener('click', () => {
+      if (currentAction) {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'action';
+        hiddenInput.value = currentAction;
+        form.appendChild(hiddenInput);
         form.submit();
       }
+    });
+
+    // Handle "No" click
+    confirmNo.addEventListener('click', () => {
       modal.style.display = 'none';
     });
 
-    document.getElementById('confirmNo').addEventListener('click', () => {
-      modal.style.display = 'none';
-    });
+    // Close modal if clicking outside the box
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    }
 
     function showNotification(msg, duration = 3000) {
       const notif = document.getElementById('notif');
@@ -455,5 +416,4 @@
     }
   </script>
 </body>
-
 </html>
