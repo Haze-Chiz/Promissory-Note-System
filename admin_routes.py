@@ -1,492 +1,528 @@
-from flask import Blueprint, render_template, redirect, url_for, request, send_file, flash, session
-import pandas as pd
-import io
-import random
-import string
-from models import db, Account, ActiveSettings, ActiveCourse, SystemLog
-from functools import wraps
+import os
 from datetime import datetime
+from functools import wraps
+from pathlib import Path
+from uuid import uuid4
 
-admin_bp = Blueprint("admin", __name__, url_prefix="/admin",
-                     template_folder="templates")
+from flask import (
+    Blueprint,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
+from werkzeug.utils import secure_filename
 
-#UTILITY FUNCTION
-def generate_random_password(last_name, length=6):
-    random_str = ''.join(random.choices(
-        string.ascii_letters + string.digits, k=length))
-    return f"{last_name}{random_str}"
+from models import db, Account, PromissoryRequest, ActiveSettings, SystemLog
 
 
-def get_full_name(acc):
-    parts = [acc.first_name, acc.middle_name, acc.last_name, acc.suffix]
-    return " ".join([p for p in parts if p and p.strip()])
+student_bp = Blueprint(
+    "student",
+    __name__,
+    url_prefix="/student",
+    template_folder="templates",
+)
+
+ALLOWED_UPLOAD_EXTENSIONS = {"pdf", "jpg", "jpeg", "png"}
+DEFAULT_UPLOAD_SUBDIR = os.path.join("static", "uploads")
+VALID_SEMESTER_TYPES = {"Midterm", "Final", "Prelim", "Pre-Final"}
 
 
 def require_role(role=None):
     def wrapper(func):
         @wraps(func)
-        def decorated_function(*args, **kwargs):
-            if "user_id" not in session:
+        def decorated(*args, **kwargs):
+            user_id = session.get("user_id")
+            if not user_id:
                 flash("Please log in first.", "warning")
                 return redirect(url_for("login"))
-            if role and session.get("role") != role:
+
+            user = db.session.get(Account, user_id)
+            if not user:
+                session.clear()
+                flash("Account not found. Please log in again.", "danger")
+                return redirect(url_for("login"))
+
+            if user.status == "Inactive":
+                flash("Your account is inactive. Please contact the admin.", "danger")
+                return redirect(url_for("student.inactive_notice"))
+
+            if role and user.role != role:
                 flash("Access denied.", "danger")
                 return redirect(url_for("login"))
+
             return func(*args, **kwargs)
-        return decorated_function
+
+        return decorated
+
     return wrapper
 
 
+def get_current_student():
+    user_id = session.get("user_id")
+    if not user_id:
+        return None
+    return db.session.get(Account, user_id)
+
+
+def get_full_name(acc):
+    return " ".join(
+        part.strip()
+        for part in [
+            getattr(acc, "first_name", "") or "",
+            getattr(acc, "middle_name", "") or "",
+            getattr(acc, "last_name", "") or "",
+            getattr(acc, "suffix", "") or "",
+        ]
+        if part and part.strip()
+    ).strip()
+
+
 def log_action(user_name, action):
-    """Helper to log system actions."""
-    log = SystemLog(user_name=user_name, action=action,
-                    timestamp=datetime.utcnow())
-    db.session.add(log)
-    db.session.commit()
-
-
-def get_active_settings():
-    settings = ActiveSettings.query.first()
-    if not settings:
-        return "Not Set", "Not Set"
-    return settings.active_semester, settings.active_school_year
-
-#DASHBOARD
-@admin_bp.route("/dashboard")
-@require_role("Admin")
-def dashboard():
-    total_active = Account.query.filter_by(_status="Active").count()
-    total_inactive = Account.query.filter_by(_status="Inactive").count()
-    total_active_students = Account.query.filter_by(
-        _status="Active", _role="Student").count()
-    total_active_finance = Account.query.filter_by(
-        _status="Active", _role="Finance").count()
-    total_active_admin = Account.query.filter_by(
-        _status="Active", _role="Admin").count()
-
-    active_settings = ActiveSettings.query.first()
-    active_semester = active_settings.active_semester if active_settings else "Not Set"
-    active_school_year = active_settings.active_school_year if active_settings else "Not Set"
-    active_course = getattr(
-        active_settings, 'active_course', 'Not Set (using list model)')
-
-    data = {
-        "total_active_accounts": total_active,
-        "total_unactivated_accounts": total_inactive,
-        "total_active_students": total_active_students,
-        "total_active_finance": total_active_finance,
-        "total_active_admin": total_active_admin,
-        "admin_user": session.get("user_name", "Admin User"),
-        "active_semester": active_semester,
-        "active_school_year": active_school_year,
-        "active_course": active_course
-    }
-
-    log_action(session.get("user_name", "Admin User"), "Viewed dashboard")
-    return render_template("admin/dashboard.html", data=data)
-
-#ACCOUNTS 
-@admin_bp.route("/accounts")
-@require_role("Admin")
-def accounts():
-    search = request.args.get("search", "").strip()
-    role_filter = request.args.get("role", "").strip().capitalize()
-    status_filter = request.args.get("status", "").strip().capitalize()
-    page = request.args.get("page", 1, type=int)
-    per_page = 10
-
-    query = Account.query
-    if search:
-        query = query.filter(
-            (Account.first_name.ilike(f"%{search}%")) |
-            (Account.last_name.ilike(f"%{search}%")) |
-            (Account.email.ilike(f"%{search}%"))
+    """Safely log student actions without breaking the main request flow."""
+    try:
+        log = SystemLog(
+            user_name=user_name,
+            action=action,
+            timestamp=datetime.utcnow(),
         )
-    if role_filter:
-        query = query.filter(Account._role == role_filter)
-    if status_filter:
-        query = query.filter(Account._status == status_filter)
-
-    pagination = query.order_by(Account.id.desc()).paginate(
-        page=page, per_page=per_page, error_out=False)
-
-    active_settings = ActiveSettings.query.first()
-    active_semester = active_settings.active_semester if active_settings else "Not Set"
-    active_school_year = active_settings.active_school_year if active_settings else "Not Set"
-    active_course = getattr(active_settings, 'active_course', 'Not Set')
-
-    log_action(session.get("user_name", "Admin User"), f"Viewed accounts page")
-
-    return render_template(
-        "admin/accounts.html",
-        accounts=pagination.items,
-        pagination=pagination,
-        page=page,
-        total_pages=pagination.pages,
-        admin_user=session.get("user_name", "Admin User"),
-        search=search,
-        role_filter=role_filter,
-        status_filter=status_filter,
-        active_semester=active_semester,
-        active_school_year=active_school_year,
-        active_course=active_course
-    )
-
-#ADD NEW ACCOUNT
-@admin_bp.route("/add_new_account", methods=["GET", "POST"])
-@require_role("Admin")
-def add_new_account():
-    if request.method == "POST":
-        email = request.form.get("email", "").strip()
-        if Account.query.filter_by(email=email).first():
-            flash("Email already exists.", "danger")
-            active_courses = ActiveCourse.query.order_by(
-                ActiveCourse.name.asc()).all()
-            return render_template("admin/add_new_account.html", active_courses=active_courses)
-
-        last_name = request.form.get("lastName", "").strip()
-        password = generate_random_password(last_name)
-        role = request.form.get("role")
-
-        account = Account(
-            first_name=request.form.get("firstName", "").strip(),
-            middle_name=request.form.get("middleName", "").strip(),
-            last_name=last_name,
-            suffix=request.form.get("suffix", "").strip(),
-            email=email,
-            role=role.capitalize(),
-            status="Active"
-        )
-
-        if role == "Student":
-            account.year_level = request.form.get("year_level")
-            account.course = request.form.get("course")
-        else:
-            account.year_level = None
-            account.course = None
-
-        account.set_password(password)
-        db.session.add(account)
+        db.session.add(log)
         db.session.commit()
+    except Exception:
+        db.session.rollback()
 
-        log_action(session.get("user_name", "Admin User"),
-                   f"Added new account: {account.full_name} ({email})")
-        return redirect(url_for("admin.show_generated_password", pwd=password, email=email))
 
-    active_courses = ActiveCourse.query.order_by(ActiveCourse.name.asc()).all()
-    return render_template("admin/add_new_account.html", active_courses=active_courses)
+def is_allowed_file(filename):
+    if not filename or "." not in filename:
+        return False
+    ext = filename.rsplit(".", 1)[-1].lower()
+    return ext in ALLOWED_UPLOAD_EXTENSIONS
 
-#EDIT ACCOUNT 
-@admin_bp.route("/edit_account/<int:account_id>", methods=["GET", "POST"])
-@require_role("Admin")
-def edit_account(account_id):
-    account = Account.query.get_or_404(account_id)
-    new_password = None
 
-    if request.method == "POST":
-        if "reset_password" in request.form:
-            new_password = generate_random_password(account.last_name)
-            account.set_password(new_password)
-            db.session.commit()
-            flash(
-                f"Password reset successfully. New password: {new_password}", "success")
-            log_action(session.get("user_name", "Admin User"),
-                       f"Reset password for {account.full_name}")
-        else:
-            account.first_name = request.form.get("first_name").strip()
-            account.middle_name = request.form.get("middle_name").strip()
-            account.last_name = request.form.get("last_name").strip()
-            account.suffix = request.form.get("suffix").strip()
-            account.email = request.form.get("email").strip()
+def get_upload_root():
+    configured_path = current_app.config.get("UPLOAD_FOLDER", DEFAULT_UPLOAD_SUBDIR)
+    return Path(configured_path)
 
-            role_value = request.form.get("role", "").strip().capitalize()
-            status_value = request.form.get("status", "").strip().capitalize()
-            setattr(account, '_role', role_value)
-            setattr(account, '_status', status_value)
 
-            if role_value == "Student":
-                account.year_level = request.form.get("year_level")
-                account.course = request.form.get("course")
-            else:
-                account.year_level = None
-                account.course = None
+def ensure_student_upload_dir(student_id):
+    folder = get_upload_root() / f"student_{student_id}"
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder
 
-            db.session.commit()
-            flash("Account updated successfully", "success")
-            log_action(session.get("user_name", "Admin User"),
-                       f"Updated account: {account.full_name}")
 
-        return redirect(url_for("admin.edit_account", account_id=account.id))
+def save_file(file_obj, student_id, category="reason"):
+    if not file_obj or not getattr(file_obj, "filename", None):
+        return None
 
-    active_courses = ActiveCourse.query.order_by(ActiveCourse.name.asc()).all()
-    return render_template("admin/edit_account.html", account=account, new_password=new_password, active_courses=active_courses)
+    original_name = secure_filename(file_obj.filename)
+    if not original_name:
+        raise ValueError("Invalid file name.")
 
-#SYSTEM LOGS
-@admin_bp.route('/logs')
-@require_role("Admin")
-def logs():
-    user_filter = request.args.get('user', '').strip()
-    action_filter = request.args.get('action', '').strip()
-    page = request.args.get('page', 1, type=int)
-    per_page = 10
+    if not is_allowed_file(original_name):
+        raise ValueError("Unsupported file type.")
 
-    query = SystemLog.query
-    if user_filter:
-        query = query.filter(SystemLog.user_name.ilike(f'%{user_filter}%'))
-    if action_filter:
-        query = query.filter(SystemLog.action.ilike(f'%{action_filter}%'))
+    ext = original_name.rsplit(".", 1)[-1].lower()
+    unique_name = f"{category}_{uuid4().hex}.{ext}"
 
-    logs_pagination = query.order_by(SystemLog.timestamp.desc()).paginate(
-        page=page, per_page=per_page, error_out=False)
+    student_folder = ensure_student_upload_dir(student_id)
+    absolute_path = student_folder / unique_name
+    file_obj.save(absolute_path)
 
-    active_semester, active_school_year = get_active_settings()
+    relative_path = Path(student_folder.name) / unique_name
+    return str(Path("uploads") / relative_path).replace("\\", "/")
 
-    return render_template(
-        'admin/logs.html',
-        logs=logs_pagination,
-        active_semester=active_semester,
-        active_school_year=active_school_year,
-        user_filter=user_filter,
-        action_filter=action_filter,
-        total_pages=logs_pagination.pages
-    )
 
-#ACTIVE SEMESTER
-@admin_bp.route("/semester", methods=["GET", "POST"])
-@require_role("Admin")
-def semester():
-    active_settings = ActiveSettings.query.first()
-    if not active_settings:
-        active_settings = ActiveSettings()
-        db.session.add(active_settings)
-        db.session.commit()
-
-    if request.method == "POST":
-        old_semester = active_settings.active_semester
-        active_settings.active_semester = request.form.get(
-            "semester", "").strip()
-        db.session.commit()
-        flash("Active semester updated successfully!", "success")
-        log_action(session.get("user_name", "Admin User"),
-                   f"Changed semester from '{old_semester}' to '{active_settings.active_semester}'")
-        return redirect(url_for("admin.semester"))
-
-    return render_template("admin/semester.html", active_semester=active_settings.active_semester)
-
-#ACTIVE SCHOOL YEAR
-@admin_bp.route("/school_year", methods=["GET", "POST"])
-@require_role("Admin")
-def school_year():
-    active_settings = ActiveSettings.query.first()
-    if not active_settings:
-        active_settings = ActiveSettings()
-        db.session.add(active_settings)
-        db.session.commit()
-
-    if request.method == "POST":
-        old_year = active_settings.active_school_year
-        active_settings.active_school_year = request.form.get(
-            "school_year", "").strip()
-        db.session.commit()
-        flash("Active school year updated successfully!", "success")
-        log_action(session.get("user_name", "Admin User"),
-                   f"Changed school year from '{old_year}' to '{active_settings.active_school_year}'")
-        return redirect(url_for("admin.school_year"))
-
-    return render_template("admin/school_year.html", active_school_year=active_settings.active_school_year)
-
-#ACTIVE COURSE
-@admin_bp.route("/course", methods=["GET", "POST"])
-@require_role("Admin")
-def course():
-    if request.method == "POST":
-        course_name = request.form.get("course_name", "").strip()
-        if not course_name:
-            flash("Course name cannot be empty.", "danger")
-            return redirect(url_for("admin.course"))
-
-        existing_course = ActiveCourse.query.filter_by(
-            name=course_name).first()
-        if existing_course:
-            flash(f"Course '{course_name}' is already active.", "warning")
-            return redirect(url_for("admin.course"))
-
-        new_course = ActiveCourse(name=course_name)
-        db.session.add(new_course)
-        db.session.commit()
-        flash(
-            f"Course '{course_name}' added to active list successfully!", "success")
-        log_action(session.get("user_name", "Admin User"),
-                   f"Added new course '{course_name}'")
-        return redirect(url_for("admin.course"))
-
-    active_courses = ActiveCourse.query.order_by(ActiveCourse.name.asc()).all()
-    return render_template("admin/course.html", active_courses=active_courses)
-
-#REMOVE COURSE
-@admin_bp.route("/course/delete/<int:course_id>", methods=["POST"])
-@require_role("Admin")
-def delete_course(course_id):
-    course = ActiveCourse.query.get_or_404(course_id)
-    db.session.delete(course)
-    db.session.commit()
-    flash(f"Course '{course.name}' removed from active list.", "info")
-    log_action(session.get("user_name", "Admin User"),
-               f"Deleted course '{course.name}'")
-    return redirect(url_for("admin.course"))
-
-#IMPORT ACCOUNTS
-@admin_bp.route("/upload_accounts", methods=["POST"])
-@require_role("Admin")
-def upload_accounts():
-    file = request.files.get("file")
-    if not file or file.filename == "":
-        flash("No file selected.", "warning")
-        return redirect(url_for("admin.accounts"))
+def delete_uploaded_file(relative_path):
+    if not relative_path:
+        return
 
     try:
-        if file.filename.endswith(".csv"):
-            df = pd.read_csv(file)
-        elif file.filename.endswith((".xlsx", ".xls")):
-            df = pd.read_excel(file)
+        static_path = Path("static")
+        normalized = Path(relative_path)
+
+        if normalized.parts and normalized.parts[0] == "uploads":
+            absolute_path = static_path / normalized
         else:
-            flash("Unsupported file type. Please use CSV or Excel.", "danger")
-            return redirect(url_for("admin.accounts"))
+            absolute_path = normalized
 
-        df = df.fillna("")
-        uploaded_rows = []
+        if absolute_path.exists() and absolute_path.is_file():
+            absolute_path.unlink()
+    except Exception:
+        pass
 
-        for _, row in df.iterrows():
-            email = str(row.get("email")).strip()
-            if not email or Account.query.filter_by(email=email).first():
-                continue
 
-            first_name = str(row.get("first_name")).strip()
-            middle_name = str(row.get("middle_name")).strip()
-            last_name = str(row.get("last_name")).strip()
-            suffix = str(row.get("suffix")).strip()
-            role = str(row.get("role")).strip().capitalize() or "Student"
-            status = str(row.get("status")).strip().capitalize() or "Inactive"
-            password = generate_random_password(last_name)
+def get_active_term():
+    active_settings = ActiveSettings.query.first()
+    if active_settings:
+        return active_settings.active_semester, active_settings.active_school_year
+    return "Not Set", "Not Set"
 
-            acc = Account(
-                first_name=first_name,
-                middle_name=middle_name,
-                last_name=last_name,
-                suffix=suffix,
-                email=email,
-                _role=role,
-                _status=status
-            )
-            if acc.role == "Student":
-                acc.year_level = str(row.get("year_level")).strip()
-                acc.course = str(row.get("course")).strip()
 
-            acc.set_password(password)
-            db.session.add(acc)
-            uploaded_rows.append(acc.full_name)
+def normalize_form_value(name):
+    return (request.form.get(name) or "").strip()
 
-        db.session.commit()
-        if uploaded_rows:
-            flash(
-                f"Successfully uploaded {len(uploaded_rows)} accounts.", "success")
-            log_action(session.get("user_name", "Admin User"),
-                       f"Uploaded accounts: {', '.join(uploaded_rows)}")
-        else:
-            flash("No new accounts were added (all emails exist or invalid).", "info")
 
-        return redirect(url_for("admin.accounts"))
+def is_unique_email(email, current_user_id):
+    existing = (
+        Account.query.filter(Account.email == email, Account.id != current_user_id)
+        .first()
+    )
+    return existing is None
 
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Upload failed: {str(e)}", "danger")
-        return redirect(url_for("admin.accounts"))
 
-#DOWNLOAD IMPORT ACCOUNT TEMPLATE
-@admin_bp.route("/download_template")
-@require_role("Admin")
-def download_template():
-    headers = ["first_name", "middle_name", "last_name", "suffix",
-               "email", "role", "status", "year_level", "course"]
-    df = pd.DataFrame(columns=headers)
-    out = io.StringIO()
-    df.to_csv(out, index=False)
-    out.seek(0)
-    log_action(session.get("user_name", "Admin User"),
-               "Downloaded account upload template")
-    return send_file(
-        io.BytesIO(out.getvalue().encode()),
-        mimetype="text/csv",
-        as_attachment=True,
-        download_name="account_upload_template.csv"
+def is_unique_username(username, current_user_id):
+    existing = (
+        Account.query.filter(Account.username == username, Account.id != current_user_id)
+        .first()
+    )
+    return existing is None
+
+
+@student_bp.route("/inactive")
+def inactive_notice():
+    return render_template("student/inactive_notice.html")
+
+
+@student_bp.route("/dashboard")
+@require_role("Student")
+def dashboard():
+    student = get_current_student()
+    if not student:
+        session.clear()
+        flash("Session expired. Please log in again.", "warning")
+        return redirect(url_for("login"))
+
+    total_promissory = PromissoryRequest.query.filter_by(student_id=student.id).count()
+    active_promissory = PromissoryRequest.query.filter_by(
+        student_id=student.id,
+        status="Pending",
+    ).count()
+
+    recent_requests = (
+        PromissoryRequest.query.filter(
+            PromissoryRequest.student_id == student.id,
+            PromissoryRequest.status.in_(["Approved", "Rejected"]),
+        )
+        .order_by(PromissoryRequest.requested_at.desc())
+        .limit(5)
+        .all()
     )
 
-#EXPORT AS CSV
-@admin_bp.route("/export_csv")
-@require_role("Admin")
-def export_csv():
-    accounts = Account.query.all()
-    data = [{
-        "ID": a.id,
-        "First_Name": a.first_name,
-        "Middle_Name": a.middle_name,
-        "Last_Name": a.last_name,
-        "Suffix": a.suffix,
-        "Email": a.email,
-        "Role": a.role,
-        "Status": a.status,
-        "Year_Level": getattr(a, "year_level", ""),
-        "Course": getattr(a, "course", ""),
-        "Password": getattr(a, 'plain_password', 'N/A')
-    } for a in accounts]
+    rejected_requests = PromissoryRequest.query.filter_by(
+        student_id=student.id,
+        status="Rejected",
+    ).all()
 
-    df = pd.DataFrame(data)
-    output = io.StringIO()
-    df.to_csv(output, index=False)
-    output.seek(0)
+    incomplete_requests = PromissoryRequest.query.filter(
+        PromissoryRequest.student_id == student.id,
+        (PromissoryRequest.reason_doc.is_(None)) | (PromissoryRequest.valid_id.is_(None)),
+    ).all()
 
-    log_action(session.get("user_name", "Admin User"),
-               "Exported all accounts to CSV")
-    return send_file(io.BytesIO(output.getvalue().encode()),
-                     mimetype="text/csv",
-                     as_attachment=True,
-                     download_name="accounts.csv")
+    data = {
+        "full_name": get_full_name(student),
+        "role": student.role,
+        "total_promissory": total_promissory,
+        "active_promissory": active_promissory,
+        "current_time": datetime.now().strftime("%B %d, %Y %I:%M %p"),
+    }
 
-#EXPORT AS EXCEL
-@admin_bp.route("/export_excel")
-@require_role("Admin")
-def export_excel():
-    accounts = Account.query.all()
-    data = [{
-        "ID": a.id,
-        "First_Name": a.first_name,
-        "Middle_Name": a.middle_name,
-        "Last_Name": a.last_name,
-        "Suffix": a.suffix,
-        "Email": a.email,
-        "Role": a.role,
-        "Status": a.status,
-        "Year_Level": getattr(a, "year_level", ""),
-        "Course": getattr(a, "course", ""),
-        "Password": getattr(a, 'plain_password', 'N/A')
-    } for a in accounts]
+    log_action(student.email, "Viewed dashboard")
 
-    df = pd.DataFrame(data)
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
-        df.to_excel(writer, index=False, sheet_name="Accounts")
+    return render_template(
+        "student/dashboard.html",
+        student=student,
+        data=data,
+        recent_requests=recent_requests,
+        rejected_requests=rejected_requests,
+        incomplete_requests=incomplete_requests,
+    )
 
-    log_action(session.get("user_name", "Admin User"),
-               "Exported all accounts to Excel")
-    return send_file(io.BytesIO(output.getvalue()),
-                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                     as_attachment=True,
-                     download_name="accounts.xlsx")
 
-#LOGOUT
-@admin_bp.route("/logout")
+@student_bp.route("/request", methods=["GET", "POST"])
+@require_role("Student")
+def request_promissory():
+    student = get_current_student()
+    if not student:
+        session.clear()
+        flash("Session expired. Please log in again.", "warning")
+        return redirect(url_for("login"))
+
+    semester, school_year = get_active_term()
+
+    if request.method == "POST":
+        reason_text = normalize_form_value("reason_text")
+        semester_type = normalize_form_value("semester_type")
+        reason_file = request.files.get("reason_doc")
+        valid_id_file = request.files.get("valid_id")
+
+        if semester_type not in VALID_SEMESTER_TYPES:
+            flash("Invalid semester type selected.", "danger")
+            return redirect(url_for("student.request_promissory"))
+
+        existing_request = (
+            PromissoryRequest.query.filter_by(
+                student_id=student.id,
+                semester_type=semester_type,
+                semester=semester,
+                school_year=school_year,
+            )
+            .order_by(PromissoryRequest.requested_at.desc())
+            .first()
+        )
+
+        if existing_request:
+            if existing_request.status == "Approved":
+                flash(
+                    f"Your {semester_type} request for {semester} ({school_year}) is already approved.",
+                    "info",
+                )
+                return redirect(url_for("student.request_promissory"))
+
+            if existing_request.status == "Pending":
+                flash(
+                    f"You already have a pending {semester_type} request for {semester} ({school_year}).",
+                    "danger",
+                )
+                return redirect(url_for("student.request_promissory"))
+
+        if not reason_text and not (reason_file and reason_file.filename):
+            flash("Please provide a reason or upload a document.", "danger")
+            return redirect(url_for("student.request_promissory"))
+
+        saved_reason_doc = None
+        saved_valid_id = None
+
+        try:
+            if reason_file and reason_file.filename:
+                saved_reason_doc = save_file(reason_file, student.id, "reason")
+
+            if valid_id_file and valid_id_file.filename:
+                saved_valid_id = save_file(valid_id_file, student.id, "valid_id")
+
+            new_request = PromissoryRequest(
+                student_id=student.id,
+                year_level=student.year_level,
+                course=student.course,
+                email=student.email,
+                reason_text=reason_text or None,
+                reason_doc=saved_reason_doc,
+                valid_id=saved_valid_id,
+                semester_type=semester_type,
+                semester=semester,
+                school_year=school_year,
+                status="Pending",
+                requested_at=datetime.utcnow(),
+            )
+
+            db.session.add(new_request)
+            db.session.commit()
+
+            log_action(
+                student.email,
+                f"Submitted promissory request for {semester_type} {semester} {school_year}",
+            )
+            flash("Your promissory request has been submitted.", "success")
+            return redirect(url_for("student.request_promissory"))
+
+        except ValueError as exc:
+            delete_uploaded_file(saved_reason_doc)
+            delete_uploaded_file(saved_valid_id)
+            db.session.rollback()
+            flash(str(exc), "danger")
+            return redirect(url_for("student.request_promissory"))
+
+        except Exception:
+            delete_uploaded_file(saved_reason_doc)
+            delete_uploaded_file(saved_valid_id)
+            db.session.rollback()
+            flash("An error occurred while submitting your request.", "danger")
+            return redirect(url_for("student.request_promissory"))
+
+    return render_template(
+        "student/request.html",
+        student=student,
+        active_semester=semester,
+        active_school_year=school_year,
+    )
+
+
+@student_bp.route("/history")
+@require_role("Student")
+def history():
+    student = get_current_student()
+    if not student:
+        session.clear()
+        flash("Session expired. Please log in again.", "warning")
+        return redirect(url_for("login"))
+
+    query = PromissoryRequest.query.filter_by(student_id=student.id)
+
+    filterable_fields = ["status", "semester", "semester_type", "school_year"]
+    for key in filterable_fields:
+        value = normalize_form_value(key) if request.method == "POST" else (request.args.get(key, "").strip())
+        if value:
+            column = getattr(PromissoryRequest, key, None)
+            if column is not None:
+                query = query.filter(column == value)
+
+    requests_list = query.order_by(PromissoryRequest.requested_at.desc()).all()
+
+    school_years = [
+        sy[0]
+        for sy in db.session.query(PromissoryRequest.school_year)
+        .filter_by(student_id=student.id)
+        .distinct()
+        .order_by(PromissoryRequest.school_year.desc())
+        .all()
+    ]
+
+    log_action(student.email, "Viewed promissory request history")
+
+    return render_template(
+        "student/history.html",
+        student=student,
+        requests=requests_list,
+        school_years=school_years,
+    )
+
+
+@student_bp.route("/delete_request/<int:request_id>", methods=["POST"])
+@require_role("Student")
+def delete_request(request_id):
+    student = get_current_student()
+    if not student:
+        session.clear()
+        flash("Session expired. Please log in again.", "warning")
+        return redirect(url_for("login"))
+
+    req = PromissoryRequest.query.filter_by(
+        id=request_id,
+        student_id=student.id,
+    ).first()
+
+    if not req:
+        flash("Request not found.", "danger")
+        return redirect(url_for("student.history"))
+
+    if req.status != "Pending":
+        flash("Only pending requests can be deleted.", "warning")
+        return redirect(url_for("student.history"))
+
+    reason_doc_path = req.reason_doc
+    valid_id_path = req.valid_id
+
+    try:
+        db.session.delete(req)
+        db.session.commit()
+
+        delete_uploaded_file(reason_doc_path)
+        delete_uploaded_file(valid_id_path)
+
+        flash("Pending request has been deleted.", "success")
+        log_action(student.email, f"Deleted pending promissory request ID {request_id}")
+    except Exception:
+        db.session.rollback()
+        flash("An error occurred while deleting the request.", "danger")
+
+    return redirect(url_for("student.history"))
+
+
+@student_bp.route("/setup", methods=["GET", "POST"])
+@require_role("Student")
+def setup():
+    student = get_current_student()
+    if not student:
+        session.clear()
+        flash("Session expired. Please log in again.", "warning")
+        return redirect(url_for("login"))
+
+    db.session.refresh(student)
+
+    if request.method == "POST":
+        username = normalize_form_value("username")
+        first_name = normalize_form_value("first_name")
+        middle_name = normalize_form_value("middle_name")
+        last_name = normalize_form_value("last_name")
+        email = normalize_form_value("email").lower()
+        phone = normalize_form_value("phone")
+        password = request.form.get("password", "").strip()
+
+        if username and not is_unique_username(username, student.id):
+            flash("Username is already taken.", "danger")
+            return redirect(url_for("student.setup"))
+
+        if email and not is_unique_email(email, student.id):
+            flash("Email is already in use.", "danger")
+            return redirect(url_for("student.setup"))
+
+        try:
+            if username:
+                student.username = username
+            if first_name:
+                student.first_name = first_name
+            if middle_name:
+                student.middle_name = middle_name
+            if last_name:
+                student.last_name = last_name
+            if email:
+                student.email = email
+            if phone:
+                student.phone = phone
+            if password:
+                student.set_password(password)
+
+            db.session.commit()
+
+            session["user_name"] = get_full_name(student) or student.email
+
+            flash("Profile updated successfully!", "success")
+            log_action(student.email, "Updated profile information")
+            return redirect(url_for("student.setup"))
+
+        except Exception:
+            db.session.rollback()
+            flash("An error occurred while updating your profile.", "danger")
+            return redirect(url_for("student.setup"))
+
+    return render_template(
+        "student/setup.html",
+        student=student,
+        student_user=session.get("user_name", "Student User"),
+    )
+
+
+@student_bp.route("/view_request/<int:request_id>")
+@require_role("Student")
+def view_request(request_id):
+    student = get_current_student()
+    if not student:
+        session.clear()
+        flash("Session expired. Please log in again.", "warning")
+        return redirect(url_for("login"))
+
+    req = PromissoryRequest.query.filter_by(
+        id=request_id,
+        student_id=student.id,
+    ).first()
+
+    if not req:
+        flash("Request not found.", "danger")
+        return redirect(url_for("student.history"))
+
+    log_action(student.email, f"Viewed promissory request ID {request_id}")
+    return render_template(
+        "student/view_request.html",
+        student=student,
+        request=req,
+    )
+
+
+@student_bp.route("/logout", methods=["POST"])
 def logout():
-    user_name = session.get("user_name", "Admin User")
+    user_name = session.get("user_name", "Student User")
     session.clear()
     flash("You have been logged out.", "danger")
     log_action(user_name, "Logged out")
