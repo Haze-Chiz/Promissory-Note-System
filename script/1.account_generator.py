@@ -16,8 +16,8 @@ courses = [
     "Bachelor of Science in Criminology",
     "Bachelor of Science in Information Technology",
     "Bachelor of Science in Computer Science",
-    "Bachelor or Arts in Communication",
-    "Bachelor or Arts in Psychology",
+    "Bachelor of Arts in Communication",
+    "Bachelor of Arts in Psychology",
     "Bachelor of Science in Civil Engineering"
 ]
 
@@ -34,12 +34,33 @@ promissory_reasons = [
     "Awaiting scholarship disbursement.",
     "Unexpected household expenses.",
     "Need extension to settle tuition fees.",
-    "Still processing financial documents."
+    "Still processing financial documents.",
+
+    "Delay in salary of parent or guardian.",
+    "Recent family hospitalization caused financial strain.",
+    "Tuition payment will be settled after next salary release.",
+    "Family currently prioritizing urgent household expenses.",
+    "Waiting for remittance from relatives abroad.",
+    "Delay in release of educational loan funds.",
+    "Pending approval of financial assistance application.",
+    "School fees will be paid after scholarship confirmation.",
+    "Parent's business experienced temporary financial loss.",
+    "Unexpected repair expenses at home affected finances.",
+    "Funds are temporarily unavailable due to emergency spending.",
+    "Awaiting release of government educational assistance.",
+    "Parent's salary deduction affected available funds this month.",
+    "Family encountered sudden transportation or relocation expenses.",
+    "Recent calamity or disaster affected family finances.",
+    "Delayed bank transaction or financial processing.",
+    "Tuition payment will be settled once pending funds are received.",
+    "Temporary financial difficulty due to family obligations.",
+    "Unexpected increase in household expenses this month.",
+    "Financial support from sponsor is still being processed."
 ]
 
 semester_names = ["First Semester", "Second Semester", "Mid Year"]
-semester_types_list = ["Prelims", "Midterms", "Finals"]
-school_years_list = ["2024-2025", "2025-2026"]
+semester_types_list = ["Prelim", "Midterm", "Final"]
+school_years_list = ["2023-2024", "2024-2025", "2025-2026"]
 
 password_default = "password123"
 
@@ -140,7 +161,7 @@ with app.app_context():
     used_names = set()
     students = []
     for course_name in courses:
-        total_students = random.randint(80, 120)
+        total_students = random.randint(50, 80)
         year_counts = [int(total_students * w) for w in year_weights]
         while sum(year_counts) < total_students:
             year_counts[0] += 1

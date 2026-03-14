@@ -7,3 +7,4 @@ Flask-SQLAlchemy
 pandas
 XlsxWriter
 faker
+openpyxl

@@ -1,12 +1,18 @@
 import os
 from datetime import timedelta, datetime
 from functools import wraps
-
 from flask import Flask, redirect, url_for, render_template, request, flash, session
 from models import db, Account, SystemLog
-from admin_routes import admin_bp
-from finance_routes import finance_bp
-from student_routes import student_bp
+from routes.admin_routes import admin_bp
+from routes.finance_routes import finance_bp
+from routes.student_routes import student_bp
+
+
+def env_bool(name: str, default: bool = False) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
 class Config:
@@ -23,10 +29,12 @@ class Config:
 
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
-    SESSION_COOKIE_SECURE = os.environ.get("FLASK_ENV", "").lower() == "production"
+    SESSION_COOKIE_SECURE = env_bool("FLASK_ENV", False) and os.environ.get("FLASK_ENV", "").lower() == "production"
 
     PREFERRED_URL_SCHEME = "https"
-    TEMPLATES_AUTO_RELOAD = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+
+    # Properly support FLASK_DEBUG=true / 1 / yes / on
+    TEMPLATES_AUTO_RELOAD = env_bool("FLASK_DEBUG", True)
 
 
 def create_app():
@@ -35,7 +43,11 @@ def create_app():
 
     db.init_app(app)
 
-    # Blueprints already contain their own url_prefix in the route modules.
+    # Force template reload in debug/dev mode
+    if env_bool("FLASK_DEBUG", True):
+        app.config["TEMPLATES_AUTO_RELOAD"] = True
+        app.jinja_env.auto_reload = True
+
     app.register_blueprint(admin_bp)
     app.register_blueprint(finance_bp)
     app.register_blueprint(student_bp)
@@ -58,7 +70,6 @@ def create_app():
         return decorator
 
     def log_action(user_name: str, action: str) -> None:
-        """Safely record a system log entry."""
         try:
             log = SystemLog(
                 user_name=user_name or "Unknown",
@@ -80,10 +91,6 @@ def create_app():
 
     @app.before_request
     def protect_admin_routes():
-        """
-        Extra safety layer for /admin routes.
-        Allows only authenticated Admin users past this point.
-        """
         if not request.path.startswith("/admin"):
             return None
 
@@ -177,11 +184,14 @@ app = create_app()
 
 
 if __name__ == "__main__":
+    debug_mode = env_bool("FLASK_DEBUG", True)
+
     with app.app_context():
         db.create_all()
 
     app.run(
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 50001)),
-        debug=os.environ.get("FLASK_DEBUG", "true").lower() == "true",
+        debug=debug_mode,
+        use_reloader=debug_mode,
     )

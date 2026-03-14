@@ -4,7 +4,6 @@ import calendar
 import csv
 import io
 import json
-
 import pandas as pd
 from flask import (
     Blueprint,
@@ -20,7 +19,6 @@ from flask import (
 )
 from sqlalchemy import func, literal
 from sqlalchemy.orm import joinedload
-
 from models import db, Account, PromissoryRequest, ActiveSettings, ActiveCourse
 from utils.auth import require_role, require_active_user
 from utils.logging import log_action
@@ -765,13 +763,22 @@ def students_promissory():
     all_school_years = filter_lists["all_school_years"]
 
     search = normalize_arg("search")
-    selected_semester = normalize_optional_filter(request.args.get("semester"))
-    selected_semester_type = normalize_optional_filter(request.args.get("semester_type"))
-    selected_course = normalize_optional_filter(request.args.get("course"))
-    selected_year_level = normalize_optional_filter(request.args.get("year_level"))
-    selected_school_year = normalize_optional_filter(request.args.get("school_year"))
 
-    if selected_semester is None and "page" not in request.args:
+    raw_semester = request.args.get("semester")
+    raw_semester_type = request.args.get("semester_type")
+    raw_course = request.args.get("course")
+    raw_year_level = request.args.get("year_level")
+    raw_school_year = request.args.get("school_year")
+
+    selected_semester = normalize_optional_filter(raw_semester)
+    selected_semester_type = normalize_optional_filter(raw_semester_type)
+    selected_course = normalize_optional_filter(raw_course)
+    selected_year_level = normalize_optional_filter(raw_year_level)
+    selected_school_year = normalize_optional_filter(raw_school_year)
+
+    # Apply defaults only when the filter is not present at all.
+    # This allows explicit "All" selections to stay as None.
+    if "semester" not in request.args and "page" not in request.args:
         selected_semester = active_semester
 
     if selected_school_year is None and "page" not in request.args:

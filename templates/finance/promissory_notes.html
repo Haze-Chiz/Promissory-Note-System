@@ -32,6 +32,29 @@
       }
     };
   </script>
+  <style>
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f4f7fc;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(#3a4bb3, #1e2a78);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #16205d;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #1e2a78 #f4f7fc;
+    }
+  </style>
 </head>
 
 <body class="bg-bg font-sans leading-6 text-textmain antialiased">
@@ -176,7 +199,7 @@
           name="semester_type"
           class="min-w-0 w-full rounded-xl border border-borderline bg-slate-50 px-[14px] py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
           <option value="" {% if not selected_semester_type %}selected{% endif %}>All Examination Types</option>
-          {% for et in ['Prelims', 'Midterms', 'Finals'] %}
+          {% for et in ['Prelim', 'Midterm', 'Final'] %}
           <option value="{{ et }}" {% if selected_semester_type == et %}selected{% endif %}>{{ et }}</option>
           {% endfor %}
         </select>

@@ -30,8 +30,7 @@
       }
     };
   </script>
-    
-  <!-- CUSTOM SCROLLBAR -->
+
   <style>
     ::-webkit-scrollbar {
       width: 10px;
@@ -60,23 +59,53 @@
 <body class="min-h-screen bg-bg font-sans leading-6 text-textmain antialiased">
   {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-  <div class="fixed left-4 right-4 top-4 z-[1200] flex flex-col gap-2.5 md:left-auto md:right-6 md:w-full md:max-w-md">
-    {% for category, message in messages %}
-    <div class="rounded-xl border-l-[5px] bg-white px-4 py-[14px] text-sm font-semibold shadow-flash
-      {% if category == 'success' %}
-        border-l-green-500 bg-green-50 text-green-800
-      {% elif category == 'danger' %}
-        border-l-red-500 bg-red-50 text-red-800
-      {% elif category == 'warning' %}
-        border-l-amber-500 bg-amber-50 text-amber-800
-      {% elif category == 'info' %}
-        border-l-cyan-500 bg-cyan-50 text-cyan-800
-      {% else %}
-        border-l-slate-300 bg-white text-slate-700
-      {% endif %}">
-      {{ message }}
+  <div
+    id="flashModal"
+    class="fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/50 px-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="flashModalTitle">
+    <div class="w-full max-w-md rounded-2xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.22)]">
+      <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+        <h3 id="flashModalTitle" class="text-lg font-bold text-primary">Password Update Status</h3>
+        <button
+          type="button"
+          id="closeFlashModal"
+          class="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
+          aria-label="Close popup">
+          ✕
+        </button>
+      </div>
+
+      <div class="space-y-3 px-5 py-5">
+        {% for category, message in messages %}
+        <div
+          class="rounded-xl border-l-[5px] px-4 py-3 text-sm font-semibold shadow-sm
+          {% if category == 'success' %}
+            border-l-green-500 bg-green-50 text-green-800
+          {% elif category == 'danger' %}
+            border-l-red-500 bg-red-50 text-red-800
+          {% elif category == 'warning' %}
+            border-l-amber-500 bg-amber-50 text-amber-800
+          {% elif category == 'info' %}
+            border-l-cyan-500 bg-cyan-50 text-cyan-800
+          {% else %}
+            border-l-slate-300 bg-slate-50 text-slate-700
+          {% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="flex justify-end border-t border-slate-200 px-5 py-4">
+        <button
+          type="button"
+          id="okFlashModal"
+          class="rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-primary-light focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300">
+          OK
+        </button>
+      </div>
     </div>
-    {% endfor %}
   </div>
   {% endif %}
   {% endwith %}
@@ -97,7 +126,7 @@
     <aside
       id="sidebar"
       aria-label="Student navigation"
-      class="fixed left-0 top-0 z-[1000] flex min-h-screen w-[240px] flex-col bg-[linear-gradient(160deg,#1e2a78,#3a4bb3)] px-0 pb-4 pt-5 text-white shadow-sidebar transition-transform duration-300 ease-in-out max-[980px]:w-[260px] max-[980px]:-translate-x-full motion-reduce:transition-none">
+      class="fixed left-0 top-0 z-[1000] flex min-h-screen w-[240px] flex-col bg-gradient-to-br from-[#1e2a78] to-[#3a4bb3] px-0 pb-4 pt-5 text-white shadow-sidebar transition-transform duration-300 ease-in-out max-[980px]:w-[260px] max-[980px]:-translate-x-full motion-reduce:transition-none">
       <div class="mb-3 border-b border-white/15 px-[18px] pb-5">
         <h1 class="break-words text-[17px] font-semibold leading-[1.4]">Student</h1>
         <span class="mt-1 block text-[13px] font-normal opacity-90">Promissory Notes System</span>
@@ -238,6 +267,10 @@
     const passwordInput = document.getElementById("password");
     const togglePasswordBtn = document.getElementById("togglePasswordBtn");
 
+    const flashModal = document.getElementById("flashModal");
+    const closeFlashModal = document.getElementById("closeFlashModal");
+    const okFlashModal = document.getElementById("okFlashModal");
+
     function openSidebar() {
       sidebar.classList.remove("max-[980px]:-translate-x-full");
       sidebar.classList.add("translate-x-0");
@@ -270,12 +303,38 @@
       togglePasswordBtn.textContent = isPassword ? "Hide" : "Show";
     }
 
+    function hideFlashModal() {
+      if (flashModal) {
+        flashModal.classList.add("hidden");
+      }
+    }
+
     sidebarToggle.addEventListener("click", toggleSidebar);
     sidebarOverlay.addEventListener("click", closeSidebar);
     togglePasswordBtn.addEventListener("click", togglePassword);
 
+    if (closeFlashModal) {
+      closeFlashModal.addEventListener("click", hideFlashModal);
+    }
+
+    if (okFlashModal) {
+      okFlashModal.addEventListener("click", hideFlashModal);
+    }
+
+    if (flashModal) {
+      flashModal.addEventListener("click", function (event) {
+        if (event.target === flashModal) {
+          hideFlashModal();
+        }
+      });
+    }
+
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") {
+        if (flashModal && !flashModal.classList.contains("hidden")) {
+          hideFlashModal();
+          return;
+        }
         closeSidebar();
       }
     });

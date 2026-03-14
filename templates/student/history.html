@@ -25,17 +25,31 @@
             soft: "0 10px 25px rgba(0, 0, 0, 0.08)",
             sidebar: "2px 0 12px rgba(0, 0, 0, 0.12)",
             card: "0 4px 15px rgba(0, 0, 0, 0.06)",
-            flash: "0 4px 12px rgba(0, 0, 0, 0.06)"
+            flash: "0 14px 35px rgba(15, 23, 42, 0.12)"
+          },
+          keyframes: {
+            slideInToast: {
+              "0%": { opacity: "0", transform: "translateX(40px) translateY(-8px)" },
+              "100%": { opacity: "1", transform: "translateX(0) translateY(0)" }
+            },
+            shrinkBar: {
+              "0%": { width: "100%" },
+              "100%": { width: "0%" }
+            }
+          },
+          animation: {
+            slideInToast: "slideInToast 0.35s ease-out forwards",
+            shrinkBar: "shrinkBar 5s linear forwards"
           }
         }
       }
     };
   </script>
-    
-  <!-- CUSTOM SCROLLBAR -->
+
   <style>
     ::-webkit-scrollbar {
       width: 10px;
+      height: 10px;
     }
 
     ::-webkit-scrollbar-track {
@@ -61,21 +75,133 @@
 <body class="min-h-screen bg-bg font-sans leading-6 text-textmain antialiased">
   {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-  <div class="fixed left-4 right-4 top-4 z-[1200] flex flex-col gap-2.5 md:left-auto md:right-6 md:w-full md:max-w-md">
+  <div id="flashContainer"
+    class="fixed right-4 top-4 z-[1400] flex w-[calc(100%-2rem)] max-w-md flex-col gap-3 md:right-6 md:top-6 md:w-full">
     {% for category, message in messages %}
-    <div class="rounded-xl border-l-[5px] bg-white px-4 py-[14px] text-sm font-semibold shadow-flash
-      {% if category == 'success' %}
-        border-l-green-500 bg-green-50 text-green-800
-      {% elif category == 'danger' %}
-        border-l-red-500 bg-red-50 text-red-800
-      {% elif category == 'warning' %}
-        border-l-amber-500 bg-amber-50 text-amber-800
-      {% elif category == 'info' %}
-        border-l-cyan-500 bg-cyan-50 text-cyan-800
-      {% else %}
-        border-l-slate-300 bg-white text-slate-700
-      {% endif %}">
-      {{ message }}
+    <div
+      class="flash-toast animate-slideInToast overflow-hidden rounded-2xl border bg-white shadow-flash"
+      data-autohide="true">
+      <div class="flex items-start gap-3 p-4
+        {% if category == 'success' %}
+          border-l-[6px] border-emerald-500 bg-emerald-50/80
+        {% elif category == 'danger' %}
+          border-l-[6px] border-red-500 bg-red-50/80
+        {% elif category == 'warning' %}
+          border-l-[6px] border-amber-500 bg-amber-50/80
+        {% elif category == 'info' %}
+          border-l-[6px] border-sky-500 bg-sky-50/80
+        {% else %}
+          border-l-[6px] border-slate-300 bg-white
+        {% endif %}
+      ">
+        <div class="mt-0.5 shrink-0">
+          {% if category == 'success' %}
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          {% elif category == 'danger' %}
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-7.5 13A2 2 0 004.5 20h15a2 2 0 001.71-3.14l-7.5-13a2 2 0 00-3.42 0z" />
+            </svg>
+          </div>
+          {% elif category == 'warning' %}
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M10.29 3.86l-7.5 13A2 2 0 004.5 20h15a2 2 0 001.71-3.14l-7.5-13a2 2 0 00-3.42 0z" />
+            </svg>
+          </div>
+          {% elif category == 'info' %}
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sky-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+            </svg>
+          </div>
+          {% else %}
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+            </svg>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="min-w-0 flex-1">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="text-sm font-bold
+                {% if category == 'success' %}
+                  text-emerald-800
+                {% elif category == 'danger' %}
+                  text-red-800
+                {% elif category == 'warning' %}
+                  text-amber-800
+                {% elif category == 'info' %}
+                  text-sky-800
+                {% else %}
+                  text-slate-800
+                {% endif %}
+              ">
+                {% if category == 'success' %}
+                  Success
+                {% elif category == 'danger' %}
+                  Error
+                {% elif category == 'warning' %}
+                  Warning
+                {% elif category == 'info' %}
+                  Information
+                {% else %}
+                  Notice
+                {% endif %}
+              </p>
+
+              <p class="mt-1 break-words pr-2 text-sm font-medium leading-6
+                {% if category == 'success' %}
+                  text-emerald-700
+                {% elif category == 'danger' %}
+                  text-red-700
+                {% elif category == 'warning' %}
+                  text-amber-700
+                {% elif category == 'info' %}
+                  text-sky-700
+                {% else %}
+                  text-slate-700
+                {% endif %}
+              ">
+                {{ message }}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="flash-close shrink-0 rounded-lg p-1.5 text-slate-400 transition hover:bg-white/70 hover:text-slate-700 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
+              aria-label="Close notification">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="h-1 w-full bg-black/5">
+        <div
+          class="flash-progress h-full animate-shrinkBar
+          {% if category == 'success' %}
+            bg-emerald-500
+          {% elif category == 'danger' %}
+            bg-red-500
+          {% elif category == 'warning' %}
+            bg-amber-500
+          {% elif category == 'info' %}
+            bg-sky-500
+          {% else %}
+            bg-slate-400
+          {% endif %}
+        "></div>
+      </div>
     </div>
     {% endfor %}
   </div>
@@ -130,7 +256,7 @@
       <div class="mt-3 border-t border-white/15 px-[10px] pt-3">
         <form action="{{ url_for('student.logout') }}" method="post" class="w-full">
           <button
-            class="w-full cursor-pointer rounded-[10px] border-0 bg-white/10 px-[14px] py-3 font-bold text-white transition duration-200 ease-in-out hover:-translate-y-px hover:bg-white/15 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none"
+            class="logout-link w-full cursor-pointer rounded-[10px] border-0 bg-white/10 px-[14px] py-3 font-bold text-white transition duration-200 ease-in-out hover:-translate-y-px hover:bg-white/15 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none"
             type="submit">
             Logout
           </button>
@@ -139,8 +265,8 @@
     </aside>
 
     <main class="ml-[240px] min-h-screen flex-1 p-6 transition-all duration-300 ease-in-out max-[980px]:ml-0 max-[980px]:px-4 max-[980px]:pb-5 max-[980px]:pt-[76px] motion-reduce:transition-none">
-      <header class="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-surface px-5 py-[18px] shadow-soft">
-        <h2 class="text-[28px] font-bold text-primary max-[980px]:text-2xl">My Request History</h2>
+      <header class="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-surface px-5 py-[18px] shadow-soft max-sm:px-4 max-sm:py-4">
+        <h2 class="text-[28px] font-bold text-primary max-[980px]:text-2xl max-sm:text-[22px]">My Request History</h2>
         <div class="text-right text-sm leading-6 text-muted max-[980px]:text-left">
           <strong class="text-textmain">{{ student.first_name }} {{ student.last_name }}</strong><br />
           {{ student.role }}
@@ -148,15 +274,15 @@
       </header>
 
       <div class="flex flex-col gap-5">
-        <section class="rounded-2xl bg-surface p-[22px] shadow-soft">
-          <h3 class="mb-[18px] text-[22px] font-bold text-primary">My Request History</h3>
+        <section class="rounded-2xl bg-surface p-[22px] shadow-soft max-sm:p-4">
+          <h3 class="mb-[18px] text-[22px] font-bold text-primary max-sm:text-xl">My Request History</h3>
 
           <form
             id="filterForm"
             method="GET"
             action="{{ url_for('student.history') }}"
-            class="mb-5 flex flex-wrap items-end gap-[14px] rounded-[14px] border border-borderline bg-white p-4 shadow-card max-md:flex-col max-md:items-stretch">
-            <div class="min-w-[180px] flex-1 basis-[180px] flex-col gap-1.5 max-md:w-full">
+            class="mb-4 flex flex-wrap items-end gap-3 rounded-[14px] border border-borderline bg-white p-4 shadow-card max-md:flex-col max-md:items-stretch max-md:gap-2.5 max-sm:mb-3 max-sm:p-3">
+            <div class="flex min-w-[180px] flex-col gap-1.5 md:flex-1 md:basis-[180px] max-md:w-full">
               <label for="status" class="mb-1.5 block text-[13px] font-semibold text-muted">Status</label>
               <select
                 id="status"
@@ -169,7 +295,7 @@
               </select>
             </div>
 
-            <div class="min-w-[180px] flex-1 basis-[180px] flex-col gap-1.5 max-md:w-full">
+            <div class="flex min-w-[180px] flex-col gap-1.5 md:flex-1 md:basis-[180px] max-md:w-full">
               <label for="semester" class="mb-1.5 block text-[13px] font-semibold text-muted">Semester</label>
               <select
                 id="semester"
@@ -182,20 +308,20 @@
               </select>
             </div>
 
-            <div class="min-w-[180px] flex-1 basis-[180px] flex-col gap-1.5 max-md:w-full">
+            <div class="flex min-w-[180px] flex-col gap-1.5 md:flex-1 md:basis-[180px] max-md:w-full">
               <label for="semester_type" class="mb-1.5 block text-[13px] font-semibold text-muted">Exam Type</label>
               <select
                 id="semester_type"
                 name="semester_type"
                 class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
                 <option value="">All Exam Types</option>
-                <option value="Prelims" {% if request.args.get('semester_type') == 'Prelims' %}selected{% endif %}>Prelims</option>
-                <option value="Midterm" {% if request.args.get('semester_type') == 'Midterm' %}selected{% endif %}>Midterm</option>
-                <option value="Finals" {% if request.args.get('semester_type') == 'Finals' %}selected{% endif %}>Finals</option>
+                <option value="Prelim" {% if request.args.get('semester_type') == 'Prelim' %}selected{% endif %}>Prelim</option>
+                <option value="Midter" {% if request.args.get('semester_type') == 'Midterm' %}selected{% endif %}>Midterm</option>
+                <option value="Final" {% if request.args.get('semester_type') == 'Final' %}selected{% endif %}>Final</option>
               </select>
             </div>
 
-            <div class="min-w-[180px] flex-1 basis-[180px] flex-col gap-1.5 max-md:w-full">
+            <div class="flex min-w-[180px] flex-col gap-1.5 md:flex-1 md:basis-[180px] max-md:w-full">
               <label for="school_year" class="mb-1.5 block text-[13px] font-semibold text-muted">School Year</label>
               <select
                 id="school_year"
@@ -208,24 +334,25 @@
               </select>
             </div>
 
-            <div class="flex flex-wrap items-center gap-3 max-md:w-full max-md:flex-col">
+            <div class="flex flex-wrap items-center gap-2.5 pt-1 max-md:w-full max-md:flex-col max-md:gap-2">
               <button
                 type="button"
-                class="btn rounded-xl border border-slate-300 bg-slate-100 px-[18px] py-[11px] text-sm font-bold whitespace-nowrap text-textmain transition duration-200 ease-in-out hover:-translate-y-px hover:bg-slate-200 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-md:w-full motion-reduce:transition-none"
+                class="btn rounded-xl border border-slate-300 bg-slate-100 px-[18px] py-[10px] text-sm font-bold whitespace-nowrap text-textmain transition duration-200 ease-in-out hover:-translate-y-px hover:bg-slate-200 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-md:w-full motion-reduce:transition-none"
                 onclick="clearFilter()">
                 Clear Filter
               </button>
 
               <button
                 type="button"
-                class="btn rounded-xl bg-primary px-[18px] py-[11px] text-sm font-bold whitespace-nowrap text-white transition duration-200 ease-in-out hover:-translate-y-px hover:bg-primary-light focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-md:w-full motion-reduce:transition-none"
+                class="btn rounded-xl bg-primary px-[18px] py-[10px] text-sm font-bold whitespace-nowrap text-white transition duration-200 ease-in-out hover:-translate-y-px hover:bg-primary-light focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-md:w-full motion-reduce:transition-none"
                 onclick="window.location.href='{{ url_for('student.request_promissory') }}'">
                 Create New Request
               </button>
             </div>
           </form>
 
-          <div class="w-full overflow-x-auto rounded-[14px] border border-borderline bg-white shadow-card">
+          <!-- DESKTOP / TABLET TABLE -->
+          <div class="hidden md:block w-full overflow-x-auto rounded-[14px] border border-borderline bg-white shadow-card">
             <table class="min-w-[920px] w-full border-collapse">
               <thead>
                 <tr>
@@ -267,16 +394,16 @@
                         View
                       </a>
 
-                      <form method="POST" action="{{ url_for('student.delete_request', request_id=req.id) }}" class="inline">
+                      <form method="POST" action="{{ url_for('student.delete_request', request_id=req.id) }}" class="inline delete-request-form">
                         <button
-                          type="submit"
-                          class="btn rounded-xl px-[18px] py-[11px] text-sm font-bold text-white transition duration-200 ease-in-out focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-md:w-full motion-reduce:transition-none
+                          type="button"
+                          class="delete-request-btn btn rounded-xl px-[18px] py-[11px] text-sm font-bold text-white transition duration-200 ease-in-out focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-md:w-full motion-reduce:transition-none
                           {% if req.status != 'Pending' %}
                             cursor-not-allowed bg-slate-300 text-slate-500 opacity-90
                           {% else %}
                             bg-red-600 hover:-translate-y-px hover:bg-red-700
                           {% endif %}"
-                          {% if req.status != 'Pending' %}disabled{% else %}onclick="return confirm('Are you sure you want to delete this pending request?');"{% endif %}>
+                          {% if req.status != 'Pending' %}disabled{% endif %}>
                           Delete
                         </button>
                       </form>
@@ -291,9 +418,132 @@
               </tbody>
             </table>
           </div>
+
+          <!-- MOBILE CARDS -->
+          <div class="md:hidden space-y-4">
+            {% for req in requests %}
+            <div class="overflow-hidden rounded-2xl border border-borderline bg-white shadow-card">
+              <div class="border-b border-slate-100 bg-[#f8faff] px-4 py-3">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="text-sm font-bold text-primary">{{ req.program or req.course }}</p>
+                    <p class="mt-1 text-xs text-muted">{{ req.semester or "N/A" }} {{ req.semester_type or "" }}</p>
+                  </div>
+                  <span class="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 text-[11px] font-bold
+                    {% if req.status == 'Pending' %}
+                      border border-amber-300 bg-amber-100 text-amber-800
+                    {% elif req.status == 'Approved' %}
+                      border border-green-300 bg-green-100 text-green-800
+                    {% else %}
+                      border border-red-300 bg-red-100 text-red-800
+                    {% endif %}">
+                    {{ req.status.upper() }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="space-y-3 px-4 py-4">
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="rounded-xl bg-slate-50 px-3 py-2">
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-muted">Date</p>
+                    <p class="mt-1 text-sm font-semibold text-textmain">{{ req.requested_at.strftime('%m/%d/%Y') }}</p>
+                  </div>
+                  <div class="rounded-xl bg-slate-50 px-3 py-2">
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-muted">Time</p>
+                    <p class="mt-1 text-sm font-semibold text-textmain">{{ req.requested_at.strftime('%I:%M %p') }}</p>
+                  </div>
+                </div>
+
+                <div class="rounded-xl bg-slate-50 px-3 py-2">
+                  <p class="text-[11px] font-semibold uppercase tracking-wide text-muted">School Year</p>
+                  <p class="mt-1 text-sm font-semibold text-textmain">{{ req.school_year or "N/A" }}</p>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                  <a
+                    href="{{ url_for('student.view_request', request_id=req.id) }}"
+                    class="btn w-full rounded-xl border border-slate-300 bg-slate-100 px-[18px] py-[11px] text-center text-sm font-bold text-textmain transition duration-200 ease-in-out hover:bg-slate-200 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+                    View
+                  </a>
+
+                  <form method="POST" action="{{ url_for('student.delete_request', request_id=req.id) }}" class="delete-request-form w-full">
+                    <button
+                      type="button"
+                      class="delete-request-btn btn w-full rounded-xl px-[18px] py-[11px] text-sm font-bold text-white transition duration-200 ease-in-out focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none
+                      {% if req.status != 'Pending' %}
+                        cursor-not-allowed bg-slate-300 text-slate-500 opacity-90
+                      {% else %}
+                        bg-red-600 hover:bg-red-700
+                      {% endif %}"
+                      {% if req.status != 'Pending' %}disabled{% endif %}>
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+            {% else %}
+            <div class="rounded-2xl border border-borderline bg-white px-5 py-10 text-center italic text-muted shadow-card">
+              No requests found.
+            </div>
+            {% endfor %}
+          </div>
         </section>
       </div>
     </main>
+  </div>
+
+  <!-- DELETE CONFIRMATION MODAL -->
+  <div
+    id="deleteModal"
+    class="fixed inset-0 z-[1300] hidden items-center justify-center bg-slate-900/55 px-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="deleteModalTitle"
+    aria-describedby="deleteModalDescription">
+    <div class="w-full max-w-md rounded-2xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.22)]">
+      <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+        <h3 id="deleteModalTitle" class="text-lg font-bold text-primary">Delete Request</h3>
+        <button
+          type="button"
+          id="closeDeleteModal"
+          class="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
+          aria-label="Close delete confirmation">
+          ✕
+        </button>
+      </div>
+
+      <div class="px-5 py-5">
+        <div class="mb-4 flex items-center gap-3">
+          <div class="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-base font-bold text-textmain">Are you sure?</p>
+            <p id="deleteModalDescription" class="text-sm text-muted">
+              This will permanently delete your pending request. This action cannot be undone.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col-reverse gap-3 border-t border-slate-200 px-5 py-4 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          id="cancelDeleteModal"
+          class="rounded-xl border border-slate-300 bg-slate-100 px-[18px] py-[11px] text-sm font-bold text-textmain transition duration-200 ease-in-out hover:bg-slate-200 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300">
+          Cancel
+        </button>
+        <button
+          type="button"
+          id="confirmDeleteModal"
+          class="rounded-xl bg-red-600 px-[18px] py-[11px] text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-red-700 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300">
+          Yes, Delete
+        </button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -303,6 +553,17 @@
     const sidebar = document.getElementById("sidebar");
     const sidebarToggle = document.getElementById("sidebarToggle");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+    const deleteModal = document.getElementById("deleteModal");
+    const closeDeleteModalBtn = document.getElementById("closeDeleteModal");
+    const cancelDeleteModalBtn = document.getElementById("cancelDeleteModal");
+    const confirmDeleteModalBtn = document.getElementById("confirmDeleteModal");
+    const deleteButtons = document.querySelectorAll(".delete-request-btn");
+
+    const flashToasts = document.querySelectorAll(".flash-toast");
+    const flashCloseButtons = document.querySelectorAll(".flash-close");
+
+    let selectedDeleteForm = null;
 
     filterSelects.forEach((select) => {
       select.addEventListener("change", () => {
@@ -343,8 +604,89 @@
       }
     }
 
-    sidebarToggle.addEventListener("click", toggleSidebar);
-    sidebarOverlay.addEventListener("click", closeSidebar);
+    function openDeleteModal(form) {
+      selectedDeleteForm = form;
+      deleteModal.classList.remove("hidden");
+      deleteModal.classList.add("flex");
+      document.body.classList.add("overflow-hidden");
+    }
+
+    function closeDeleteModal() {
+      selectedDeleteForm = null;
+      deleteModal.classList.add("hidden");
+      deleteModal.classList.remove("flex");
+      document.body.classList.remove("overflow-hidden");
+    }
+
+    function removeToast(toast) {
+      if (!toast) return;
+      toast.style.transition = "opacity 0.25s ease, transform 0.25s ease";
+      toast.style.opacity = "0";
+      toast.style.transform = "translateX(24px)";
+      setTimeout(() => {
+        toast.remove();
+      }, 250);
+    }
+
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        if (button.disabled) {
+          return;
+        }
+
+        const form = button.closest("form");
+        if (form) {
+          openDeleteModal(form);
+        }
+      });
+    });
+
+    if (confirmDeleteModalBtn) {
+      confirmDeleteModalBtn.addEventListener("click", function () {
+        if (selectedDeleteForm) {
+          selectedDeleteForm.submit();
+        }
+      });
+    }
+
+    if (closeDeleteModalBtn) {
+      closeDeleteModalBtn.addEventListener("click", closeDeleteModal);
+    }
+
+    if (cancelDeleteModalBtn) {
+      cancelDeleteModalBtn.addEventListener("click", closeDeleteModal);
+    }
+
+    if (deleteModal) {
+      deleteModal.addEventListener("click", function (event) {
+        if (event.target === deleteModal) {
+          closeDeleteModal();
+        }
+      });
+    }
+
+    flashCloseButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const toast = button.closest(".flash-toast");
+        removeToast(toast);
+      });
+    });
+
+    flashToasts.forEach((toast) => {
+      if (toast.dataset.autohide === "true") {
+        setTimeout(() => {
+          removeToast(toast);
+        }, 5000);
+      }
+    });
+
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener("click", toggleSidebar);
+    }
+
+    if (sidebarOverlay) {
+      sidebarOverlay.addEventListener("click", closeSidebar);
+    }
 
     document.querySelectorAll(".sidebar-nav a, .logout-link").forEach((link) => {
       link.addEventListener("click", () => {
@@ -356,6 +698,10 @@
 
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") {
+        if (deleteModal && !deleteModal.classList.contains("hidden")) {
+          closeDeleteModal();
+          return;
+        }
         closeSidebar();
       }
     });
