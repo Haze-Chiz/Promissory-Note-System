@@ -23,7 +23,13 @@
             hoverbg: "#eef2ff",
             success: "#16a34a",
             danger: "#dc2626",
-            warning: "#d97706"
+            warning: "#d97706",
+            approvebg: "#ecfdf3",
+            approvetext: "#166534",
+            approveborder: "#86efac",
+            rejectbg: "#fef2f2",
+            rejecttext: "#991b1b",
+            rejectborder: "#fca5a5"
           },
           boxShadow: {
             soft: "0 10px 25px rgba(0, 0, 0, 0.08)",
@@ -31,15 +37,94 @@
             successpill: "0 2px 8px rgba(22, 163, 74, 0.2)",
             dangerpill: "0 2px 8px rgba(220, 38, 38, 0.2)",
             modal: "0 10px 30px rgba(0, 0, 0, 0.25)",
-            toast: "0 6px 16px rgba(0, 0, 0, 0.18)"
+            toast: "0 6px 16px rgba(0, 0, 0, 0.18)",
+            approveglow: "0 0 0 6px rgba(34, 197, 94, 0.12)",
+            rejectglow: "0 0 0 6px rgba(239, 68, 68, 0.12)"
           }
         }
       }
     };
   </script>
+
+  <style>
+    .animate-fade-in {
+      animation: fadeIn 0.22s ease-out;
+    }
+
+    .animate-scale-in {
+      animation: scaleIn 0.22s ease-out;
+    }
+
+    .animate-slide-down {
+      animation: slideDown 0.25s ease-out;
+    }
+
+    .animate-pop-in {
+      animation: popIn 0.28s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.96);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes popIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.88) translateY(8px);
+      }
+
+      70% {
+        opacity: 1;
+        transform: scale(1.03) translateY(0);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
 </head>
 
 <body class="bg-bg font-sans leading-6 text-textmain antialiased">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <script id="flash-data" type="application/json">
+        {{ messages|tojson|safe }}
+      </script>
+    {% endif %}
+  {% endwith %}
+
   <button
     class="fixed left-4 top-4 z-[1100] hidden rounded-[10px] bg-primary px-3 py-2 text-lg text-white shadow-soft focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[980px]:inline-flex max-[980px]:items-center max-[980px]:justify-center motion-reduce:transition-none"
     type="button"
@@ -106,7 +191,7 @@
   </nav>
 
   <div
-    class="fixed right-5 top-5 z-[3000] hidden max-w-[360px] rounded-[10px] bg-gray-900 px-[18px] py-3 text-sm text-white shadow-toast max-[700px]:left-4 max-[700px]:right-4 max-[700px]:max-w-none"
+    class="fixed right-5 top-5 z-[3000] hidden max-w-[380px] rounded-[12px] border px-[18px] py-3 text-sm text-white shadow-toast max-[700px]:left-4 max-[700px]:right-4 max-[700px]:max-w-none"
     id="notif"
     role="status"
     aria-live="polite"></div>
@@ -120,12 +205,6 @@
       <div class="rounded-[14px] bg-surface px-6 py-8 text-center text-muted shadow-soft">
         The selected promissory note was not found or has been deleted.
       </div>
-
-      <script>
-        document.addEventListener('DOMContentLoaded', () => {
-          showNotification("The selected promissory note was not found or has been deleted.", 5000);
-        });
-      </script>
     {% else %}
       <header class="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-surface px-5 py-[18px] shadow-soft">
         <h2 class="text-[28px] font-bold text-primary max-[980px]:text-2xl">Promissory Note Details</h2>
@@ -318,11 +397,15 @@
     id="confirmModal"
     aria-hidden="true">
     <div
-      class="w-full max-w-[380px] rounded-2xl bg-white p-6 text-center shadow-modal"
+      class="animate-scale-in w-full max-w-[400px] rounded-2xl bg-white p-6 text-center shadow-modal"
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirmMessage"
       aria-describedby="confirmDescription">
+      <div id="confirmActionBadge" class="mx-auto mb-4 inline-flex rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em]">
+        Action
+      </div>
+
       <h3 id="confirmMessage" class="mb-2.5 text-xl font-bold text-primary">Are you sure?</h3>
       <p id="confirmDescription" class="text-sm text-muted">
         Please confirm your action for this promissory note.
@@ -345,6 +428,61 @@
     </div>
   </div>
 
+  <div
+    class="fixed inset-0 z-[2100] hidden items-center justify-center bg-black/65 p-5"
+    id="resultModal"
+    aria-hidden="true">
+    <div
+      id="resultModalCard"
+      class="animate-pop-in w-full max-w-[460px] overflow-hidden rounded-3xl bg-white text-center shadow-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="resultTitle"
+      aria-describedby="resultMessage">
+
+      <div id="resultTopBand" class="h-3 w-full bg-primary"></div>
+
+      <div class="px-6 pb-7 pt-6">
+        <div
+          id="resultIcon"
+          class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border-4 text-4xl font-black shadow-sm">
+          ✓
+        </div>
+
+        <div
+          id="resultBadge"
+          class="mb-4 inline-flex rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em]">
+          Status
+        </div>
+
+        <h3 id="resultTitle" class="mb-2 text-[28px] font-extrabold leading-tight text-primary">
+          Success
+        </h3>
+
+        <p id="resultMessage" class="mx-auto max-w-[340px] text-sm leading-6 text-muted">
+          Action completed successfully.
+        </p>
+
+        <div
+          id="resultHighlight"
+          class="mt-5 rounded-2xl border px-4 py-4 text-left">
+          <p id="resultHighlightText" class="text-sm font-semibold leading-6">
+            Status updated successfully.
+          </p>
+        </div>
+
+        <div class="mt-6">
+          <button
+            id="resultClose"
+            type="button"
+            class="w-full rounded-[12px] bg-primary px-[18px] py-3 font-bold text-white transition duration-200 ease-in-out hover:bg-primary-light focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const sidebar = document.getElementById("sidebar");
     const sidebarToggle = document.getElementById("sidebarToggle");
@@ -355,7 +493,19 @@
     const confirmDescription = document.getElementById("confirmDescription");
     const confirmYes = document.getElementById("confirmYes");
     const confirmNo = document.getElementById("confirmNo");
+    const confirmActionBadge = document.getElementById("confirmActionBadge");
     const form = document.getElementById("promissoryForm");
+
+    const resultModal = document.getElementById("resultModal");
+    const resultModalCard = document.getElementById("resultModalCard");
+    const resultTitle = document.getElementById("resultTitle");
+    const resultMessage = document.getElementById("resultMessage");
+    const resultIcon = document.getElementById("resultIcon");
+    const resultBadge = document.getElementById("resultBadge");
+    const resultTopBand = document.getElementById("resultTopBand");
+    const resultHighlight = document.getElementById("resultHighlight");
+    const resultHighlightText = document.getElementById("resultHighlightText");
+    const resultClose = document.getElementById("resultClose");
 
     let currentAction = null;
     let previousFocus = null;
@@ -390,21 +540,129 @@
       currentAction = action;
       previousFocus = document.activeElement;
 
-      const actionText = action === "approve" ? "approve" : "reject";
-      message.textContent = `Are you sure you want to ${actionText} this promissory note?`;
-      confirmDescription.textContent = `This action will mark the promissory note as ${actionText}d.`;
+      const isApprove = action === "approve";
+      const actionText = isApprove ? "approve" : "reject";
+      const pastTense = isApprove ? "approved" : "rejected";
 
-      modal.classList.add("show", "flex");
+      message.textContent = `Are you sure you want to ${actionText} this promissory note?`;
+      confirmDescription.textContent = `This action will mark the promissory note as ${pastTense}.`;
+
+      confirmActionBadge.textContent = isApprove ? "Approve Action" : "Reject Action";
+      confirmActionBadge.className = isApprove
+        ? "mx-auto mb-4 inline-flex rounded-full border border-green-300 bg-green-100 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-green-800"
+        : "mx-auto mb-4 inline-flex rounded-full border border-red-300 bg-red-100 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-red-800";
+
+      confirmYes.textContent = isApprove ? "Yes, Approve" : "Yes, Reject";
+      confirmYes.className = isApprove
+        ? "confirm-yes rounded-[10px] bg-success px-[18px] py-2.5 font-bold text-white transition duration-200 ease-in-out hover:-translate-y-px hover:bg-green-700 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[700px]:w-full motion-reduce:transition-none"
+        : "confirm-yes rounded-[10px] bg-danger px-[18px] py-2.5 font-bold text-white transition duration-200 ease-in-out hover:-translate-y-px hover:bg-red-700 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[700px]:w-full motion-reduce:transition-none";
+
       modal.classList.remove("hidden");
+      modal.classList.add("flex", "animate-fade-in");
       modal.setAttribute("aria-hidden", "false");
+
       confirmYes.focus();
     }
 
     function closeModal() {
-      modal.classList.remove("show", "flex");
+      modal.classList.remove("flex", "animate-fade-in");
       modal.classList.add("hidden");
       modal.setAttribute("aria-hidden", "true");
       currentAction = null;
+
+      if (previousFocus) {
+        previousFocus.focus();
+      }
+    }
+
+    function openResultModal(type, msg) {
+      previousFocus = document.activeElement;
+
+      let title = "Notice";
+      let icon = "!";
+      let iconClass = "mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border-4 text-4xl font-black shadow-sm border-amber-300 bg-amber-100 text-amber-700";
+      let badgeClass = "mb-4 inline-flex rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] border-amber-300 bg-amber-100 text-amber-800";
+      let topBandClass = "h-3 w-full bg-amber-500";
+      let buttonClass = "w-full rounded-[12px] bg-amber-500 px-[18px] py-3 font-bold text-white transition duration-200 ease-in-out hover:bg-amber-600 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none";
+      let highlightClass = "mt-5 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-4 text-left";
+      let highlightText = "Status updated successfully.";
+      let badgeText = "Notice";
+
+      if (type === "approve_success" || type === "success") {
+        title = "Promissory Note Approved";
+        icon = "✓";
+        iconClass = "mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border-4 text-4xl font-black shadow-sm border-green-300 bg-green-100 text-green-700";
+        badgeClass = "mb-4 inline-flex rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] border-green-300 bg-green-100 text-green-800";
+        topBandClass = "h-3 w-full bg-green-600";
+        buttonClass = "w-full rounded-[12px] bg-green-600 px-[18px] py-3 font-bold text-white transition duration-200 ease-in-out hover:bg-green-700 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none";
+        highlightClass = "mt-5 rounded-2xl border border-green-300 bg-green-50 px-4 py-4 text-left";
+        highlightText = "The promissory note has been approved and the student record now reflects the approved status.";
+        badgeText = "Approved";
+      } else if (type === "reject_success") {
+        title = "Promissory Note Rejected";
+        icon = "✕";
+        iconClass = "mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border-4 text-4xl font-black shadow-sm border-red-300 bg-red-100 text-red-700";
+        badgeClass = "mb-4 inline-flex rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] border-red-300 bg-red-100 text-red-800";
+        topBandClass = "h-3 w-full bg-red-600";
+        buttonClass = "w-full rounded-[12px] bg-red-600 px-[18px] py-3 font-bold text-white transition duration-200 ease-in-out hover:bg-red-700 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none";
+        highlightClass = "mt-5 rounded-2xl border border-red-300 bg-red-50 px-4 py-4 text-left";
+        highlightText = "The promissory note has been rejected. Review the comments section if additional explanation was provided.";
+        badgeText = "Rejected";
+      } else if (type === "danger" || type === "error") {
+        title = "Action Failed";
+        icon = "✕";
+        iconClass = "mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border-4 text-4xl font-black shadow-sm border-red-300 bg-red-100 text-red-700";
+        badgeClass = "mb-4 inline-flex rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] border-red-300 bg-red-100 text-red-800";
+        topBandClass = "h-3 w-full bg-red-600";
+        buttonClass = "w-full rounded-[12px] bg-red-600 px-[18px] py-3 font-bold text-white transition duration-200 ease-in-out hover:bg-red-700 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none";
+        highlightClass = "mt-5 rounded-2xl border border-red-300 bg-red-50 px-4 py-4 text-left";
+        highlightText = "The system could not complete your request. Please try again.";
+        badgeText = "Failed";
+      } else if (type === "warning") {
+        title = "Warning";
+        icon = "!";
+        iconClass = "mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border-4 text-4xl font-black shadow-sm border-amber-300 bg-amber-100 text-amber-700";
+        badgeClass = "mb-4 inline-flex rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] border-amber-300 bg-amber-100 text-amber-800";
+        topBandClass = "h-3 w-full bg-amber-500";
+        buttonClass = "w-full rounded-[12px] bg-amber-500 px-[18px] py-3 font-bold text-white transition duration-200 ease-in-out hover:bg-amber-600 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none";
+        highlightClass = "mt-5 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-4 text-left";
+        highlightText = "Please review the information before continuing.";
+        badgeText = "Warning";
+      } else if (type === "info") {
+        title = "Information";
+        icon = "i";
+        iconClass = "mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border-4 text-4xl font-black shadow-sm border-blue-300 bg-blue-100 text-blue-700";
+        badgeClass = "mb-4 inline-flex rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] border-blue-300 bg-blue-100 text-blue-800";
+        topBandClass = "h-3 w-full bg-blue-600";
+        buttonClass = "w-full rounded-[12px] bg-blue-600 px-[18px] py-3 font-bold text-white transition duration-200 ease-in-out hover:bg-blue-700 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none";
+        highlightClass = "mt-5 rounded-2xl border border-blue-300 bg-blue-50 px-4 py-4 text-left";
+        highlightText = "Information updated.";
+        badgeText = "Info";
+      }
+
+      resultTitle.textContent = title;
+      resultMessage.textContent = msg || "Action completed.";
+      resultIcon.textContent = icon;
+      resultBadge.textContent = badgeText;
+      resultHighlightText.textContent = highlightText;
+
+      resultIcon.className = iconClass;
+      resultBadge.className = badgeClass;
+      resultTopBand.className = topBandClass;
+      resultHighlight.className = highlightClass;
+      resultClose.className = buttonClass;
+
+      resultModal.classList.remove("hidden");
+      resultModal.classList.add("flex", "animate-fade-in");
+      resultModal.setAttribute("aria-hidden", "false");
+
+      resultClose.focus();
+    }
+
+    function closeResultModal() {
+      resultModal.classList.remove("flex", "animate-fade-in");
+      resultModal.classList.add("hidden");
+      resultModal.setAttribute("aria-hidden", "true");
 
       if (previousFocus) {
         previousFocus.focus();
@@ -426,43 +684,131 @@
       form.submit();
     }
 
-    function showNotification(msg, duration = 3000) {
+    function showNotification(msg, category = "info", duration = 3000) {
       const notif = document.getElementById("notif");
+
       notif.textContent = msg;
-      notif.classList.add("show", "block");
+      notif.classList.remove(
+        "hidden",
+        "bg-green-600",
+        "bg-red-600",
+        "bg-amber-500",
+        "bg-blue-600",
+        "border-green-300",
+        "border-red-300",
+        "border-amber-300",
+        "border-blue-300"
+      );
+
+      notif.classList.add("block", "animate-slide-down");
+
+      if (category === "approve_success" || category === "success") {
+        notif.classList.add("bg-green-600", "border-green-300");
+      } else if (category === "reject_success" || category === "danger" || category === "error") {
+        notif.classList.add("bg-red-600", "border-red-300");
+      } else if (category === "warning") {
+        notif.classList.add("bg-amber-500", "border-amber-300");
+      } else {
+        notif.classList.add("bg-blue-600", "border-blue-300");
+      }
 
       window.clearTimeout(showNotification._timer);
       showNotification._timer = window.setTimeout(() => {
-        notif.classList.remove("show", "block");
+        notif.classList.remove("block", "animate-slide-down");
+        notif.classList.add("hidden");
       }, duration);
     }
 
-    sidebarToggle.addEventListener("click", toggleSidebar);
-    sidebarOverlay.addEventListener("click", closeSidebar);
+    function handleFlashMessages() {
+      const flashDataEl = document.getElementById("flash-data");
+      if (!flashDataEl) return;
+
+      let flashMessages = [];
+
+      try {
+        flashMessages = JSON.parse(flashDataEl.textContent);
+      } catch (error) {
+        console.error("Failed to parse flash messages:", error);
+        return;
+      }
+
+      if (!Array.isArray(flashMessages) || flashMessages.length === 0) return;
+
+      const [category, msg] = flashMessages[0];
+
+      showNotification(msg, category, 4500);
+
+      if (
+        [
+          "approve_success",
+          "reject_success",
+          "success",
+          "danger",
+          "error",
+          "warning",
+          "info"
+        ].includes(category)
+      ) {
+        openResultModal(category, msg);
+      }
+    }
+
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener("click", toggleSidebar);
+    }
+
+    if (sidebarOverlay) {
+      sidebarOverlay.addEventListener("click", closeSidebar);
+    }
 
     if (form) {
-      document.querySelectorAll(".actions .btn, .btn.approve, .btn.reject").forEach((btn) => {
+      document.querySelectorAll(".btn.approve, .btn.reject").forEach((btn) => {
         btn.addEventListener("click", () => {
           openModal(btn.dataset.action);
         });
       });
     }
 
-    confirmYes.addEventListener("click", submitPromissoryAction);
-    confirmNo.addEventListener("click", closeModal);
+    if (confirmYes) {
+      confirmYes.addEventListener("click", submitPromissoryAction);
+    }
 
-    modal.addEventListener("click", function (event) {
-      if (event.target === modal) {
-        closeModal();
-      }
-    });
+    if (confirmNo) {
+      confirmNo.addEventListener("click", closeModal);
+    }
+
+    if (modal) {
+      modal.addEventListener("click", function (event) {
+        if (event.target === modal) {
+          closeModal();
+        }
+      });
+    }
+
+    if (resultClose) {
+      resultClose.addEventListener("click", closeResultModal);
+    }
+
+    if (resultModal) {
+      resultModal.addEventListener("click", function (event) {
+        if (event.target === resultModal) {
+          closeResultModal();
+        }
+      });
+    }
 
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") {
-        if (modal.classList.contains("flex")) {
+        if (resultModal && resultModal.classList.contains("flex")) {
+          closeResultModal();
+          return;
+        }
+
+        if (modal && modal.classList.contains("flex")) {
           closeModal();
           return;
         }
+
         closeSidebar();
       }
     });
@@ -476,6 +822,14 @@
       } else if (!sidebar.classList.contains("translate-x-0")) {
         sidebar.classList.add("max-[980px]:-translate-x-full");
       }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      if (!{{ 'true' if promissory_data else 'false' }}) {
+        showNotification("The selected promissory note was not found or has been deleted.", "warning", 5000);
+      }
+
+      handleFlashMessages();
     });
   </script>
 </body>

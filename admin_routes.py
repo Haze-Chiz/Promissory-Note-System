@@ -1,9 +1,20 @@
 import io
+import re
 import secrets
 import string
 
 import pandas as pd
-from flask import Blueprint, flash, redirect, render_template, request, send_file, session, url_for
+from flask import (
+    Blueprint,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    session,
+    url_for,
+)
 
 from models import db, Account, ActiveSettings, ActiveCourse, SystemLog
 from utils.auth import require_role, require_active_user
@@ -19,14 +30,20 @@ admin_bp = Blueprint(
 
 VALID_ROLES = {"Admin", "Finance", "Student"}
 VALID_STATUSES = {"Active", "Inactive"}
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 # =====================================================
 # HELPERS
 # =====================================================
+def get_admin_display_name():
+    return session.get("user_name", "Admin User")
+
+
 def generate_random_password(last_name: str, length: int = 8) -> str:
     """
-    Generate a safer temporary password.
+    Generate a temporary password using the user's last name plus
+    a cryptographically secure random suffix.
     """
     clean_last_name = (last_name or "User").strip() or "User"
     alphabet = string.ascii_letters + string.digits
@@ -60,6 +77,10 @@ def get_active_settings():
     return settings.active_semester or "Not Set", settings.active_school_year or "Not Set"
 
 
+def get_active_settings_record():
+    return ActiveSettings.query.first()
+
+
 def get_or_create_active_settings():
     settings = ActiveSettings.query.first()
     if not settings:
@@ -73,12 +94,21 @@ def normalize_text(value):
     return (value or "").strip()
 
 
+def normalize_email(value):
+    return normalize_text(value).lower()
+
+
 def normalize_role(value):
     return normalize_text(value).capitalize()
 
 
 def normalize_status(value):
     return normalize_text(value).capitalize()
+
+
+def normalize_optional_student_field(value):
+    cleaned = normalize_text(value)
+    return cleaned or None
 
 
 def is_valid_role(value):
@@ -89,11 +119,37 @@ def is_valid_status(value):
     return value in VALID_STATUSES
 
 
+def is_valid_email(value):
+    return bool(value and EMAIL_PATTERN.match(value))
+
+
 def account_email_exists(email, exclude_account_id=None):
     query = Account.query.filter(Account.email == email)
     if exclude_account_id is not None:
         query = query.filter(Account.id != exclude_account_id)
     return db.session.query(query.exists()).scalar()
+
+
+def set_account_role(account, role_value):
+    if hasattr(account, "role"):
+        account.role = role_value
+    else:
+        setattr(account, "_role", role_value)
+
+
+def set_account_status(account, status_value):
+    if hasattr(account, "status"):
+        account.status = status_value
+    else:
+        setattr(account, "_status", status_value)
+
+
+def get_account_role(account):
+    return getattr(account, "role", None) or getattr(account, "_role", None)
+
+
+def get_account_status(account):
+    return getattr(account, "status", None) or getattr(account, "_status", None)
 
 
 def build_account_export_rows(accounts):
@@ -105,8 +161,8 @@ def build_account_export_rows(accounts):
             "Last_Name": account.last_name or "",
             "Suffix": account.suffix or "",
             "Email": account.email or "",
-            "Role": getattr(account, "role", "") or getattr(account, "_role", ""),
-            "Status": getattr(account, "status", "") or getattr(account, "_status", ""),
+            "Role": get_account_role(account) or "",
+            "Status": get_account_status(account) or "",
             "Year_Level": getattr(account, "year_level", "") or "",
             "Course": getattr(account, "course", "") or "",
         }
@@ -132,26 +188,61 @@ def apply_account_filters(query, search="", role_filter="", status_filter=""):
     return query
 
 
-def set_account_role(account, role_value):
-    if hasattr(account, "role"):
-        account.role = role_value
+def validate_account_payload(
+    *,
+    first_name,
+    last_name,
+    email,
+    role,
+    status=None,
+    course=None,
+    exclude_account_id=None,
+):
+    if not first_name or not last_name or not email:
+        return "First name, last name, and email are required."
+
+    if not is_valid_email(email):
+        return "Please enter a valid email address."
+
+    if not is_valid_role(role):
+        return "Invalid role selected."
+
+    if status is not None and not is_valid_status(status):
+        return "Invalid status selected."
+
+    if account_email_exists(email, exclude_account_id=exclude_account_id):
+        return "Email already exists."
+
+    if role == "Student" and not course:
+        return "Course is required for student accounts."
+
+    return None
+
+
+def populate_account_fields(account, *, form_or_row, role_value):
+    account.first_name = normalize_text(form_or_row.get("first_name"))
+    account.middle_name = normalize_optional_student_field(form_or_row.get("middle_name"))
+    account.last_name = normalize_text(form_or_row.get("last_name"))
+    account.suffix = normalize_optional_student_field(form_or_row.get("suffix"))
+    account.email = normalize_email(form_or_row.get("email"))
+
+    set_account_role(account, role_value)
+
+    if role_value == "Student":
+        account.year_level = normalize_optional_student_field(form_or_row.get("year_level"))
+        account.course = normalize_optional_student_field(form_or_row.get("course"))
     else:
-        setattr(account, "_role", role_value)
+        account.year_level = None
+        account.course = None
 
 
-def set_account_status(account, status_value):
-    if hasattr(account, "status"):
-        account.status = status_value
-    else:
-        setattr(account, "_status", status_value)
-
-
-def get_account_role(account):
-    return getattr(account, "role", None) or getattr(account, "_role", None)
-
-
-def get_account_status(account):
-    return getattr(account, "status", None) or getattr(account, "_status", None)
+def get_active_context():
+    active_settings = get_active_settings_record()
+    return {
+        "active_semester": active_settings.active_semester if active_settings else "Not Set",
+        "active_school_year": active_settings.active_school_year if active_settings else "Not Set",
+        "active_course": getattr(active_settings, "active_course", "Not Set") if active_settings else "Not Set",
+    }
 
 
 # =====================================================
@@ -170,10 +261,7 @@ def dashboard():
     total_active_finance = Account.query.filter_by(_status="Active", _role="Finance").count()
     total_active_admin = Account.query.filter_by(_status="Active", _role="Admin").count()
 
-    active_settings = ActiveSettings.query.first()
-    active_semester = active_settings.active_semester if active_settings else "Not Set"
-    active_school_year = active_settings.active_school_year if active_settings else "Not Set"
-    active_course = getattr(active_settings, "active_course", "Not Set (using list model)") if active_settings else "Not Set"
+    active_context = get_active_context()
 
     data = {
         "total_active_accounts": total_active,
@@ -181,13 +269,13 @@ def dashboard():
         "total_active_students": total_active_students,
         "total_active_finance": total_active_finance,
         "total_active_admin": total_active_admin,
-        "admin_user": session.get("user_name", "Admin User"),
-        "active_semester": active_semester,
-        "active_school_year": active_school_year,
-        "active_course": active_course,
+        "admin_user": get_admin_display_name(),
+        "active_semester": active_context["active_semester"],
+        "active_school_year": active_context["active_school_year"],
+        "active_course": active_context["active_course"],
     }
 
-    log_action(session.get("user_name", "Admin User"), "Viewed dashboard")
+    log_action(get_admin_display_name(), "Viewed dashboard")
     return render_template("admin/dashboard.html", data=data)
 
 
@@ -225,12 +313,9 @@ def accounts():
         error_out=False,
     )
 
-    active_settings = ActiveSettings.query.first()
-    active_semester = active_settings.active_semester if active_settings else "Not Set"
-    active_school_year = active_settings.active_school_year if active_settings else "Not Set"
-    active_course = getattr(active_settings, "active_course", "Not Set")
+    active_context = get_active_context()
 
-    log_action(session.get("user_name", "Admin User"), "Viewed accounts page")
+    log_action(get_admin_display_name(), "Viewed accounts page")
 
     return render_template(
         "admin/accounts.html",
@@ -238,13 +323,13 @@ def accounts():
         pagination=pagination,
         page=page,
         total_pages=pagination.pages,
-        admin_user=session.get("user_name", "Admin User"),
+        admin_user=get_admin_display_name(),
         search=search,
         role_filter=role_filter,
         status_filter=status_filter,
-        active_semester=active_semester,
-        active_school_year=active_school_year,
-        active_course=active_course,
+        active_semester=active_context["active_semester"],
+        active_school_year=active_context["active_school_year"],
+        active_course=active_context["active_course"],
     )
 
 
@@ -265,28 +350,30 @@ def add_new_account():
         middle_name = normalize_text(request.form.get("middleName"))
         last_name = normalize_text(request.form.get("lastName"))
         suffix = normalize_text(request.form.get("suffix"))
-        email = normalize_text(request.form.get("email")).lower()
+        email = normalize_email(request.form.get("email"))
         role = normalize_role(request.form.get("role"))
+        year_level = normalize_optional_student_field(request.form.get("year_level"))
+        course = normalize_optional_student_field(request.form.get("course"))
 
-        if not first_name or not last_name or not email or not role:
-            flash("First name, last name, email, and role are required.", "danger")
-            return render_template("admin/add_new_account.html", active_courses=active_courses)
-
-        if not is_valid_role(role):
-            flash("Invalid role selected.", "danger")
-            return render_template("admin/add_new_account.html", active_courses=active_courses)
-
-        if account_email_exists(email):
-            flash("Email already exists.", "danger")
+        validation_error = validate_account_payload(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            role=role,
+            status="Active",
+            course=course,
+        )
+        if validation_error:
+            flash(validation_error, "danger")
             return render_template("admin/add_new_account.html", active_courses=active_courses)
 
         password = generate_random_password(last_name)
 
         account = Account(
             first_name=first_name,
-            middle_name=middle_name,
+            middle_name=middle_name or None,
             last_name=last_name,
-            suffix=suffix,
+            suffix=suffix or None,
             email=email,
         )
 
@@ -294,8 +381,8 @@ def add_new_account():
         set_account_status(account, "Active")
 
         if role == "Student":
-            account.year_level = normalize_text(request.form.get("year_level"))
-            account.course = normalize_text(request.form.get("course"))
+            account.year_level = year_level
+            account.course = course
         else:
             account.year_level = None
             account.course = None
@@ -307,15 +394,20 @@ def add_new_account():
             db.session.commit()
 
             log_action(
-                session.get("user_name", "Admin User"),
+                get_admin_display_name(),
                 f"Added new account: {get_full_name(account)} ({email})",
             )
 
-            return redirect(
-                url_for("admin.show_generated_password", pwd=password, email=email)
-            )
+            session["generated_account_password"] = {
+                "email": email,
+                "password": password,
+            }
+
+            return redirect(url_for("admin.show_generated_password"))
+
         except Exception:
             db.session.rollback()
+            current_app.logger.exception("Failed to create new account for email: %s", email)
             flash("Failed to create account.", "danger")
             return render_template("admin/add_new_account.html", active_courses=active_courses)
 
@@ -337,8 +429,6 @@ def edit_account(account_id):
         flash("Account not found.", "danger")
         return redirect(url_for("admin.accounts"))
 
-    new_password = None
-
     if request.method == "POST":
         try:
             if "reset_password" in request.form:
@@ -346,73 +436,78 @@ def edit_account(account_id):
                 account.set_password(new_password)
                 db.session.commit()
 
-                flash(f"Password reset successfully. New password: {new_password}", "success")
+                session["generated_account_password"] = {
+                    "email": account.email or "",
+                    "password": new_password,
+                }
+
+                flash("Password reset successfully.", "success")
                 log_action(
-                    session.get("user_name", "Admin User"),
+                    get_admin_display_name(),
                     f"Reset password for {get_full_name(account)}",
                 )
+                return redirect(url_for("admin.show_generated_password"))
+
+            first_name = normalize_text(request.form.get("first_name"))
+            middle_name = normalize_text(request.form.get("middle_name"))
+            last_name = normalize_text(request.form.get("last_name"))
+            suffix = normalize_text(request.form.get("suffix"))
+            email = normalize_email(request.form.get("email"))
+            role_value = normalize_role(request.form.get("role"))
+            status_value = normalize_status(request.form.get("status"))
+            year_level = normalize_optional_student_field(request.form.get("year_level"))
+            course = normalize_optional_student_field(request.form.get("course"))
+
+            validation_error = validate_account_payload(
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                role=role_value,
+                status=status_value,
+                course=course,
+                exclude_account_id=account.id,
+            )
+            if validation_error:
+                flash(validation_error, "danger")
+                return redirect(url_for("admin.edit_account", account_id=account.id))
+
+            if account.id == admin.id and status_value != "Active":
+                flash("You cannot deactivate your own admin account.", "danger")
+                return redirect(url_for("admin.edit_account", account_id=account.id))
+
+            if account.id == admin.id and role_value != "Admin":
+                flash("You cannot change your own admin role.", "danger")
+                return redirect(url_for("admin.edit_account", account_id=account.id))
+
+            account.first_name = first_name
+            account.middle_name = middle_name or None
+            account.last_name = last_name
+            account.suffix = suffix or None
+            account.email = email
+
+            set_account_role(account, role_value)
+            set_account_status(account, status_value)
+
+            if role_value == "Student":
+                account.year_level = year_level
+                account.course = course
             else:
-                first_name = normalize_text(request.form.get("first_name"))
-                middle_name = normalize_text(request.form.get("middle_name"))
-                last_name = normalize_text(request.form.get("last_name"))
-                suffix = normalize_text(request.form.get("suffix"))
-                email = normalize_text(request.form.get("email")).lower()
-                role_value = normalize_role(request.form.get("role"))
-                status_value = normalize_status(request.form.get("status"))
+                account.year_level = None
+                account.course = None
 
-                if not first_name or not last_name or not email:
-                    flash("First name, last name, and email are required.", "danger")
-                    return redirect(url_for("admin.edit_account", account_id=account.id))
+            db.session.commit()
 
-                if not is_valid_role(role_value):
-                    flash("Invalid role selected.", "danger")
-                    return redirect(url_for("admin.edit_account", account_id=account.id))
-
-                if not is_valid_status(status_value):
-                    flash("Invalid status selected.", "danger")
-                    return redirect(url_for("admin.edit_account", account_id=account.id))
-
-                if account_email_exists(email, exclude_account_id=account.id):
-                    flash("Email already exists.", "danger")
-                    return redirect(url_for("admin.edit_account", account_id=account.id))
-
-                # Basic self-protection: don't let current admin deactivate themselves accidentally
-                if account.id == admin.id and status_value != "Active":
-                    flash("You cannot deactivate your own admin account.", "danger")
-                    return redirect(url_for("admin.edit_account", account_id=account.id))
-
-                if account.id == admin.id and role_value != "Admin":
-                    flash("You cannot change your own admin role.", "danger")
-                    return redirect(url_for("admin.edit_account", account_id=account.id))
-
-                account.first_name = first_name
-                account.middle_name = middle_name
-                account.last_name = last_name
-                account.suffix = suffix
-                account.email = email
-
-                set_account_role(account, role_value)
-                set_account_status(account, status_value)
-
-                if role_value == "Student":
-                    account.year_level = normalize_text(request.form.get("year_level"))
-                    account.course = normalize_text(request.form.get("course"))
-                else:
-                    account.year_level = None
-                    account.course = None
-
-                db.session.commit()
-
-                flash("Account updated successfully", "success")
-                log_action(
-                    session.get("user_name", "Admin User"),
-                    f"Updated account: {get_full_name(account)}",
-                )
+            flash("Account updated successfully.", "success")
+            log_action(
+                get_admin_display_name(),
+                f"Updated account: {get_full_name(account)}",
+            )
 
             return redirect(url_for("admin.edit_account", account_id=account.id))
 
         except Exception:
             db.session.rollback()
+            current_app.logger.exception("Failed to update account ID %s", account_id)
             flash("Failed to update account.", "danger")
             return redirect(url_for("admin.edit_account", account_id=account.id))
 
@@ -420,7 +515,6 @@ def edit_account(account_id):
     return render_template(
         "admin/edit_account.html",
         account=account,
-        new_password=new_password,
         active_courses=active_courses,
     )
 
@@ -491,11 +585,12 @@ def semester():
             db.session.commit()
             flash("Active semester updated successfully!", "success")
             log_action(
-                session.get("user_name", "Admin User"),
+                get_admin_display_name(),
                 f"Changed semester from '{old_semester}' to '{active_settings.active_semester}'",
             )
         except Exception:
             db.session.rollback()
+            current_app.logger.exception("Failed to update active semester")
             flash("Failed to update active semester.", "danger")
 
         return redirect(url_for("admin.semester"))
@@ -531,11 +626,12 @@ def school_year():
             db.session.commit()
             flash("Active school year updated successfully!", "success")
             log_action(
-                session.get("user_name", "Admin User"),
+                get_admin_display_name(),
                 f"Changed school year from '{old_year}' to '{active_settings.active_school_year}'",
             )
         except Exception:
             db.session.rollback()
+            current_app.logger.exception("Failed to update active school year")
             flash("Failed to update active school year.", "danger")
 
         return redirect(url_for("admin.school_year"))
@@ -574,11 +670,12 @@ def course():
             db.session.commit()
             flash(f"Course '{course_name}' added to active list successfully!", "success")
             log_action(
-                session.get("user_name", "Admin User"),
+                get_admin_display_name(),
                 f"Added new course '{course_name}'",
             )
         except Exception:
             db.session.rollback()
+            current_app.logger.exception("Failed to add course: %s", course_name)
             flash("Failed to add course.", "danger")
 
         return redirect(url_for("admin.course"))
@@ -609,11 +706,12 @@ def delete_course(course_id):
         db.session.commit()
         flash(f"Course '{course_name}' removed from active list.", "info")
         log_action(
-            session.get("user_name", "Admin User"),
+            get_admin_display_name(),
             f"Deleted course '{course_name}'",
         )
     except Exception:
         db.session.rollback()
+        current_app.logger.exception("Failed to delete course ID %s", course_id)
         flash("Failed to delete course.", "danger")
 
     return redirect(url_for("admin.course"))
@@ -645,6 +743,7 @@ def upload_accounts():
             flash("Unsupported file type. Please use CSV or Excel.", "danger")
             return redirect(url_for("admin.accounts"))
 
+        df.columns = [str(col).strip().lower() for col in df.columns]
         df = df.fillna("")
 
         existing_emails = {
@@ -653,66 +752,83 @@ def upload_accounts():
             if email
         }
 
-        uploaded_rows = []
+        created_count = 0
+        skipped_count = 0
+        created_names = []
 
         for _, row in df.iterrows():
-            email = normalize_text(row.get("email")).lower()
-            if not email or email in existing_emails:
-                continue
-
             first_name = normalize_text(row.get("first_name"))
             middle_name = normalize_text(row.get("middle_name"))
             last_name = normalize_text(row.get("last_name"))
             suffix = normalize_text(row.get("suffix"))
+            email = normalize_email(row.get("email"))
             role = normalize_role(row.get("role")) or "Student"
             status = normalize_status(row.get("status")) or "Inactive"
+            year_level = normalize_optional_student_field(row.get("year_level"))
+            course = normalize_optional_student_field(row.get("course"))
 
-            if not first_name or not last_name or not email:
+            if not email or email in existing_emails:
+                skipped_count += 1
                 continue
-            if not is_valid_role(role) or not is_valid_status(status):
+
+            validation_error = validate_account_payload(
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                role=role,
+                status=status,
+                course=course,
+            )
+            if validation_error:
+                skipped_count += 1
                 continue
 
             password = generate_random_password(last_name)
 
-            acc = Account(
+            account = Account(
                 first_name=first_name,
-                middle_name=middle_name,
+                middle_name=middle_name or None,
                 last_name=last_name,
-                suffix=suffix,
+                suffix=suffix or None,
                 email=email,
             )
 
-            set_account_role(acc, role)
-            set_account_status(acc, status)
+            set_account_role(account, role)
+            set_account_status(account, status)
 
             if role == "Student":
-                acc.year_level = normalize_text(row.get("year_level"))
-                acc.course = normalize_text(row.get("course"))
+                account.year_level = year_level
+                account.course = course
             else:
-                acc.year_level = None
-                acc.course = None
+                account.year_level = None
+                account.course = None
 
-            acc.set_password(password)
-            db.session.add(acc)
+            account.set_password(password)
 
+            db.session.add(account)
             existing_emails.add(email)
-            uploaded_rows.append(get_full_name(acc))
+            created_count += 1
+            created_names.append(get_full_name(account))
 
         db.session.commit()
 
-        if uploaded_rows:
-            flash(f"Successfully uploaded {len(uploaded_rows)} accounts.", "success")
+        if created_count:
+            flash(f"Successfully uploaded {created_count} account(s).", "success")
             log_action(
-                session.get("user_name", "Admin User"),
-                f"Uploaded accounts: {', '.join(uploaded_rows)}",
+                get_admin_display_name(),
+                f"Uploaded accounts: {', '.join(created_names)}",
             )
         else:
-            flash("No new accounts were added (all emails exist or invalid).", "info")
+            flash("No new accounts were added.", "info")
+
+        if skipped_count:
+            flash(f"Skipped {skipped_count} invalid or duplicate row(s).", "warning")
 
         return redirect(url_for("admin.accounts"))
 
     except Exception as exc:
         db.session.rollback()
+        current_app.logger.exception("Failed to upload accounts file: %s", filename)
         flash(f"Upload failed: {str(exc)}", "danger")
         return redirect(url_for("admin.accounts"))
 
@@ -744,7 +860,7 @@ def download_template():
     out.seek(0)
 
     log_action(
-        session.get("user_name", "Admin User"),
+        get_admin_display_name(),
         "Downloaded account upload template",
     )
 
@@ -774,7 +890,7 @@ def export_csv():
     df.to_csv(output, index=False)
     output.seek(0)
 
-    log_action(session.get("user_name", "Admin User"), "Exported all accounts to CSV")
+    log_action(get_admin_display_name(), "Exported all accounts to CSV")
 
     return send_file(
         io.BytesIO(output.getvalue().encode("utf-8")),
@@ -805,7 +921,7 @@ def export_excel():
 
     output.seek(0)
 
-    log_action(session.get("user_name", "Admin User"), "Exported all accounts to Excel")
+    log_action(get_admin_display_name(), "Exported all accounts to Excel")
 
     return send_file(
         output,
@@ -825,13 +941,19 @@ def show_generated_password():
     if response:
         return response
 
-    password = request.args.get("pwd", "")
-    email = request.args.get("email", "")
+    generated = session.get("generated_account_password", {}) or {}
+    password = generated.get("password", "")
+    email = generated.get("email", "")
+
+    if not password and not email:
+        flash("No generated password is available.", "warning")
+        return redirect(url_for("admin.accounts"))
+
     return render_template(
         "admin/generated_password.html",
         password=password,
         email=email,
-        admin_user=session.get("user_name", "Admin User"),
+        admin_user=get_admin_display_name(),
     )
 
 
@@ -841,7 +963,7 @@ def show_generated_password():
 @admin_bp.route("/logout", methods=["GET", "POST"])
 @require_role("Admin")
 def logout():
-    user_name = session.get("user_name", "Admin User")
+    user_name = get_admin_display_name()
     log_action(user_name, "Logged out")
     session.clear()
     flash("You have been logged out.", "danger")
