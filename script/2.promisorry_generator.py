@@ -15,8 +15,8 @@ from models import db, Account, PromissoryRequest
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 input_file = os.path.join(BASE_DIR, "accounts.xlsx")
 
-min_notes = 1      # minimum promissory per student
-max_notes = 3      # maximum promissory per student
+min_notes = 3      # minimum promissory per student
+max_notes = 10      # maximum promissory per student
 
 promissory_reasons = [
     "Financial hardship due to family emergency.",
@@ -28,7 +28,117 @@ promissory_reasons = [
     "Awaiting scholarship disbursement.",
     "Unexpected household expenses.",
     "Need extension to settle tuition fees.",
-    "Still processing financial documents."
+    "Still processing financial documents.",
+
+    "Delayed salary of parent or guardian.",
+    "Family business experiencing low income.",
+    "Recent hospitalization of a family member.",
+    "Funds allocated for tuition were used for emergency.",
+    "Ongoing financial obligations at home.",
+    "Recent natural disaster affected family income.",
+    "Unexpected travel expenses due to family matters.",
+    "Tuition funds were delayed due to bank processing.",
+    "Additional school-related expenses exceeded budget.",
+    "Guardian is currently recovering from illness.",
+
+    "Partial payment already made, remaining balance pending.",
+    "Late remittance from overseas family member.",
+    "Pending release of financial aid.",
+    "Unexpected increase in living expenses.",
+    "Funds reallocated for urgent home repairs.",
+    "Family prioritizing medical needs over tuition.",
+    "Delayed income from small business.",
+    "Awaiting loan approval.",
+    "Short-term financial instability.",
+    "Multiple dependents supported by family income.",
+
+    "Recent job loss of parent.",
+    "Income affected by seasonal employment.",
+    "Family prioritizing basic necessities.",
+    "Unexpected expenses due to school projects.",
+    "Financial support reduced temporarily.",
+    "Awaiting payout from insurance claim.",
+    "Unexpected fees from other obligations.",
+    "Delayed pension release.",
+    "Family facing financial restructuring.",
+    "Recent relocation expenses.",
+
+    "Temporary delay in receiving allowance.",
+    "Budget constraints due to inflation.",
+    "Unexpected cost of transportation.",
+    "Pending reimbursement from employer.",
+    "Family savings depleted due to emergency.",
+    "Multiple tuition payments due simultaneously.",
+    "Unexpected academic-related expenses.",
+    "Household income affected by recent events.",
+    "Delayed financial support from relatives.",
+    "Unexpected bills accumulated this month.",
+
+    "Awaiting release of government assistance.",
+    "Family prioritizing rent and utilities.",
+    "Recent accident caused financial strain.",
+    "Income reduced due to reduced working hours.",
+    "Family recovering from financial setback.",
+    "Unexpected legal expenses.",
+    "Pending business income collection.",
+    "Emergency repairs at home required funds.",
+    "Additional expenses for sibling’s education.",
+    "Financial obligations increased unexpectedly.",
+
+    "Delay in scholarship validation process.",
+    "Unexpected expenses for health maintenance.",
+    "Family affected by economic downturn.",
+    "Income diverted to urgent family needs.",
+    "Awaiting salary adjustment release.",
+    "Unexpected academic fees incurred.",
+    "Medical maintenance costs increased.",
+    "Family income delayed due to employer issues.",
+    "Shortfall in monthly budget allocation.",
+    "Temporary financial mismanagement.",
+
+    "Unexpected travel due to family emergency.",
+    "Delayed freelance income payment.",
+    "Family dealing with debt obligations.",
+    "Unexpected increase in tuition-related costs.",
+    "Awaiting payment from client or employer.",
+    "Temporary pause in income stream.",
+    "Financial support redirected to urgent needs.",
+    "Unexpected maintenance costs at home.",
+    "Budget shortage due to inflation increase.",
+    "Recent unexpected expenditures.",
+
+    "Delayed cash flow from family business.",
+    "Pending release of academic subsidy.",
+    "Additional medical tests required funding.",
+    "Emergency support needed for relatives.",
+    "Unexpected utility bill increase.",
+    "Income affected by external circumstances.",
+    "Awaiting funds from external sponsor.",
+    "Recent family financial adjustments.",
+    "Budget constraints due to multiple expenses.",
+    "Short-term inability to pay full tuition.",
+
+    "Unexpected expenses related to internship.",
+    "Delayed stipend release.",
+    "Additional costs due to academic requirements.",
+    "Temporary shortage of funds.",
+    "Awaiting financial support confirmation.",
+    "Unexpected increase in cost of living.",
+    "Family focusing on urgent priorities.",
+    "Pending approval of financial assistance.",
+    "Recent unexpected financial burden.",
+    "Temporary financial constraints due to emergency.",
+
+    "Awaiting remittance from abroad.",
+    "Unexpected expenses due to pandemic recovery.",
+    "Family income disrupted by recent events.",
+    "Short-term delay in tuition payment capability.",
+    "Financial adjustments due to household needs.",
+    "Unexpected expenses related to transportation.",
+    "Budget allocation shifted to urgent needs.",
+    "Awaiting confirmation of payment source.",
+    "Temporary financial difficulty this semester.",
+    "Family experiencing financial transition period."
 ]
 
 semester_names = ["First Semester", "Second Semester", "Mid Year"]
@@ -48,9 +158,10 @@ def normalize_text(value):
     return str(value).strip()
 
 
-def validate_config():
+def validate_config(min_notes: int, max_notes: int) -> None:
     if min_notes < 1 or max_notes < 1:
-        raise ValueError("min_notes and max_notes must be at least 1.")
+        raise ValueError("Values must be positive.")
+
     if min_notes > max_notes:
         raise ValueError("min_notes cannot be greater than max_notes.")
 
@@ -117,7 +228,7 @@ def has_required_account_fields(account):
 # MAIN
 # -------------------------
 def main():
-    validate_config()
+    validate_config(min_notes, max_notes)
     validate_excel_file(input_file)
 
     print(f"Reading Excel file: {input_file}")

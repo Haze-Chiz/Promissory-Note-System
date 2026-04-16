@@ -29,7 +29,7 @@ admin_bp = Blueprint(
 )
 
 VALID_ROLES = {"Admin", "Finance", "Student"}
-VALID_STATUSES = {"Active", "Inactive"}
+VALID_STATUSES = {"Active", "Inactive", "Archived"}
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
@@ -257,6 +257,7 @@ def dashboard():
 
     total_active = Account.query.filter_by(_status="Active").count()
     total_inactive = Account.query.filter_by(_status="Inactive").count()
+    total_archived = Account.query.filter_by(_status="Archived").count()
     total_active_students = Account.query.filter_by(_status="Active", _role="Student").count()
     total_active_finance = Account.query.filter_by(_status="Active", _role="Finance").count()
     total_active_admin = Account.query.filter_by(_status="Active", _role="Admin").count()
@@ -266,6 +267,7 @@ def dashboard():
     data = {
         "total_active_accounts": total_active,
         "total_unactivated_accounts": total_inactive,
+        "total_archived_accounts": total_archived,
         "total_active_students": total_active_students,
         "total_active_finance": total_active_finance,
         "total_active_admin": total_active_admin,
@@ -472,7 +474,7 @@ def edit_account(account_id):
                 return redirect(url_for("admin.edit_account", account_id=account.id))
 
             if account.id == admin.id and status_value != "Active":
-                flash("You cannot deactivate your own admin account.", "danger")
+                flash("You cannot deactivate or archive your own admin account.", "danger")
                 return redirect(url_for("admin.edit_account", account_id=account.id))
 
             if account.id == admin.id and role_value != "Admin":

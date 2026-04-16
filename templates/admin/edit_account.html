@@ -289,6 +289,7 @@
               class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300">
               <option value="Active" {% if account.status == 'Active' %}selected{% endif %}>Active</option>
               <option value="Inactive" {% if account.status == 'Inactive' %}selected{% endif %}>Inactive</option>
+              <option value="Archived" {% if account.status == 'Archived' %}selected{% endif %}>Archived</option>
             </select>
           </div>
 

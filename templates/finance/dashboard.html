@@ -121,18 +121,13 @@
     </div>
   </nav>
 
-  <main
-    id="mainContent"
-    class="ml-[240px] min-h-screen p-6 transition-all duration-300 ease-in-out max-[900px]:ml-0 max-[900px]:px-4 max-[900px]:pb-5 max-[900px]:pt-[76px] motion-reduce:transition-none">
-    <header class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-surface p-5 shadow-soft max-[900px]:p-[18px]">
-      <div>
-        <h2 class="text-[28px] font-bold text-primary max-[900px]:text-2xl">Dashboard</h2>
+  <main class="ml-[240px] min-h-screen p-6 transition-all duration-300 ease-in-out max-[980px]:ml-0 max-[980px]:px-4 max-[980px]:pb-5 max-[980px]:pt-[76px] motion-reduce:transition-none">
+    <header class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-surface px-5 py-[18px] shadow-soft max-[700px]:items-start">
+      <h2 class="text-[28px] font-bold text-primary max-[980px]:text-2xl">Dashboard</h2>
+      <div class="text-right text-sm leading-6 text-muted max-[980px]:text-left">
+        Semester: <strong class="text-textmain">{{ active_semester }}</strong><br>
+        S.Y: <strong class="text-textmain">{{ active_school_year }}</strong>
       </div>
-      <p class="text-sm text-muted">
-        Active Semester: <strong class="text-textmain">{{ active_semester }}</strong>
-        |
-        S.Y.: <strong class="text-textmain">{{ active_school_year }}</strong>
-      </p>
     </header>
 
     <section class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[18px] max-[900px]:grid-cols-[repeat(auto-fit,minmax(150px,1fr))]" aria-label="Promissory summary cards">

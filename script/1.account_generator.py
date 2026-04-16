@@ -64,7 +64,6 @@ school_years_list = ["2023-2024", "2024-2025", "2025-2026"]
 
 password_default = "password123"
 
-# Expanded first and last names pools
 first_names = [
     "Juan", "Maria", "Jose", "Ana", "Mark", "John", "Paula", "Miguel", "Sofia", "Daniel",
     "Renz", "Joshua", "Angela", "Carla", "Raven", "Bruce", "Ella", "Nicole", "Liam", "Zyra",
@@ -74,7 +73,23 @@ first_names = [
     "Carlo", "Ellaine", "Rafael", "Katrina", "Dominic", "Angelica", "Jonathan", "Danica", "Kevin", "Abigail",
     "Anthony", "Nicole", "Michael", "Patricia", "Joshua", "Camille", "Adrian", "Francesca", "Jacob", "Gabrielle",
     "Sean", "Sophia", "Vincent", "Alyssa", "Christian", "Beatrice", "Aaron", "Charlotte", "Markus", "Clarisse",
-    "Julian", "Vanessa", "Edwin", "Marianne", "Leo", "Diana", "Harrison", "Paula", "Ian", "Rachel"
+    "Julian", "Vanessa", "Edwin", "Marianne", "Leo", "Diana", "Harrison", "Paula", "Ian", "Rachel",
+    "Alvin", "Bryan", "Cedric", "Derrick", "Enzo", "Franco", "Gian", "Harvey", "Ivan", "Jared",
+    "Kurt", "Lester", "Marvin", "Neil", "Oscar", "Paolo", "Quentin", "Ralph", "Steve", "Tristan",
+    "Ulysses", "Victor", "Warren", "Xander", "Yves", "Zachary",
+    "Aileen", "Bianca", "Cassandra", "Denise", "Elaine", "Faith", "Giselle", "Hazel", "Irene", "Joy",
+    "Karen", "Liza", "Megan", "Nina", "Olivia", "Princess", "Queenie", "Rica", "Sheila", "Therese",
+    "Ursula", "Vera", "Wendy", "Xenia", "Yasmin", "Zara",
+    "Andrei", "Benedict", "Carl", "Diego", "Erwin", "Felix", "Gerald", "Henry", "Isaac", "Jayson",
+    "Kris", "Louie", "Marlon", "Noel", "Owen", "Philip", "Rico", "Seth", "Timothy", "Ulrich",
+    "Vince", "Wilfred", "Xyron", "Yuri", "Zion",
+    "Aubrey", "Brianna", "Celine", "Daphne", "Erika", "Fiona", "Glenda", "Heidi", "Isabel", "Janine",
+    "Kristine", "Leah", "Monica", "Nadine", "Odessa", "Pamela", "Queena", "Ruth", "Samantha", "Tiffany",
+    "Una", "Valerie", "Whitney", "Xyza", "Yvette", "Zenaida",
+    "Arvin", "Brent", "Clifford", "Dennis", "Emmanuel", "Francis", "Gilbert", "Hector", "Irvin", "Jerome",
+    "Karl", "Lawrence", "Melvin", "Norbert", "Orlando", "Percy", "Ruben", "Stanley", "Terrence", "Virgil",
+    "Althea", "Bea", "Chantal", "Darlene", "Eunice", "Florence", "Gretchen", "Helena", "Ivana", "Jessa",
+    "Kaye", "Lourdes", "Maricel", "Noemi", "Ofelia", "Pauline", "Rochelle", "Shaina", "Tricia", "Vienna"
 ]
 
 last_names = [
@@ -86,7 +101,38 @@ last_names = [
     "Carreon", "Tupas", "Valdez", "Vergara", "Manalo", "Bayani", "Abella", "Castañeda", "Rosales", "Salvador",
     "DelaRosa", "Marquez", "Lagman", "Delgado", "Antonio", "Gonzales", "Buenaventura", "Ferrer", "Torralba", "Alvarez",
     "Cordero", "Labrador", "Padua", "Dimaano", "Malvar", "Roces", "Aguilar", "Castro", "Roldan", "Serrano",
-    "Balagtas", "Alfaro", "Lazaro", "Bacani", "Villanueva", "Soriano", "Delgado", "Navarro", "Ramos", "Tañada"
+    "Balagtas", "Alfaro", "Lazaro", "Bacani", "Villanueva", "Soriano", "Delgado", "Navarro", "Ramos", "Tañada",
+    "Abad", "Abalos", "Abrenica", "Adriano", "Agbayani", "Agcaoili", "Agustin", "Alano", "Alba", "Alcaraz",
+    "Alipio", "Altamirano", "Amador", "Amante", "Ampatuan", "Andrada", "Angeles", "Ansay", "Apostol",
+    "Arce", "Arevalo", "Arroyo", "Atienza", "Austria",
+    "Baldonado", "Ballesteros", "Banal", "Bangayan", "Bantug", "Barrios", "Basco", "Bautista", "Belmonte",
+    "Benitez", "Bernabe", "Bernardino", "Borja", "Briones", "Bulatao",
+    "Cabral", "Calderon", "Callanta", "Camacho", "Campos", "Canlas", "Capili", "Carandang", "Cardona",
+    "Cariaga", "Casimiro", "Celis", "Chavez", "Ching", "Cojuangco", "Colmenares", "Concepcion",
+    "Dagdag", "Damaso", "Datu", "David", "De Jesus", "De Leon", "De Mesa", "De Vera", "De Villa",
+    "Decena", "Del Mundo", "Dela Fuente", "Dela Torre", "Dela Vega", "Delos Reyes", "Dizon", "Domingo",
+    "Echavez", "Ejercito", "Elizalde", "Encarnacion", "Endaya", "Enriquez", "Escobar", "Espiritu",
+    "Fajardo", "Falcon", "Felipe", "Fernandez", "Fernando", "Fortun", "Fuentes",
+    "Galang", "Galvez", "Garces", "Gatchalian", "Gomez", "Gorospe", "Guanzon", "Guerrero", "Guinto",
+    "Hernandez", "Hilario", "Hipolito", "Hizon",
+    "Ilagan", "Inocencio", "Isidro",
+    "Jalandoni", "Javier", "Jocson", "Juliano",
+    "Lacson", "Ladlad", "Lao", "Lariosa", "Legaspi", "Lorenzo", "Lucero",
+    "Macapagal", "Magtanggol", "Malabanan", "Maliksi", "Mangahas", "Manzano", "Mariano",
+    "Matias", "Medina", "Mercado", "Miranda", "Montero", "Montoya",
+    "Natividad", "Nepomuceno", "Nolasco",
+    "Ocampo", "Ong", "Ordonez", "Oreta",
+    "Pablo", "Pacquiao", "Pajarillo", "Palma", "Panganiban", "Pangilinan", "Paredes",
+    "Parungao", "Pelayo", "Peralta", "Ponce", "Puno",
+    "Quimbo", "Quintos",
+    "Recto", "Regalado", "Resurreccion", "Ricafort", "Rigor", "Robles", "Romualdez", "Roxas",
+    "Samson", "San Pedro", "San Juan", "Sandoval", "Sarmiento", "Sebastian", "Soliman", "Suarez",
+    "Tabora", "Tagle", "Talavera", "Tamayo", "Tanchanco", "Tapia", "Tejada", "Tenorio",
+    "Tolentino", "Trinidad", "Tuazon",
+    "Umali", "Urbano",
+    "Valencia", "Vargas", "Vasquez", "Ventura", "Verano", "Vidal",
+    "Yabut", "Yap", "Ylagan",
+    "Zamora", "Zaragoza", "Zialcita"
 ]
 
 with app.app_context():
@@ -94,14 +140,12 @@ with app.app_context():
     db.create_all()
     print("✔ Database cleared and tables created")
 
-    # Add courses
     for course_name in courses:
         if not ActiveCourse.query.filter_by(name=course_name).first():
             db.session.add(ActiveCourse(name=course_name))
     db.session.commit()
     print(f"✔ {len(courses)} ActiveCourses created")
 
-    # Finance account
     if not Account.query.filter_by(email="finance@school.edu").first():
         finance_account = Account(
             first_name="Finance",
@@ -120,7 +164,6 @@ with app.app_context():
         db.session.commit()
         print("✔ Finance account created")
 
-    # Admin accounts
     admins = [
         {
             "first_name": "Master",
@@ -157,11 +200,10 @@ with app.app_context():
             db.session.commit()
             print(f"Admin account '{admin_data['email']}' created successfully!")
 
-    # Generate students with unique names
     used_names = set()
     students = []
     for course_name in courses:
-        total_students = random.randint(50, 80)
+        total_students = random.randint(200, 300)
         year_counts = [int(total_students * w) for w in year_weights]
         while sum(year_counts) < total_students:
             year_counts[0] += 1
@@ -196,7 +238,6 @@ with app.app_context():
     db.session.commit()
     print(f"✔ {len(students)} Student accounts created with unique names")
 
-    # Active settings
     active_settings = ActiveSettings(
         active_semester="First Semester",
         active_school_year="2025-2026"
