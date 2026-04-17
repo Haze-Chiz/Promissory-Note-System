@@ -59,6 +59,11 @@
 </head>
 
 <body class="bg-bg font-sans leading-6 text-textmain antialiased">
+  {% set role_is_locked = role_locked if role_locked is defined else false %}
+  {% set status_is_locked = status_locked if status_locked is defined else false %}
+  {% set current_role = account.role %}
+  {% set current_status = account.status %}
+
   <button
     class="fixed left-4 top-4 z-[1100] hidden rounded-[10px] bg-primary px-3 py-2 text-lg text-white shadow-soft focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[980px]:inline-flex max-[980px]:items-center max-[980px]:justify-center motion-reduce:transition-none"
     type="button"
@@ -90,8 +95,8 @@
       </a>
 
       <a href="{{ url_for('admin.accounts') }}"
-        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if request.endpoint == 'admin.accounts' %}bg-white/20 font-bold{% else %}font-medium{% endif %}"
-        aria-current="{% if request.endpoint == 'admin.accounts' %}page{% endif %}">
+        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if request.endpoint == 'admin.accounts' or request.endpoint == 'admin.edit_account' %}bg-white/20 font-bold{% else %}font-medium{% endif %}"
+        aria-current="{% if request.endpoint == 'admin.accounts' or request.endpoint == 'admin.edit_account' %}page{% endif %}">
         <img src="{{ url_for('static', filename='images/accounts.png') }}"
           class="h-[30px] w-[30px] shrink-0 rounded-full bg-white p-1.5" alt="">
         <span>Accounts</span>
@@ -175,12 +180,6 @@
 
       <h3 class="mb-5 text-[22px] font-bold text-primary">Account Details</h3>
 
-      {% if new_password %}
-      <div class="mb-[18px] rounded-xl border border-green-300 bg-green-50 px-4 py-[14px] font-semibold text-green-800">
-        <strong>New Password:</strong> {{ new_password }}
-      </div>
-      {% endif %}
-
       <form method="POST">
         <div class="grid grid-cols-4 gap-x-5 gap-y-4 max-[992px]:grid-cols-2 max-[768px]:grid-cols-1">
           <div class="min-w-0">
@@ -201,7 +200,7 @@
               id="middle_name"
               name="middle_name"
               class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
-              value="{{ account.middle_name }}">
+              value="{{ account.middle_name or '' }}">
           </div>
 
           <div class="min-w-0">
@@ -222,7 +221,7 @@
               id="suffix"
               name="suffix"
               class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
-              value="{{ account.suffix }}">
+              value="{{ account.suffix or '' }}">
           </div>
 
           <div class="col-span-4 min-w-0 max-[992px]:col-span-2 max-[768px]:col-span-1">
@@ -238,19 +237,30 @@
 
           <div class="col-span-4 min-w-0 max-[992px]:col-span-2 max-[768px]:col-span-1">
             <label for="role" class="mb-1.5 block text-sm font-semibold text-muted">Role</label>
+
+            {% if role_is_locked %}
+            <input
+              type="text"
+              class="w-full rounded-xl border border-borderline bg-slate-100 px-3 py-[11px] text-sm font-semibold text-textmain"
+              value="{{ current_role }}"
+              readonly>
+            <input type="hidden" name="role" value="{{ current_role }}">
+            {% else %}
             <select
               id="role"
               name="role"
               class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300">
-              <option value="Admin" {% if account.role == 'Admin' %}selected{% endif %}>Admin</option>
-              <option value="Finance" {% if account.role == 'Finance' %}selected{% endif %}>Finance</option>
-              <option value="Student" {% if account.role == 'Student' %}selected{% endif %}>Student</option>
+              <option value="" disabled>Select role</option>
+              {% for role in assignable_roles %}
+              <option value="{{ role }}" {% if current_role == role %}selected{% endif %}>{{ role }}</option>
+              {% endfor %}
             </select>
+            {% endif %}
           </div>
 
           <div
             id="studentFields"
-            class="col-span-4 grid grid-cols-2 gap-x-5 gap-y-4 border-t border-borderline pt-4 max-[992px]:col-span-2 max-[768px]:col-span-1 max-[768px]:grid-cols-1 {% if account.role != 'Student' %}hidden{% endif %}">
+            class="col-span-4 grid grid-cols-2 gap-x-5 gap-y-4 border-t border-borderline pt-4 max-[992px]:col-span-2 max-[768px]:col-span-1 max-[768px]:grid-cols-1 {% if current_role != 'Student' %}hidden{% endif %}">
             <div class="min-w-0">
               <label for="year_level" class="mb-1.5 block text-sm font-semibold text-muted">Year Level</label>
               <select
@@ -283,14 +293,24 @@
 
           <div class="col-span-4 min-w-0 max-[992px]:col-span-2 max-[768px]:col-span-1">
             <label for="status" class="mb-1.5 block text-sm font-semibold text-muted">Status</label>
+
+            {% if status_is_locked %}
+            <input
+              type="text"
+              class="w-full rounded-xl border border-borderline bg-slate-100 px-3 py-[11px] text-sm font-semibold text-textmain"
+              value="{{ current_status }}"
+              readonly>
+            <input type="hidden" name="status" value="{{ current_status }}">
+            {% else %}
             <select
               id="status"
               name="status"
               class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300">
-              <option value="Active" {% if account.status == 'Active' %}selected{% endif %}>Active</option>
-              <option value="Inactive" {% if account.status == 'Inactive' %}selected{% endif %}>Inactive</option>
-              <option value="Archived" {% if account.status == 'Archived' %}selected{% endif %}>Archived</option>
+              <option value="Active" {% if current_status == 'Active' %}selected{% endif %}>Active</option>
+              <option value="Inactive" {% if current_status == 'Inactive' %}selected{% endif %}>Inactive</option>
+              <option value="Archived" {% if current_status == 'Archived' %}selected{% endif %}>Archived</option>
             </select>
+            {% endif %}
           </div>
 
           <div class="col-span-4 mt-4 flex flex-wrap gap-2.5 border-t border-borderline pt-4 max-[992px]:col-span-2 max-[768px]:col-span-1 max-[768px]:flex-col">
@@ -351,7 +371,15 @@
     }
 
     function toggleStudentFields() {
-      const isStudent = roleSelect.value === "Student";
+      if (!studentFields || !yearLevelSelect || !courseSelect) return;
+
+      let selectedRole = "{{ current_role }}";
+
+      if (roleSelect && !roleSelect.hasAttribute("readonly")) {
+        selectedRole = roleSelect.value;
+      }
+
+      const isStudent = selectedRole === "Student";
       studentFields.classList.toggle("hidden", !isStudent);
 
       yearLevelSelect.required = isStudent;
@@ -366,7 +394,10 @@
     sidebarToggle.addEventListener("click", toggleSidebar);
     sidebarOverlay.addEventListener("click", closeSidebar);
 
-    roleSelect.addEventListener("change", toggleStudentFields);
+    if (roleSelect) {
+      roleSelect.addEventListener("change", toggleStudentFields);
+    }
+
     toggleStudentFields();
 
     document.addEventListener("DOMContentLoaded", () => {

@@ -189,9 +189,9 @@
           id="role"
           class="min-w-[160px] rounded-xl border border-borderline bg-slate-50 px-[14px] py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none max-md:w-full">
           <option value="" {% if not role_filter %}selected{% endif %}>All Roles</option>
-          <option value="Admin" {% if role_filter == 'Admin' %}selected{% endif %}>Admin</option>
-          <option value="Student" {% if role_filter == 'Student' %}selected{% endif %}>Student</option>
-          <option value="Finance" {% if role_filter == 'Finance' %}selected{% endif %}>Finance</option>
+          {% for role in filter_role_options %}
+          <option value="{{ role }}" {% if role_filter == role %}selected{% endif %}>{{ role }}</option>
+          {% endfor %}
         </select>
 
         <label for="status" class="sr-only absolute -m-px h-px w-px overflow-hidden whitespace-nowrap border-0 p-0 [clip:rect(0,0,0,0)]">Status</label>
@@ -248,14 +248,17 @@
           </button>
           <div
             class="dropdown-content absolute right-0 z-30 mt-2 hidden min-w-[190px] overflow-hidden rounded-xl border border-borderline bg-white shadow-dropdown max-md:left-0 max-md:right-0">
-            <a href="{{ url_for('admin.export_csv') }}" role="menuitem" class="block w-full bg-white px-4 py-3 text-left text-sm text-textmain transition duration-200 ease-in-out hover:bg-slate-50">Export as CSV</a>
-            <a href="{{ url_for('admin.export_excel') }}" role="menuitem" class="block w-full bg-white px-4 py-3 text-left text-sm text-textmain transition duration-200 ease-in-out hover:bg-slate-50">Export as Excel</a>
+            <a href="{{ url_for('admin.export_csv', search=search, role=role_filter, status=status_filter) }}" role="menuitem" class="block w-full bg-white px-4 py-3 text-left text-sm text-textmain transition duration-200 ease-in-out hover:bg-slate-50">Export as CSV</a>
+            <a href="{{ url_for('admin.export_excel', search=search, role=role_filter, status=status_filter) }}" role="menuitem" class="block w-full bg-white px-4 py-3 text-left text-sm text-textmain transition duration-200 ease-in-out hover:bg-slate-50">Export as Excel</a>
           </div>
         </div>
       </div>
     </form>
 
     <form id="uploadForm" action="{{ url_for('admin.upload_accounts') }}" method="POST" enctype="multipart/form-data" class="hidden">
+      {% if csrf_token is defined %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% endif %}
       <input type="file" name="file" id="uploadFile" accept=".csv,.xlsx,.xls">
     </form>
 
@@ -271,7 +274,7 @@
             <th scope="col" class="w-[320px] whitespace-nowrap px-[15px] py-[14px] text-left text-sm font-bold">Email</th>
             <th scope="col" class="w-[140px] whitespace-nowrap px-[15px] py-[14px] text-left text-sm font-bold">Role</th>
             <th scope="col" class="w-[140px] whitespace-nowrap px-[15px] py-[14px] text-left text-sm font-bold">Status</th>
-            <th scope="col" class="w-[140px] whitespace-nowrap px-[15px] py-[14px] text-left text-sm font-bold">Actions</th>
+            <th scope="col" class="w-[160px] whitespace-nowrap px-[15px] py-[14px] text-left text-sm font-bold">Actions</th>
           </tr>
         </thead>
 
@@ -282,10 +285,19 @@
               {% if i < accounts|length %}
                 {% set acc = accounts[i] %}
                 <td class="border-b border-slate-100 px-[15px] py-[14px] text-left align-middle text-sm">{{ (pagination.page - 1) * pagination.per_page + i + 1 }}</td>
-                <td class="border-b border-slate-100 px-[15px] py-[14px] text-left align-middle text-sm">{{ acc.full_name }}</td>
+                <td class="border-b border-slate-100 px-[15px] py-[14px] text-left align-middle text-sm">
+                  {{ acc.full_name if acc.full_name is defined else ((acc.first_name or '') ~ ' ' ~ (acc.middle_name or '') ~ ' ' ~ (acc.last_name or '') ~ ' ' ~ (acc.suffix or ''))|trim }}
+                </td>
                 <td class="border-b border-slate-100 px-[15px] py-[14px] text-left align-middle text-sm">{{ acc.email }}</td>
                 <td class="border-b border-slate-100 px-[15px] py-[14px] text-left align-middle text-sm">
-                  <span class="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-indigo-200 bg-indigo-100 px-3 py-1.5 text-xs font-bold text-indigo-800">
+                  <span class="inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-bold
+                  {% if acc.role == 'Admin' %}
+                    border border-indigo-200 bg-indigo-100 text-indigo-800
+                  {% elif acc.role == 'Finance' %}
+                    border border-cyan-200 bg-cyan-100 text-cyan-800
+                  {% else %}
+                    border border-emerald-200 bg-emerald-100 text-emerald-800
+                  {% endif %}">
                     {{ acc.role }}
                   </span>
                 </td>
@@ -297,18 +309,24 @@
                     border border-red-300 bg-red-100 text-red-800
                   {% elif acc.status == 'Archived' %}
                     border border-gray-300 bg-gray-100 text-gray-800
-                  {% endif %}
-                  ">
+                  {% endif %}">
                     {{ acc.status }}
                   </span>
                 </td>
                 <td class="border-b border-slate-100 px-[15px] py-[14px] text-left align-middle text-sm">
                   <div class="flex flex-wrap gap-2">
+                    {% if acc.can_edit is defined and acc.can_edit %}
                     <a
                       href="{{ url_for('admin.edit_account', account_id=acc.id) }}"
                       class="inline-flex items-center justify-center rounded-[10px] bg-success px-3 py-2 text-[13px] font-semibold text-white shadow-btn transition duration-200 ease-in-out hover:-translate-y-px hover:bg-green-700 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none">
                       Edit
                     </a>
+                    {% else %}
+                    <span
+                      class="inline-flex cursor-not-allowed items-center justify-center rounded-[10px] bg-slate-300 px-3 py-2 text-[13px] font-semibold text-slate-600 opacity-80">
+                      Restricted
+                    </span>
+                    {% endif %}
                   </div>
                 </td>
               {% else %}

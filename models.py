@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
-VALID_ROLES = {"Admin", "Finance", "Student"}
+VALID_ROLES = {"Admin", "Finance", "Student", "Superadmin"}
 VALID_STATUSES = {"Active", "Inactive", "Archived"}
 VALID_REQUEST_STATUSES = {"Pending", "Approved", "Rejected"}
 VALID_SEMESTER_TYPES = {"Prelim", "Midterm", "Final"}

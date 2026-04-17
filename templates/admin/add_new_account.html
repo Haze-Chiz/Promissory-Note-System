@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Add New Account - Promissory App</title>
+  <title>{% if account %}Edit{% else %}Add New{% endif %} Account - Promissory App</title>
   <link rel="icon" type="image/x-icon" href="./static/images/logo.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -21,7 +21,10 @@
             muted: "#6b7280",
             borderline: "#e5e7eb",
             hoverbg: "#eef2ff",
-            success: "#16a34a"
+            success: "#16a34a",
+            danger: "#dc2626",
+            warning: "#d97706",
+            info: "#2563eb"
           },
           boxShadow: {
             soft: "0 10px 25px rgba(0, 0, 0, 0.08)",
@@ -57,6 +60,12 @@
 </head>
 
 <body class="bg-bg font-sans leading-6 text-textmain antialiased">
+  {% set is_edit = account is defined and account %}
+  {% set current_role = account.role if is_edit else '' %}
+  {% set current_status = account.status if is_edit else 'Active' %}
+  {% set role_is_locked = role_locked if role_locked is defined else false %}
+  {% set status_is_locked = status_locked if status_locked is defined else false %}
+
   <button
     class="fixed left-4 top-4 z-[1100] hidden rounded-[10px] bg-primary px-3 py-2 text-lg text-white shadow-soft focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[980px]:inline-flex max-[980px]:items-center max-[980px]:justify-center motion-reduce:transition-none"
     type="button"
@@ -88,8 +97,8 @@
       </a>
 
       <a href="{{ url_for('admin.accounts') }}"
-        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if request.endpoint == 'admin.accounts' %}bg-white/20 font-bold{% else %}font-medium{% endif %}"
-        aria-current="{% if request.endpoint == 'admin.accounts' %}page{% endif %}">
+        class="flex items-center gap-2.5 rounded-[10px] px-[14px] py-3 text-white transition duration-200 ease-in-out hover:translate-x-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 motion-reduce:transition-none {% if request.endpoint == 'admin.accounts' or request.endpoint == 'admin.add_new_account' or request.endpoint == 'admin.edit_account' %}bg-white/20 font-bold{% else %}font-medium{% endif %}"
+        aria-current="{% if request.endpoint == 'admin.accounts' or request.endpoint == 'admin.add_new_account' or request.endpoint == 'admin.edit_account' %}page{% endif %}">
         <img src="{{ url_for('static', filename='images/accounts.png') }}"
           class="h-[30px] w-[30px] shrink-0 rounded-full bg-white p-1.5" alt="">
         <span>Accounts</span>
@@ -142,7 +151,7 @@
     class="ml-[240px] min-h-screen p-6 transition-all duration-300 ease-in-out max-[980px]:ml-0 max-[980px]:px-4 max-[980px]:pb-5 max-[980px]:pt-[76px] motion-reduce:transition-none">
     <header class="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-surface px-5 py-[18px] shadow-soft max-[768px]:flex-col max-[768px]:items-start max-[768px]:gap-2.5">
       <h2 class="text-[28px] font-bold text-primary max-[980px]:text-2xl">
-        {% if account %}Edit{% else %}Add New{% endif %} Account
+        {% if is_edit %}Edit{% else %}Add New{% endif %} Account
       </h2>
       <div class="text-sm text-muted">
         <strong class="text-textmain">{{ admin_user }}</strong>
@@ -162,8 +171,24 @@
       </div>
 
       <h3 class="mb-5 text-[22px] font-bold text-primary">
-        {% if account %}Edit{% else %}Add New{% endif %} Account
+        {% if is_edit %}Edit{% else %}Add New{% endif %} Account
       </h3>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="mb-5 space-y-3">
+        {% for category, message in messages %}
+        <div class="rounded-xl border px-4 py-3 text-sm font-medium
+          {% if category == 'success' %}border-green-200 bg-green-50 text-green-700
+          {% elif category == 'danger' %}border-red-200 bg-red-50 text-red-700
+          {% elif category == 'warning' %}border-amber-200 bg-amber-50 text-amber-700
+          {% else %}border-blue-200 bg-blue-50 text-blue-700{% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
 
       <form method="POST" action="">
         <div class="mb-4 flex flex-wrap gap-4 max-[768px]:flex-col">
@@ -174,10 +199,10 @@
             <input
               type="text"
               id="firstName"
-              name="firstName"
+              name="{% if is_edit %}first_name{% else %}firstName{% endif %}"
               class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out placeholder:text-slate-400 focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
               placeholder="Enter first name"
-              value="{{ account.first_name if account else '' }}"
+              value="{{ account.first_name if is_edit else '' }}"
               required>
           </div>
 
@@ -188,10 +213,10 @@
             <input
               type="text"
               id="middleName"
-              name="middleName"
+              name="{% if is_edit %}middle_name{% else %}middleName{% endif %}"
               class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out placeholder:text-slate-400 focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
               placeholder="Enter middle name"
-              value="{{ account.middle_name if account else '' }}">
+              value="{{ account.middle_name if is_edit else '' }}">
           </div>
 
           <div class="flex min-w-[180px] flex-1 flex-col">
@@ -201,10 +226,10 @@
             <input
               type="text"
               id="lastName"
-              name="lastName"
+              name="{% if is_edit %}last_name{% else %}lastName{% endif %}"
               class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out placeholder:text-slate-400 focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
               placeholder="Enter last name"
-              value="{{ account.last_name if account else '' }}"
+              value="{{ account.last_name if is_edit else '' }}"
               required>
           </div>
 
@@ -218,7 +243,7 @@
               name="suffix"
               class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out placeholder:text-slate-400 focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
               placeholder="Jr., Sr., III"
-              value="{{ account.suffix if account else '' }}">
+              value="{{ account.suffix if is_edit else '' }}">
           </div>
         </div>
 
@@ -233,7 +258,7 @@
               name="email"
               class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out placeholder:text-slate-400 focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
               placeholder="Enter email address"
-              value="{{ account.email if account else '' }}"
+              value="{{ account.email if is_edit else '' }}"
               required>
           </div>
         </div>
@@ -243,20 +268,58 @@
             <label for="role" class="mb-1.5 text-sm font-semibold text-muted">
               Role <span class="text-red-600">*</span>
             </label>
+
+            {% if role_is_locked %}
+            <input
+              type="text"
+              class="w-full rounded-xl border border-borderline bg-slate-100 px-3 py-[11px] text-sm font-semibold text-textmain"
+              value="{{ current_role }}"
+              readonly>
+            <input type="hidden" name="role" value="{{ current_role }}">
+            {% else %}
             <select
               id="role"
               name="role"
               class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
               required>
-              <option value="" disabled {% if not account %}selected{% endif %}>Select role</option>
-              <option value="Student" {% if account and account.role == 'Student' %}selected{% endif %}>Student</option>
-              <option value="Admin" {% if account and account.role == 'Admin' %}selected{% endif %}>Admin</option>
-              <option value="Finance" {% if account and account.role == 'Finance' %}selected{% endif %}>Finance</option>
+              <option value="" disabled {% if not current_role %}selected{% endif %}>Select role</option>
+
+              {% for role in assignable_roles %}
+              <option value="{{ role }}" {% if current_role == role %}selected{% endif %}>{{ role }}</option>
+              {% endfor %}
             </select>
+            {% endif %}
           </div>
+
+          {% if is_edit %}
+          <div class="flex min-w-[180px] flex-1 flex-col">
+            <label for="status" class="mb-1.5 text-sm font-semibold text-muted">
+              Status <span class="text-red-600">*</span>
+            </label>
+
+            {% if status_is_locked %}
+            <input
+              type="text"
+              class="w-full rounded-xl border border-borderline bg-slate-100 px-3 py-[11px] text-sm font-semibold text-textmain"
+              value="{{ current_status }}"
+              readonly>
+            <input type="hidden" name="status" value="{{ current_status }}">
+            {% else %}
+            <select
+              id="status"
+              name="status"
+              class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
+              required>
+              <option value="Active" {% if current_status == 'Active' %}selected{% endif %}>Active</option>
+              <option value="Inactive" {% if current_status == 'Inactive' %}selected{% endif %}>Inactive</option>
+              <option value="Archived" {% if current_status == 'Archived' %}selected{% endif %}>Archived</option>
+            </select>
+            {% endif %}
+          </div>
+          {% endif %}
         </div>
 
-        <div id="studentFields" class="{% if account and account.role == 'Student' %}{% else %}hidden{% endif %}">
+        <div id="studentFields" class="{% if current_role == 'Student' %}{% else %}hidden{% endif %}">
           <div class="mb-4 flex flex-wrap gap-4 max-[768px]:flex-col">
             <div class="flex min-w-[180px] flex-1 flex-col">
               <label for="yearLevel" class="mb-1.5 text-sm font-semibold text-muted">
@@ -266,11 +329,11 @@
                 id="yearLevel"
                 name="year_level"
                 class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300">
-                <option value="" disabled {% if not account or not account.year_level %}selected{% endif %}>Select year level</option>
-                <option value="1st Year" {% if account and account.year_level == '1st Year' %}selected{% endif %}>1st Year</option>
-                <option value="2nd Year" {% if account and account.year_level == '2nd Year' %}selected{% endif %}>2nd Year</option>
-                <option value="3rd Year" {% if account and account.year_level == '3rd Year' %}selected{% endif %}>3rd Year</option>
-                <option value="4th Year" {% if account and account.year_level == '4th Year' %}selected{% endif %}>4th Year</option>
+                <option value="" disabled {% if not is_edit or not account.year_level %}selected{% endif %}>Select year level</option>
+                <option value="1st Year" {% if is_edit and account.year_level == '1st Year' %}selected{% endif %}>1st Year</option>
+                <option value="2nd Year" {% if is_edit and account.year_level == '2nd Year' %}selected{% endif %}>2nd Year</option>
+                <option value="3rd Year" {% if is_edit and account.year_level == '3rd Year' %}selected{% endif %}>3rd Year</option>
+                <option value="4th Year" {% if is_edit and account.year_level == '4th Year' %}selected{% endif %}>4th Year</option>
               </select>
             </div>
 
@@ -282,9 +345,9 @@
                 id="course"
                 name="course"
                 class="w-full rounded-xl border border-borderline bg-slate-50 px-3 py-[11px] text-sm text-textmain transition duration-200 ease-in-out focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300">
-                <option value="" disabled {% if not account or not account.course %}selected{% endif %}>Select course</option>
+                <option value="" disabled {% if not is_edit or not account.course %}selected{% endif %}>Select course</option>
                 {% for course in active_courses %}
-                <option value="{{ course.name }}" {% if account and account.course == course.name %}selected{% endif %}>
+                <option value="{{ course.name }}" {% if is_edit and account.course == course.name %}selected{% endif %}>
                   {{ course.name }}
                 </option>
                 {% endfor %}
@@ -293,12 +356,22 @@
           </div>
         </div>
 
-        <div class="mt-1.5">
+        <div class="mt-1.5 flex flex-wrap gap-3">
           <button
             type="submit"
             class="mt-2.5 inline-flex items-center justify-center rounded-xl bg-primary px-[18px] py-[11px] text-[15px] font-bold text-white transition duration-200 ease-in-out hover:-translate-y-px hover:bg-primary-light focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sky-300 max-[768px]:w-full motion-reduce:transition-none">
-            {% if account %}Update{% else %}Submit{% endif %}
+            {% if is_edit %}Update{% else %}Submit{% endif %}
           </button>
+
+          {% if is_edit %}
+          <button
+            type="submit"
+            name="reset_password"
+            value="1"
+            class="mt-2.5 inline-flex items-center justify-center rounded-xl bg-amber-500 px-[18px] py-[11px] text-[15px] font-bold text-white transition duration-200 ease-in-out hover:-translate-y-px hover:bg-amber-600 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-amber-300 max-[768px]:w-full motion-reduce:transition-none">
+            Reset Password
+          </button>
+          {% endif %}
         </div>
       </form>
     </section>
@@ -341,6 +414,10 @@
     }
 
     function toggleStudentFields() {
+      if (!roleSelect || !studentFields || !yearLevelSelect || !courseSelect) {
+        return;
+      }
+
       const show = roleSelect.value === "Student";
       studentFields.classList.toggle("hidden", !show);
       yearLevelSelect.required = show;
@@ -355,8 +432,18 @@
     sidebarToggle.addEventListener("click", toggleSidebar);
     sidebarOverlay.addEventListener("click", closeSidebar);
 
-    roleSelect.addEventListener("change", toggleStudentFields);
-    toggleStudentFields();
+    if (roleSelect) {
+      roleSelect.addEventListener("change", toggleStudentFields);
+      toggleStudentFields();
+    } else {
+      if (studentFields && yearLevelSelect && courseSelect) {
+        const currentRole = "{{ current_role }}";
+        const show = currentRole === "Student";
+        studentFields.classList.toggle("hidden", !show);
+        yearLevelSelect.required = show;
+        courseSelect.required = show;
+      }
+    }
 
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") {
